@@ -5,9 +5,9 @@ Consumer SDK for the HeyAtom platform services. It replaces the `src/modules/fil
 | Import | What |
 |---|---|
 | `@heyatom/client/fileharbor` | `FileHarborClient` (API-key surface), auth helpers, generated types |
-| `@heyatom/client/fileharbor/nest` | the above plus `FileHarborModule.forRoot / forRootAsync` |
+| `@heyatom/client/fileharbor/nest` | the above plus `HeyAtomFileHarborModule.forRoot / forRootAsync` |
 | `@heyatom/client/articuno` | `ArticunoClient` (public, tenant-scoped surface), auth helpers, generated types |
-| `@heyatom/client/articuno/nest` | the above plus `ArticunoModule.forRoot / forRootAsync` |
+| `@heyatom/client/articuno/nest` | the above plus `HeyAtomArticunoModule.forRoot / forRootAsync` |
 
 There is no root export, so import a subpath. The core subpaths depend on nothing: they use native `fetch`, `FormData` and `Blob`, need Node ≥ 20.19, and run the same in Nuxt/Nitro. `@nestjs/common` is an optional peer, used only by `/nest`. `@heyatom/bastion-client` is an optional peer, needed only if you pass its `ServiceTokenProvider` to `serviceTokenAuth`. Ships CJS and ESM.
 
@@ -47,19 +47,19 @@ export default defineEventHandler((event) =>
 ## NestJS
 
 ```ts
-import { FileHarborModule, apiKeyAuth } from '@heyatom/client/fileharbor/nest';
-import { ArticunoModule, serviceTokenAuth } from '@heyatom/client/articuno/nest';
+import { HeyAtomFileHarborModule, apiKeyAuth } from '@heyatom/client/fileharbor/nest';
+import { HeyAtomArticunoModule, serviceTokenAuth } from '@heyatom/client/articuno/nest';
 
 @Module({
   imports: [
-    FileHarborModule.forRootAsync({
+    HeyAtomFileHarborModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         baseUrl: config.getOrThrow('FILEHARBOR_URL'),
         auth: apiKeyAuth(config.getOrThrow('FILEHARBOR_API_KEY')),
       }),
     }),
-    ArticunoModule.forRootAsync({
+    HeyAtomArticunoModule.forRootAsync({
       inject: [ConfigService, BastionService],
       useFactory: (config: ConfigService, bastion: BastionService) => ({
         baseUrl: config.getOrThrow('ARTICUNO_BASE_URL'),
@@ -130,7 +130,7 @@ Each service's `openapi:dump` (`scripts/openapi-dump.ts`) boots the Nest app wit
 
 ## Migrating from a copied module
 
-**shelfie-api `modules/fileharbor`**: drop the module and import `FileHarborModule.forRootAsync` with `baseUrl: \`${FILEHARBOR_URL}/v2\``. Then change the calls:
+**shelfie-api `modules/fileharbor`**: drop the module and import `HeyAtomFileHarborModule.forRootAsync` with `baseUrl: \`${FILEHARBOR_URL}/v2\``. Then change the calls:
 - `uploadImage(file, userId)` becomes `fileharbor.uploadImage({ data: file.buffer, filename: file.originalname, contentType: file.mimetype }, {}, { userId })`
 - Keep the MIME and size checks in the app.
 - `deleteImage` now throws on failure. Keep the old `.catch(warn)` at the call site if you want the swallow.

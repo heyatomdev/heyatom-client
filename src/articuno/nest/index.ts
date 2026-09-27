@@ -13,7 +13,7 @@ export const ARTICUNO_OPTIONS = Symbol('ARTICUNO_OPTIONS');
  * Provides `ArticunoClient` (the public surface). Global: import once in `AppModule`.
  * `auth` is the tenant scope: a tenant key, or a Bastion service-client token.
  * ```ts
- * ArticunoModule.forRootAsync({
+ * HeyAtomArticunoModule.forRootAsync({
  *   inject: [ConfigService],
  *   useFactory: (config: ConfigService) => ({
  *     baseUrl: config.getOrThrow('ARTICUNO_URL'),
@@ -25,7 +25,7 @@ export const ARTICUNO_OPTIONS = Symbol('ARTICUNO_OPTIONS');
  */
 @Global()
 @Module({})
-export class ArticunoModule {
+export class HeyAtomArticunoModule {
   static forRoot(options: HeyAtomClientOptions): DynamicModule {
     return this.build({ provide: ARTICUNO_OPTIONS, useValue: options });
   }
@@ -36,7 +36,7 @@ export class ArticunoModule {
 
   private static build(optionsProvider: Provider, imports: DynamicModule['imports'] = []): DynamicModule {
     return {
-      module: ArticunoModule,
+      module: HeyAtomArticunoModule,
       imports,
       providers: [
         optionsProvider,

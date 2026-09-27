@@ -25,8 +25,8 @@ Injectable()(Consumer);
 class Root {}
 Module({
   imports: [
-    fh.FileHarborModule.forRoot({ baseUrl: 'http://fileharbor.invalid', auth: fh.apiKeyAuth('fh-key'), fetch }),
-    ar.ArticunoModule.forRootAsync({
+    fh.HeyAtomFileHarborModule.forRoot({ baseUrl: 'http://fileharbor.invalid', auth: fh.apiKeyAuth('fh-key'), fetch }),
+    ar.HeyAtomArticunoModule.forRootAsync({
       useFactory: async () => ({ baseUrl: 'http://articuno.invalid', auth: ar.apiKeyAuth('tenant-key'), fetch }),
     }),
   ],

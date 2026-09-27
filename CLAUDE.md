@@ -9,7 +9,7 @@ dbdbuilds-api, shelfie-api, website4 (e sgweb). Gemello di `../bastion-client`
 - **Un package, subpath per servizio.** Non un package per servizio.
   ```
   @heyatom/client/fileharbor        core: FileHarborClient + tipi
-  @heyatom/client/fileharbor/nest   FileHarborModule.forRoot / forRootAsync
+  @heyatom/client/fileharbor/nest   HeyAtomFileHarborModule.forRoot / forRootAsync
   @heyatom/client/articuno          core: ArticunoClient + tipi
   @heyatom/client/articuno/nest
   @heyatom/client/beacon            (fase 2, non ora)

@@ -12,7 +12,7 @@ export const FILEHARBOR_OPTIONS = Symbol('FILEHARBOR_OPTIONS');
 /**
  * Provides `FileHarborClient` (the API-key surface). Global: import once in `AppModule`.
  * ```ts
- * FileHarborModule.forRootAsync({
+ * HeyAtomFileHarborModule.forRootAsync({
  *   inject: [ConfigService],
  *   useFactory: (config: ConfigService) => ({
  *     baseUrl: config.getOrThrow('FILEHARBOR_URL'),
@@ -23,7 +23,7 @@ export const FILEHARBOR_OPTIONS = Symbol('FILEHARBOR_OPTIONS');
  */
 @Global()
 @Module({})
-export class FileHarborModule {
+export class HeyAtomFileHarborModule {
   static forRoot(options: HeyAtomClientOptions): DynamicModule {
     return this.build({ provide: FILEHARBOR_OPTIONS, useValue: options });
   }
@@ -34,7 +34,7 @@ export class FileHarborModule {
 
   private static build(optionsProvider: Provider, imports: DynamicModule['imports'] = []): DynamicModule {
     return {
-      module: FileHarborModule,
+      module: HeyAtomFileHarborModule,
       imports,
       providers: [
         optionsProvider,
