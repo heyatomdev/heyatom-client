@@ -1,0 +1,109 @@
+{
+  "name": "@heyatom/client",
+  "version": "0.1.0",
+  "description": "Consumer SDK for the HeyAtom platform services: FileHarbor and Articuno clients on native fetch, with optional NestJS modules",
+  "license": "MIT",
+  "author": "Andrea Tombolato <hey@heyatom.dev> (https://heyatom.dev)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/heyatomdev/heyatom-client.git"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    "./fileharbor": {
+      "import": {
+        "types": "./dist/esm/fileharbor/index.d.ts",
+        "default": "./dist/esm/fileharbor/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/fileharbor/index.d.ts",
+        "default": "./dist/cjs/fileharbor/index.js"
+      }
+    },
+    "./fileharbor/nest": {
+      "import": {
+        "types": "./dist/esm/fileharbor/nest/index.d.ts",
+        "default": "./dist/esm/fileharbor/nest/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/fileharbor/nest/index.d.ts",
+        "default": "./dist/cjs/fileharbor/nest/index.js"
+      }
+    },
+    "./articuno": {
+      "import": {
+        "types": "./dist/esm/articuno/index.d.ts",
+        "default": "./dist/esm/articuno/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/articuno/index.d.ts",
+        "default": "./dist/cjs/articuno/index.js"
+      }
+    },
+    "./articuno/nest": {
+      "import": {
+        "types": "./dist/esm/articuno/nest/index.d.ts",
+        "default": "./dist/esm/articuno/nest/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/articuno/nest/index.d.ts",
+        "default": "./dist/cjs/articuno/nest/index.js"
+      }
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "fileharbor": [
+        "./dist/cjs/fileharbor/index.d.ts"
+      ],
+      "fileharbor/nest": [
+        "./dist/cjs/fileharbor/nest/index.d.ts"
+      ],
+      "articuno": [
+        "./dist/cjs/articuno/index.d.ts"
+      ],
+      "articuno/nest": [
+        "./dist/cjs/articuno/nest/index.d.ts"
+      ]
+    }
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.cjs.json && tsc -p tsconfig.esm.json && echo '{\"type\":\"module\"}' > dist/esm/package.json",
+    "test": "vitest run",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test:di": "node scripts/di-smoke.cjs",
+    "openapi:dump": "pnpm --dir ../fileharbor openapi:dump \"$PWD/openapi/fileharbor.json\" && pnpm --dir ../articuno-root/articuno openapi:dump \"$PWD/openapi/articuno.json\"",
+    "gen:types": "openapi-typescript openapi/fileharbor.json -o src/fileharbor/types.gen.ts --root-types --root-types-no-schema-prefix --empty-objects-unknown && openapi-typescript openapi/articuno.json -o src/articuno/types.gen.ts --root-types --root-types-no-schema-prefix --empty-objects-unknown",
+    "prepublishOnly": "pnpm lint && pnpm test && pnpm build && pnpm test:di"
+  },
+  "engines": {
+    "node": ">=20.19"
+  },
+  "peerDependencies": {
+    "@heyatom/bastion-client": ">=0.3.0",
+    "@nestjs/common": "^11.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@heyatom/bastion-client": {
+      "optional": true
+    },
+    "@nestjs/common": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@heyatom/bastion-client": "^0.4.0",
+    "@nestjs/common": "^11.2.6",
+    "@nestjs/core": "^11.2.6",
+    "@types/node": "^26.6.3",
+    "jose": "^6.2.12",
+    "openapi-typescript": "^7.13.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7"
+  }
+}
