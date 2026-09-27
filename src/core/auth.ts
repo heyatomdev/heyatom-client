@@ -1,0 +1,39 @@
+export type AuthHeaders = Record<string, string>;
+/** Returns the credential headers for one request. Called before every request, so it may rotate. */
+export type AuthProvider = () => AuthHeaders | Promise<AuthHeaders>;
+
+/**
+ * `X-API-Key`: a FileHarbor client key, or an Articuno tenant key (the key selects the tenant).
+ * Pair it with the per-call `userId` option for FileHarbor's `X-User-Id`.
+ */
+export function apiKeyAuth(apiKey: string): AuthProvider {
+  if (!apiKey) throw new Error('apiKeyAuth: apiKey is empty');
+  const headers = { 'X-API-Key': apiKey };
+  return () => headers;
+}
+
+/**
+ * `Authorization: Bearer <token>`. A string, or a function called per request — e.g. the
+ * Bastion user JWT a BFF forwards (Meridian → FileHarbor/Articuno admin surfaces).
+ */
+export function bearerAuth(token: string | (() => string | Promise<string>)): AuthProvider {
+  return async () => {
+    const value = typeof token === 'function' ? await token() : token;
+    if (!value) throw new Error('bearerAuth: token is empty');
+    return { Authorization: `Bearer ${value}` };
+  };
+}
+
+/** What `serviceTokenAuth` needs: `ServiceTokenProvider` from `@heyatom/bastion-client` fits as-is. */
+export interface ServiceTokenSource {
+  getToken(serviceSlug?: string): Promise<string>;
+}
+
+/**
+ * `Authorization: Bearer <service-client JWT>` minted by Bastion for `serviceSlug`
+ * (the target service's App slug, e.g. `'articuno'`). Caching and renewal are the
+ * provider's job; this asks it on every request.
+ */
+export function serviceTokenAuth(tokens: ServiceTokenSource, serviceSlug: string): AuthProvider {
+  return bearerAuth(() => tokens.getToken(serviceSlug));
+}
