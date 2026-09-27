@@ -1,0 +1,5485 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/status": {
+      "get": {
+        "description": "Simple health check endpoint to verify the API is running.",
+        "operationId": "StatusController_getStatus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "API is operational",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Health check",
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/metrics": {
+      "get": {
+        "operationId": "PrometheusController_index",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Prometheus"
+        ]
+      }
+    },
+    "/articles": {
+      "post": {
+        "description": "Creates a new article for the current tenant. You may optionally include translations inline. Content is automatically checked for banned words; matching content will be created with a HIDDEN status.",
+        "operationId": "ArticlesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateArticleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Article created successfully."
+          },
+          "400": {
+            "description": "Validation error – invalid request body."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Create an article",
+        "tags": [
+          "Articles"
+        ]
+      },
+      "get": {
+        "description": "Returns a paginated list of articles belonging to the current tenant. Supports optional filtering by status, category, tag, and featured flag.",
+        "operationId": "ArticlesController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter articles by moderation status.",
+            "schema": {
+              "example": "PUBLISHED",
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "PUBLISHED",
+                "UNDER_REVIEW",
+                "HIDDEN",
+                "BANNED"
+              ]
+            }
+          },
+          {
+            "name": "categoryId",
+            "required": false,
+            "in": "query",
+            "description": "Filter articles belonging to a specific category UUID.",
+            "schema": {
+              "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              "type": "string"
+            }
+          },
+          {
+            "name": "tagId",
+            "required": false,
+            "in": "query",
+            "description": "Filter articles that have a specific tag UUID attached.",
+            "schema": {
+              "example": "tag-uuid-1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "languageCode",
+            "required": false,
+            "in": "query",
+            "description": "BCP 47 language code. Returns only articles that have a translation in this language, including only that translation.",
+            "schema": {
+              "example": "en",
+              "type": "string"
+            }
+          },
+          {
+            "name": "featured",
+            "required": false,
+            "in": "query",
+            "description": "Filter to only featured (`true`) or non-featured (`false`) articles.",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of articles.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PageMetaDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "List articles",
+        "tags": [
+          "Articles"
+        ]
+      }
+    },
+    "/articles/{slug}": {
+      "get": {
+        "description": "Returns a single article identified by its URL-friendly slug, including all translations.",
+        "operationId": "ArticlesController_findOne",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "description": "URL-friendly slug of the article",
+            "schema": {
+              "example": "getting-started-with-nestjs",
+              "type": "string"
+            }
+          },
+          {
+            "name": "languageCode",
+            "required": false,
+            "in": "query",
+            "description": "BCP 47 language code. Returns only that translation instead of all translations.",
+            "schema": {
+              "example": "en",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Article found."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "description": "Article not found."
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Get an article by slug",
+        "tags": [
+          "Articles"
+        ]
+      }
+    },
+    "/articles/{id}": {
+      "patch": {
+        "description": "Partially updates an article. Only provided fields are changed. Status changes are validated against the content status state machine.",
+        "operationId": "ArticlesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the article to update",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateArticleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Article updated successfully."
+          },
+          "400": {
+            "description": "Validation error or invalid status transition."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "description": "Article not found."
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Update an article",
+        "tags": [
+          "Articles"
+        ]
+      },
+      "delete": {
+        "description": "Permanently deletes an article and all its translations.",
+        "operationId": "ArticlesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the article to delete",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Article deleted successfully – no content returned."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "description": "Article not found."
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Delete an article",
+        "tags": [
+          "Articles"
+        ]
+      }
+    },
+    "/banned-words": {
+      "post": {
+        "description": "Adds a new word to the tenant's banned word list. Any content containing this word will be automatically hidden during creation or moderation checks.",
+        "operationId": "BannedWordsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBannedWordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Banned word added successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BannedWordDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error – invalid request body."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "409": {
+            "description": "This word is already in the banned word list."
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Add a banned word",
+        "tags": [
+          "Banned Words"
+        ]
+      },
+      "get": {
+        "description": "Returns a paginated list of banned words for the current tenant.",
+        "operationId": "BannedWordsController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Filter the list to words containing this text (case-insensitive).",
+            "schema": {
+              "example": "spam",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of banned words.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BannedWordDto"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PageMetaDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "List banned words",
+        "tags": [
+          "Banned Words"
+        ]
+      }
+    },
+    "/banned-words/{id}": {
+      "delete": {
+        "description": "Permanently removes a word from the tenant's banned word list.",
+        "operationId": "BannedWordsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the banned word entry to remove",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Banned word removed successfully – no content returned."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "description": "Banned word not found."
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Remove a banned word",
+        "tags": [
+          "Banned Words"
+        ]
+      }
+    },
+    "/articles/{id}/translations": {
+      "post": {
+        "description": "Creates a new translation for an existing article. Each language code must be unique per article.",
+        "operationId": "ArticleTranslationsController_create",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the article",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateArticleTranslationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Translation created successfully."
+          },
+          "400": {
+            "description": "Validation error – invalid request body."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "description": "Article not found."
+          },
+          "409": {
+            "description": "A translation for this language code already exists."
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Add a translation",
+        "tags": [
+          "Article Translations"
+        ]
+      },
+      "get": {
+        "description": "Returns all translations for an article, ordered by language code.",
+        "operationId": "ArticleTranslationsController_findAll",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the article",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of translations."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "description": "Article not found."
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "List translations",
+        "tags": [
+          "Article Translations"
+        ]
+      }
+    },
+    "/articles/{id}/translations/{languageCode}": {
+      "get": {
+        "description": "Returns a single translation for the given article and BCP 47 language code.",
+        "operationId": "ArticleTranslationsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the article",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "languageCode",
+            "required": true,
+            "in": "path",
+            "description": "BCP 47 language code",
+            "schema": {
+              "example": "en",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Translation found."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "description": "Translation not found."
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Get a translation by language",
+        "tags": [
+          "Article Translations"
+        ]
+      },
+      "patch": {
+        "description": "Partially updates an existing article translation. Only provided fields are changed.",
+        "operationId": "ArticleTranslationsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the article",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "languageCode",
+            "required": true,
+            "in": "path",
+            "description": "BCP 47 language code of the translation to update",
+            "schema": {
+              "example": "en",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateArticleTranslationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Translation updated successfully."
+          },
+          "400": {
+            "description": "Validation error – invalid request body."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "description": "Article or translation not found."
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Update a translation",
+        "tags": [
+          "Article Translations"
+        ]
+      },
+      "delete": {
+        "description": "Permanently removes a single language translation from an article.",
+        "operationId": "ArticleTranslationsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the article",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "languageCode",
+            "required": true,
+            "in": "path",
+            "description": "BCP 47 language code of the translation to delete",
+            "schema": {
+              "example": "en",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Translation deleted successfully – no content returned."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "description": "Article or translation not found."
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Delete a translation",
+        "tags": [
+          "Article Translations"
+        ]
+      }
+    },
+    "/bookmarks/{articleId}": {
+      "post": {
+        "description": "Adds a bookmark if the article is not yet bookmarked by the user, or removes it if it already exists.",
+        "operationId": "BookmarksController_toggle",
+        "parameters": [
+          {
+            "name": "X-User-Id",
+            "in": "header",
+            "description": "External user ID required for all bookmark endpoints",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "articleId",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the article to bookmark/unbookmark",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-user-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Bookmark toggled successfully."
+          },
+          "400": {
+            "description": "Missing X-User-Id header or invalid articleId."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "description": "Article not found."
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Toggle bookmark on an article",
+        "tags": [
+          "Bookmarks"
+        ]
+      }
+    },
+    "/bookmarks/me": {
+      "get": {
+        "description": "Returns a paginated list of articles bookmarked by the current user within the tenant.",
+        "operationId": "BookmarksController_findAll",
+        "parameters": [
+          {
+            "name": "X-User-Id",
+            "in": "header",
+            "description": "External user ID required for all bookmark endpoints",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "x-user-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of bookmarked articles returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PageMetaDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing X-User-Id header."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get bookmarked articles for the current user",
+        "tags": [
+          "Bookmarks"
+        ]
+      }
+    },
+    "/categories": {
+      "post": {
+        "description": "Creates a new category for the current tenant. The slug is auto-generated from the name.",
+        "operationId": "CategoriesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Category created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error – invalid request body."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "409": {
+            "description": "A category with this slug already exists for the tenant."
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Create a category",
+        "tags": [
+          "Categories"
+        ]
+      },
+      "get": {
+        "description": "Returns a paginated list of categories belonging to the current tenant. Each item includes the article count.",
+        "operationId": "CategoriesController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of categories.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CategoryListItemDto"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PageMetaDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "List categories",
+        "tags": [
+          "Categories"
+        ]
+      }
+    },
+    "/categories/{slug}": {
+      "get": {
+        "description": "Returns a single category identified by its URL-friendly slug.",
+        "operationId": "CategoriesController_findOne",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "description": "URL-friendly slug of the category (e.g. \"science\")",
+            "schema": {
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+              "example": "science",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "description": "Category not found."
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Get a category by slug",
+        "tags": [
+          "Categories"
+        ]
+      }
+    },
+    "/categories/{id}": {
+      "patch": {
+        "description": "Updates the name, description, or colour of an existing category. The slug is re-generated when the name changes.",
+        "operationId": "CategoriesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the category to update",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Category updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error – invalid request body."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "description": "Category not found."
+          },
+          "409": {
+            "description": "A category with the new slug already exists for the tenant."
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Update a category",
+        "tags": [
+          "Categories"
+        ]
+      },
+      "delete": {
+        "description": "Permanently deletes a category and removes its associations with existing articles.",
+        "operationId": "CategoriesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the category to delete",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Category deleted successfully – no content returned."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "description": "Category not found."
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Delete a category",
+        "tags": [
+          "Categories"
+        ]
+      }
+    },
+    "/comments": {
+      "post": {
+        "operationId": "CommentsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCommentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Comments"
+        ]
+      },
+      "get": {
+        "operationId": "CommentsController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "articleId",
+            "required": false,
+            "in": "query",
+            "description": "Filter comments by article id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter comments by moderation status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PUBLISHED",
+                "DRAFT",
+                "UNDER_REVIEW",
+                "HIDDEN",
+                "BANNED",
+                "VISIBLE"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of comments.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PageMetaDto"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Comments"
+        ]
+      }
+    },
+    "/comments/{id}": {
+      "get": {
+        "operationId": "CommentsController_findOne",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Comments"
+        ]
+      },
+      "patch": {
+        "operationId": "CommentsController_update",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCommentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Comments"
+        ]
+      },
+      "delete": {
+        "operationId": "CommentsController_remove",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Comments"
+        ]
+      }
+    },
+    "/interactions/articles/{articleId}/like": {
+      "post": {
+        "description": "Toggles the like status for the given article by the authenticated user. Returns the updated like count and whether the user has liked the article.",
+        "operationId": "InteractionsController_toggleLikeArticle",
+        "parameters": [
+          {
+            "name": "X-User-Id",
+            "in": "header",
+            "description": "External user ID required for all interaction endpoints",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "articleId",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the article to like/unlike",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-user-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Like toggled successfully."
+          },
+          "400": {
+            "description": "Missing X-User-Id header or invalid articleId."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "description": "Article not found."
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Toggle like on an article",
+        "tags": [
+          "Interactions"
+        ]
+      }
+    },
+    "/interactions/articles/{articleId}/status": {
+      "get": {
+        "description": "Returns whether the current user has liked and/or bookmarked the given article, along with total like and bookmark counts.",
+        "operationId": "InteractionsController_getArticleStatus",
+        "parameters": [
+          {
+            "name": "X-User-Id",
+            "in": "header",
+            "description": "External user ID required for all interaction endpoints",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "articleId",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the article to check",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-user-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Interaction status returned successfully."
+          },
+          "400": {
+            "description": "Missing X-User-Id header or invalid articleId."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "description": "Article not found."
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get interaction status for an article",
+        "tags": [
+          "Interactions"
+        ]
+      }
+    },
+    "/reports": {
+      "post": {
+        "description": "Creates a new report for a user, article, or comment. When the report threshold is reached the target is auto-moderated.",
+        "operationId": "ReportsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Report submitted successfully."
+          },
+          "400": {
+            "description": "Validation error – invalid request body."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "description": "Reported target not found."
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Submit a report",
+        "tags": [
+          "Reports"
+        ]
+      },
+      "get": {
+        "description": "Returns a paginated list of reports for the current tenant. Optionally filter by status.",
+        "operationId": "ReportsController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter reports by status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "REVIEWED",
+                "RESOLVED",
+                "DISMISSED"
+              ]
+            }
+          },
+          {
+            "name": "reporterId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by the external ID of the user who submitted the report",
+            "schema": {
+              "example": "user_abc123",
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetType",
+            "required": false,
+            "in": "query",
+            "description": "Filter by target type (ARTICLE, COMMENT, USER)",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ARTICLE",
+                "COMMENT",
+                "USER"
+              ]
+            }
+          },
+          {
+            "name": "targetId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by the ID of the reported entity",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "moderatorId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by the external ID of the moderator who handled the report",
+            "schema": {
+              "example": "mod_xyz789",
+              "type": "string"
+            }
+          },
+          {
+            "name": "reason",
+            "required": false,
+            "in": "query",
+            "description": "Filter by report reason (case-insensitive partial match)",
+            "schema": {
+              "example": "SPAM",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of reports.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PageMetaDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "List reports",
+        "tags": [
+          "Reports"
+        ]
+      }
+    },
+    "/reports/{id}/status": {
+      "patch": {
+        "description": "Updates the resolution status of a specific report (e.g. PENDING → RESOLVED or DISMISSED). Requires a moderator ID.",
+        "operationId": "ReportsController_updateStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the report to update",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReportStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Report status updated successfully."
+          },
+          "400": {
+            "description": "Validation error – invalid request body."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "description": "Report not found."
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Update report status",
+        "tags": [
+          "Reports"
+        ]
+      }
+    },
+    "/tags": {
+      "post": {
+        "description": "Creates a new tag for the current tenant. The slug is auto-generated from the name.",
+        "operationId": "TagsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTagDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tag created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error – invalid request body."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "409": {
+            "description": "A tag with this slug already exists for the tenant."
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Create a tag",
+        "tags": [
+          "Tags"
+        ]
+      },
+      "get": {
+        "description": "Returns a paginated list of tags belonging to the current tenant. Optionally filter by name.",
+        "operationId": "TagsController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "name",
+            "required": false,
+            "in": "query",
+            "description": "Filter tags by name (case-insensitive partial match)",
+            "schema": {
+              "example": "tech",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of tags.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TagDto"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PageMetaDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "List tags",
+        "tags": [
+          "Tags"
+        ]
+      }
+    },
+    "/tags/{slug}": {
+      "get": {
+        "description": "Returns a single tag identified by its URL-friendly slug.",
+        "operationId": "TagsController_findOne",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "description": "URL-friendly slug of the tag (e.g. \"technology\")",
+            "schema": {
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+              "example": "technology",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tag found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "description": "Tag not found."
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Get a tag by slug",
+        "tags": [
+          "Tags"
+        ]
+      }
+    },
+    "/tags/{id}": {
+      "patch": {
+        "description": "Updates the name (and consequently the slug) of an existing tag.",
+        "operationId": "TagsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the tag to update",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTagDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tag updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error – invalid request body."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "description": "Tag not found."
+          },
+          "409": {
+            "description": "A tag with the new slug already exists for the tenant."
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Update a tag",
+        "tags": [
+          "Tags"
+        ]
+      },
+      "delete": {
+        "description": "Permanently deletes a tag and removes its associations with existing articles.",
+        "operationId": "TagsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the tag to delete",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Tag deleted successfully – no content returned."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "description": "Tag not found."
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Delete a tag",
+        "tags": [
+          "Tags"
+        ]
+      }
+    },
+    "/users/sync": {
+      "post": {
+        "description": "Creates or updates a user record for the current tenant based on their external ID. Use this endpoint to keep the CMS user data in sync with your identity provider.",
+        "operationId": "UsersController_upsert",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created or updated successfully."
+          },
+          "400": {
+            "description": "Validation error – invalid request body."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Sync (upsert) a user",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/{externalId}": {
+      "delete": {
+        "description": "Permanently deletes a user record identified by their external ID. All associated content (articles, comments, interactions) may be affected depending on tenant configuration.",
+        "operationId": "UsersController_remove",
+        "parameters": [
+          {
+            "name": "externalId",
+            "required": true,
+            "in": "path",
+            "description": "External ID of the user to delete",
+            "schema": {
+              "example": "user_abc123",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "User deleted successfully – no content returned."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Delete a user",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/health/live": {
+      "get": {
+        "description": "Always returns 200. Used by container orchestrators to check if the process is alive.",
+        "operationId": "HealthController_live",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "status": "ok"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Liveness probe",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "description": "Checks database connectivity. Returns 200 when the service is ready to accept traffic, 503 otherwise.",
+        "operationId": "HealthController_ready",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Service is ready — all health indicators passed\n\nThe Health Check is successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {},
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The Health Check is not successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        },
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Readiness probe",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/admin/articles": {
+      "post": {
+        "description": "Creates a new article for the session tenant. Accepts either `application/json` (plain body) or `multipart/form-data` (JSON in the `data` field + optional `coverImage` file). Uploaded images are stored in the tenant's FileHarbor instance (JPEG/PNG/GIF/WebP, max 10 MB).",
+        "operationId": "AdminArticlesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Article data. When using multipart/form-data, serialize the article JSON in the `data` field and optionally attach a `coverImage` file.",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "string",
+                    "description": "JSON-serialized CreateArticleDto",
+                    "example": "{\"categoryId\":\"uuid\",\"translations\":[{\"languageCode\":\"en\",\"title\":\"Hello\",\"content\":\"...\",\"excerpt\":\"...\"}]}"
+                  },
+                  "coverImage": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Cover image file (JPEG/PNG/GIF/WebP, max 10 MB)"
+                  }
+                }
+              }
+            },
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "string",
+                    "description": "JSON-serialized CreateArticleDto",
+                    "example": "{\"categoryId\":\"uuid\",\"translations\":[{\"languageCode\":\"en\",\"title\":\"Hello\",\"content\":\"...\",\"excerpt\":\"...\"}]}"
+                  },
+                  "coverImage": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Cover image file (JPEG/PNG/GIF/WebP, max 10 MB)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Article created successfully."
+          },
+          "400": {
+            "description": "Validation error, invalid JSON in `data` field, or FileHarbor not configured."
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create an article",
+        "tags": [
+          "Admin / Articles"
+        ]
+      },
+      "get": {
+        "description": "Returns a paginated list of articles for the session tenant. Supports filtering by status, category, tag, and featured flag.",
+        "operationId": "AdminArticlesController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter articles by moderation status.",
+            "schema": {
+              "example": "PUBLISHED",
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "PUBLISHED",
+                "UNDER_REVIEW",
+                "HIDDEN",
+                "BANNED"
+              ]
+            }
+          },
+          {
+            "name": "categoryId",
+            "required": false,
+            "in": "query",
+            "description": "Filter articles belonging to a specific category UUID.",
+            "schema": {
+              "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              "type": "string"
+            }
+          },
+          {
+            "name": "tagId",
+            "required": false,
+            "in": "query",
+            "description": "Filter articles that have a specific tag UUID attached.",
+            "schema": {
+              "example": "tag-uuid-1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "languageCode",
+            "required": false,
+            "in": "query",
+            "description": "BCP 47 language code. Returns only articles that have a translation in this language, including only that translation.",
+            "schema": {
+              "example": "en",
+              "type": "string"
+            }
+          },
+          {
+            "name": "featured",
+            "required": false,
+            "in": "query",
+            "description": "Filter to only featured (`true`) or non-featured (`false`) articles.",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of articles.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PageMetaDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List articles",
+        "tags": [
+          "Admin / Articles"
+        ]
+      }
+    },
+    "/admin/articles/{key}": {
+      "get": {
+        "description": "Returns a single article, including all translations. The key is either the article UUID or the slug of any of its translations (slugs are unique per tenant).",
+        "operationId": "AdminArticlesController_findOne",
+        "parameters": [
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the article, or a translation slug",
+            "schema": {
+              "example": "getting-started-with-nestjs",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Article found."
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          },
+          "404": {
+            "description": "Article not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get an article by ID or slug",
+        "tags": [
+          "Admin / Articles"
+        ]
+      }
+    },
+    "/admin/articles/{id}": {
+      "patch": {
+        "description": "Partially updates an article. Accepts either `application/json` or `multipart/form-data` (JSON in `data` field + optional `coverImage`). When a new image is uploaded the previous cover is automatically deleted from FileHarbor.",
+        "operationId": "AdminArticlesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the article to update",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Updated article data. When using multipart/form-data, serialize the update JSON in the `data` field and optionally attach a new `coverImage` file.",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "string",
+                    "description": "JSON-serialized UpdateArticleDto",
+                    "example": "{\"status\":\"PUBLISHED\",\"featured\":true}"
+                  },
+                  "coverImage": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "New cover image file (JPEG/PNG/GIF/WebP, max 10 MB)"
+                  }
+                }
+              }
+            },
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "string",
+                    "description": "JSON-serialized UpdateArticleDto",
+                    "example": "{\"status\":\"PUBLISHED\",\"featured\":true}"
+                  },
+                  "coverImage": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "New cover image file (JPEG/PNG/GIF/WebP, max 10 MB)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Article updated successfully."
+          },
+          "400": {
+            "description": "Validation error, invalid JSON in `data` field, or invalid status transition."
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          },
+          "404": {
+            "description": "Article not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update an article",
+        "tags": [
+          "Admin / Articles"
+        ]
+      },
+      "delete": {
+        "description": "Permanently deletes an article and all its translations. The cover image is also removed from FileHarbor if present.",
+        "operationId": "AdminArticlesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the article to delete",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Article deleted successfully – no content returned."
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          },
+          "404": {
+            "description": "Article not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete an article",
+        "tags": [
+          "Admin / Articles"
+        ]
+      }
+    },
+    "/admin/articles/{id}/translations": {
+      "post": {
+        "description": "Creates a new translation for an existing article. Each language code must be unique per article.",
+        "operationId": "AdminArticlesController_createTranslation",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the article",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateArticleTranslationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Translation created successfully."
+          },
+          "400": {
+            "description": "Validation error – invalid request body."
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          },
+          "404": {
+            "description": "Article not found."
+          },
+          "409": {
+            "description": "A translation for this language code already exists."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a translation",
+        "tags": [
+          "Admin / Articles"
+        ]
+      },
+      "get": {
+        "description": "Returns all translations for an article, ordered by language code.",
+        "operationId": "AdminArticlesController_findTranslations",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the article",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of translations."
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          },
+          "404": {
+            "description": "Article not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List translations",
+        "tags": [
+          "Admin / Articles"
+        ]
+      }
+    },
+    "/admin/articles/{id}/translations/{languageCode}": {
+      "get": {
+        "description": "Returns a single translation for the given article and BCP 47 language code.",
+        "operationId": "AdminArticlesController_findTranslation",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the article",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "languageCode",
+            "required": true,
+            "in": "path",
+            "description": "BCP 47 language code",
+            "schema": {
+              "example": "en",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Translation found."
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          },
+          "404": {
+            "description": "Translation not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a translation by language",
+        "tags": [
+          "Admin / Articles"
+        ]
+      },
+      "patch": {
+        "description": "Partially updates an existing article translation. Only provided fields are changed.",
+        "operationId": "AdminArticlesController_updateTranslation",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the article",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "languageCode",
+            "required": true,
+            "in": "path",
+            "description": "BCP 47 language code of the translation to update",
+            "schema": {
+              "example": "en",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateArticleTranslationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Translation updated successfully."
+          },
+          "400": {
+            "description": "Validation error – invalid request body."
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          },
+          "404": {
+            "description": "Article or translation not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a translation",
+        "tags": [
+          "Admin / Articles"
+        ]
+      },
+      "delete": {
+        "description": "Permanently removes a single language translation from an article.",
+        "operationId": "AdminArticlesController_removeTranslation",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the article",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "languageCode",
+            "required": true,
+            "in": "path",
+            "description": "BCP 47 language code of the translation to delete",
+            "schema": {
+              "example": "en",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Translation deleted successfully – no content returned."
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          },
+          "404": {
+            "description": "Article or translation not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a translation",
+        "tags": [
+          "Admin / Articles"
+        ]
+      }
+    },
+    "/admin/tags": {
+      "post": {
+        "operationId": "AdminTagsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTagDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Admin / Tags"
+        ]
+      },
+      "get": {
+        "operationId": "AdminTagsController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "name",
+            "required": false,
+            "in": "query",
+            "description": "Filter tags by name (case-insensitive partial match)",
+            "schema": {
+              "example": "tech",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of tags.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TagDto"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PageMetaDto"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Admin / Tags"
+        ]
+      }
+    },
+    "/admin/tags/{id}": {
+      "get": {
+        "operationId": "AdminTagsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the tag",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Admin / Tags"
+        ]
+      },
+      "patch": {
+        "operationId": "AdminTagsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the tag",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTagDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Admin / Tags"
+        ]
+      },
+      "delete": {
+        "operationId": "AdminTagsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the tag",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Admin / Tags"
+        ]
+      }
+    },
+    "/admin/categories": {
+      "post": {
+        "operationId": "AdminCategoriesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Admin / Categories"
+        ]
+      },
+      "get": {
+        "operationId": "AdminCategoriesController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of categories.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CategoryListItemDto"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PageMetaDto"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Admin / Categories"
+        ]
+      }
+    },
+    "/admin/categories/{id}": {
+      "get": {
+        "operationId": "AdminCategoriesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the category",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Admin / Categories"
+        ]
+      },
+      "patch": {
+        "operationId": "AdminCategoriesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the category",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Admin / Categories"
+        ]
+      },
+      "delete": {
+        "operationId": "AdminCategoriesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the category",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Admin / Categories"
+        ]
+      }
+    },
+    "/admin/banned-words": {
+      "post": {
+        "description": "Adds a new word to the tenant's banned word list. The word must be between 2 and 50 characters.",
+        "operationId": "AdminBannedWordsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBannedWordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Banned word added successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BannedWordDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error – word is missing or out of length bounds."
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a banned word",
+        "tags": [
+          "Admin / Banned Words"
+        ]
+      },
+      "get": {
+        "description": "Returns a paginated list of banned words for the session tenant.",
+        "operationId": "AdminBannedWordsController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Filter the list to words containing this text (case-insensitive).",
+            "schema": {
+              "example": "spam",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of banned words.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BannedWordDto"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PageMetaDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List banned words",
+        "tags": [
+          "Admin / Banned Words"
+        ]
+      }
+    },
+    "/admin/banned-words/{id}": {
+      "delete": {
+        "description": "Permanently removes a banned word entry from the tenant's list.",
+        "operationId": "AdminBannedWordsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the banned word entry to remove",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Banned word removed successfully – no content returned."
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          },
+          "404": {
+            "description": "Banned word not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a banned word",
+        "tags": [
+          "Admin / Banned Words"
+        ]
+      }
+    },
+    "/admin/reports": {
+      "post": {
+        "description": "Creates a new report for a user, article, or comment from within the admin panel. `reporterId` is automatically set to the session user's external ID.",
+        "operationId": "AdminReportsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminCreateReportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Report submitted successfully."
+          },
+          "400": {
+            "description": "Validation error – invalid request body."
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          },
+          "404": {
+            "description": "Reported target not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Submit a report (admin)",
+        "tags": [
+          "Admin / Reports"
+        ]
+      },
+      "get": {
+        "description": "Returns a paginated list of all reports for the session tenant. Optionally filter by status.",
+        "operationId": "AdminReportsController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter reports by status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "REVIEWED",
+                "RESOLVED",
+                "DISMISSED"
+              ]
+            }
+          },
+          {
+            "name": "reporterId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by the external ID of the user who submitted the report",
+            "schema": {
+              "example": "user_abc123",
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetType",
+            "required": false,
+            "in": "query",
+            "description": "Filter by target type (ARTICLE, COMMENT, USER)",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ARTICLE",
+                "COMMENT",
+                "USER"
+              ]
+            }
+          },
+          {
+            "name": "targetId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by the ID of the reported entity",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "moderatorId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by the external ID of the moderator who handled the report",
+            "schema": {
+              "example": "mod_xyz789",
+              "type": "string"
+            }
+          },
+          {
+            "name": "reason",
+            "required": false,
+            "in": "query",
+            "description": "Filter by report reason (case-insensitive partial match)",
+            "schema": {
+              "example": "SPAM",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of reports.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PageMetaDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List reports (admin)",
+        "tags": [
+          "Admin / Reports"
+        ]
+      }
+    },
+    "/admin/reports/{id}": {
+      "get": {
+        "description": "Returns the full details of a single report identified by its UUID.",
+        "operationId": "AdminReportsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the report",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Report found."
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          },
+          "404": {
+            "description": "Report not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a report by ID",
+        "tags": [
+          "Admin / Reports"
+        ]
+      }
+    },
+    "/admin/reports/{id}/status": {
+      "patch": {
+        "description": "Updates the resolution status of a report. Valid transitions: PENDING → RESOLVED or DISMISSED.",
+        "operationId": "AdminReportsController_updateStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the report to update",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUpdateReportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Report status updated successfully."
+          },
+          "400": {
+            "description": "Validation error – invalid request body."
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          },
+          "404": {
+            "description": "Report not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update report status (admin)",
+        "tags": [
+          "Admin / Reports"
+        ]
+      }
+    },
+    "/admin/audits": {
+      "get": {
+        "description": "Returns a paginated list of audit log entries for the session tenant. Supports optional filtering by action, resource type, and actor user ID.",
+        "operationId": "AdminAuditsController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "action",
+            "required": false,
+            "in": "query",
+            "description": "Filter audit logs by action",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "USER_CREATED",
+                "USER_UPDATED_ROLE",
+                "USER_STATUS_CHANGED",
+                "USER_DELETED",
+                "ARTICLE_CREATED",
+                "ARTICLE_UPDATED",
+                "ARTICLE_DELETED",
+                "ARTICLE_STATUS_CHANGED",
+                "COMMENT_CREATED",
+                "COMMENT_UPDATED",
+                "COMMENT_DELETED",
+                "COMMENT_STATUS_CHANGED",
+                "CATEGORY_CREATED",
+                "CATEGORY_UPDATED",
+                "CATEGORY_DELETED",
+                "TAG_CREATED",
+                "TAG_UPDATED",
+                "TAG_DELETED",
+                "REPORT_CREATED",
+                "REPORT_STATUS_CHANGED",
+                "BANNED_WORD_CREATED",
+                "BANNED_WORD_DELETED",
+                "ROLE_ASSIGNMENT_CHANGED"
+              ]
+            }
+          },
+          {
+            "name": "resourceType",
+            "required": false,
+            "in": "query",
+            "description": "Filter audit logs by resource type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "USER",
+                "ARTICLE",
+                "COMMENT",
+                "REPORT",
+                "BANNED_WORD",
+                "TAG",
+                "CATEGORY"
+              ]
+            }
+          },
+          {
+            "name": "actorUserId",
+            "required": false,
+            "in": "query",
+            "description": "Filter audit logs by actor user ID (externalId)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of audit log entries.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PageMetaDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List audit logs",
+        "tags": [
+          "Admin / Audits"
+        ]
+      }
+    },
+    "/admin/audits/{id}": {
+      "get": {
+        "description": "Returns a single audit log entry identified by its UUID.",
+        "operationId": "AdminAuditsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the audit log entry",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Audit log entry found."
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          },
+          "404": {
+            "description": "Audit log entry not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get an audit log entry by ID",
+        "tags": [
+          "Admin / Audits"
+        ]
+      }
+    },
+    "/admin/users": {
+      "get": {
+        "description": "Returns a paginated list of all users belonging to the session tenant.",
+        "operationId": "AdminUsersController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "username",
+            "required": false,
+            "in": "query",
+            "description": "Filter by username (case-insensitive partial match)",
+            "schema": {
+              "example": "john",
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter by user status",
+            "schema": {
+              "example": "ACTIVE",
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "BANNED",
+                "SHADOW_BANNED"
+              ]
+            }
+          },
+          {
+            "name": "role",
+            "required": false,
+            "in": "query",
+            "description": "Filter by user role",
+            "schema": {
+              "example": "MEMBER",
+              "type": "string",
+              "enum": [
+                "TENANT_ADMIN",
+                "SUPER_MODERATOR",
+                "EDITOR",
+                "MODERATOR",
+                "MEMBER"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of users.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/UserListItemDto"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PageMetaDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List users",
+        "tags": [
+          "Admin / Users"
+        ]
+      }
+    },
+    "/admin/users/{id}": {
+      "get": {
+        "description": "Returns the full profile of a single user identified by their internal UUID.",
+        "operationId": "AdminUsersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Internal UUID of the user",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserListItemDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a user by ID",
+        "tags": [
+          "Admin / Users"
+        ]
+      },
+      "delete": {
+        "description": "Permanently deletes a user and all their associated data from the tenant.",
+        "operationId": "AdminUsersController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Internal UUID of the user",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "User deleted."
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a user",
+        "tags": [
+          "Admin / Users"
+        ]
+      }
+    },
+    "/admin/users/{id}/status": {
+      "patch": {
+        "description": "Changes the moderation status of a user (ACTIVE, BANNED, SHADOW_BANNED).",
+        "operationId": "AdminUsersController_updateStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Internal UUID of the user",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User status updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserListItemDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update user status",
+        "tags": [
+          "Admin / Users"
+        ]
+      }
+    },
+    "/admin/users/{id}/role": {
+      "patch": {
+        "description": "Assigns a new role to a user within the tenant.",
+        "operationId": "AdminUsersController_updateRole",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Internal UUID of the user",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User role updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserListItemDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update user role",
+        "tags": [
+          "Admin / Users"
+        ]
+      }
+    },
+    "/admin/comments": {
+      "get": {
+        "description": "Returns a paginated list of all comments for the session tenant. Without `status` every comment is returned regardless of moderation state. Supports filtering by articleId and status.",
+        "operationId": "AdminCommentsController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "articleId",
+            "required": false,
+            "in": "query",
+            "description": "Filter comments by article id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter comments by moderation status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PUBLISHED",
+                "DRAFT",
+                "UNDER_REVIEW",
+                "HIDDEN",
+                "BANNED",
+                "VISIBLE"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of comments.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PageMetaDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List all comments (admin)",
+        "tags": [
+          "Admin / Comments"
+        ]
+      }
+    },
+    "/admin/comments/{id}": {
+      "get": {
+        "description": "Returns a single comment identified by its UUID, regardless of status.",
+        "operationId": "AdminCommentsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the comment",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Comment found."
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          },
+          "404": {
+            "description": "Comment not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a comment by ID (admin)",
+        "tags": [
+          "Admin / Comments"
+        ]
+      },
+      "patch": {
+        "description": "Partially updates a comment (e.g. content or status). All statuses can be set by admins.",
+        "operationId": "AdminCommentsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the comment to update",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCommentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Comment updated successfully."
+          },
+          "400": {
+            "description": "Validation error – invalid request body."
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          },
+          "404": {
+            "description": "Comment not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a comment (admin)",
+        "tags": [
+          "Admin / Comments"
+        ]
+      },
+      "delete": {
+        "description": "Permanently deletes a comment.",
+        "operationId": "AdminCommentsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the comment to delete",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Comment deleted successfully – no content returned."
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          },
+          "404": {
+            "description": "Comment not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a comment (admin)",
+        "tags": [
+          "Admin / Comments"
+        ]
+      }
+    },
+    "/admin/webhooks": {
+      "get": {
+        "description": "Returns a paginated list of all webhook events (outbox) for the session tenant. Supports filtering by event type and delivery status.",
+        "operationId": "AdminWebhooksController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "event",
+            "required": false,
+            "in": "query",
+            "description": "Filter by event type (e.g. comment.moderated, article.flagged)",
+            "schema": {
+              "example": "comment.moderated",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sent",
+            "required": false,
+            "in": "query",
+            "description": "If true, return only unsent events (sentAt is null). If false, return only sent events.",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of webhook events.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PageMetaDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List webhook events",
+        "tags": [
+          "Admin / Webhooks"
+        ]
+      }
+    },
+    "/admin/webhooks/{id}": {
+      "get": {
+        "description": "Returns the full detail of a single webhook event (payload, attempts, sentAt, lastError, nextRetryAt).",
+        "operationId": "AdminWebhooksController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Internal UUID of the webhook event",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Webhook event found."
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          },
+          "404": {
+            "description": "Webhook event not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a webhook event by ID",
+        "tags": [
+          "Admin / Webhooks"
+        ]
+      }
+    },
+    "/admin/webhooks/{id}/resend": {
+      "post": {
+        "description": "Resets attempts to 0 and clears nextRetryAt / lastError for the given event so that the delivery cron picks it up on the next cycle. Returns 400 if the event was already delivered successfully.",
+        "operationId": "AdminWebhooksController_resendOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Internal UUID of the webhook event",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Webhook event reset — will be retried shortly."
+          },
+          "400": {
+            "description": "Event already delivered — resend not needed."
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          },
+          "404": {
+            "description": "Webhook event not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Resend a single failed webhook event",
+        "tags": [
+          "Admin / Webhooks"
+        ]
+      }
+    },
+    "/admin/webhooks/resend-all-failed": {
+      "post": {
+        "description": "Resets attempts, nextRetryAt and lastError to 0 / null for every undelivered event belonging to the current tenant. Use this after a temporary outage of the receiving system to trigger re-delivery of the entire backlog.",
+        "operationId": "AdminWebhooksController_resendAllFailed",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Number of events reset.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "reset": 12
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reset all failed webhook events for the tenant",
+        "tags": [
+          "Admin / Webhooks"
+        ]
+      }
+    },
+    "/admin/notifications": {
+      "get": {
+        "description": "Returns a paginated list of all notifications for the session tenant. Supports filtering by type, sentToClient and userId.",
+        "operationId": "AdminNotificationsController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "description": "Filter by notification type",
+            "schema": {
+              "example": "comment.moderated",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sentToClient",
+            "required": false,
+            "in": "query",
+            "description": "Filter by sentToClient status",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by userId (internal UUID)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of notifications.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PageMetaDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List notifications",
+        "tags": [
+          "Admin / Notifications"
+        ]
+      }
+    },
+    "/admin/notifications/{id}": {
+      "get": {
+        "description": "Returns the full detail of a single notification identified by its internal UUID.",
+        "operationId": "AdminNotificationsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Internal UUID of the notification",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notification found."
+          },
+          "401": {
+            "description": "Not authenticated – missing or expired session."
+          },
+          "404": {
+            "description": "Notification not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a notification by ID",
+        "tags": [
+          "Admin / Notifications"
+        ]
+      }
+    },
+    "/admin/stats/dashboard": {
+      "get": {
+        "operationId": "AdminStatsController_getDashboard",
+        "parameters": [
+          {
+            "name": "days",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Admin / Analytics"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Articuno",
+    "description": "",
+    "version": "1.2.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "api-key": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      },
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "CreateArticleTranslationDto": {
+        "type": "object",
+        "properties": {
+          "languageCode": {
+            "type": "string",
+            "description": "BCP 47 language code for this translation (e.g. \"en\", \"it\", \"fr\").",
+            "example": "en"
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized title of the article.",
+            "example": "Getting Started with NestJS"
+          },
+          "content": {
+            "type": "string",
+            "description": "Full HTML/Markdown body of the article.",
+            "example": "<p>NestJS is a progressive Node.js framework...</p>"
+          },
+          "excerpt": {
+            "type": "string",
+            "description": "Short plain-text summary shown in listing pages and previews.",
+            "example": "A step-by-step guide to building your first NestJS application."
+          },
+          "metaTitle": {
+            "type": "string",
+            "description": "SEO meta title. Defaults to the article title when omitted.",
+            "example": "Getting Started with NestJS | My Blog"
+          },
+          "metaDescription": {
+            "type": "string",
+            "description": "SEO meta description shown in search engine result pages.",
+            "example": "Learn how to set up your first NestJS project from scratch."
+          }
+        },
+        "required": [
+          "languageCode",
+          "title",
+          "content",
+          "excerpt"
+        ]
+      },
+      "CreateArticleDto": {
+        "type": "object",
+        "properties": {
+          "coverImage": {
+            "type": "string",
+            "description": "URL of the article cover image. When creating via multipart/form-data, upload the file in the `coverImage` field instead.",
+            "example": "https://cdn.example.com/articles/my-article-cover.jpg"
+          },
+          "status": {
+            "type": "string",
+            "description": "Initial moderation status of the article. Defaults to DRAFT when omitted.",
+            "enum": [
+              "DRAFT",
+              "PUBLISHED",
+              "UNDER_REVIEW",
+              "HIDDEN",
+              "BANNED"
+            ],
+            "example": "DRAFT"
+          },
+          "featured": {
+            "type": "boolean",
+            "description": "Whether the article should appear in featured/highlighted sections.",
+            "example": false
+          },
+          "authorId": {
+            "type": "string",
+            "description": "UUID of the user (author) to associate with the article. Defaults to the authenticated user when omitted.",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "UUID of the category the article belongs to.",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "tagIds": {
+            "description": "List of tag UUIDs to attach to the article.",
+            "example": [
+              "tag-uuid-1",
+              "tag-uuid-2"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "translations": {
+            "description": "One or more translation objects to create alongside the article. At least one translation (with the default language) is recommended.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateArticleTranslationDto"
+            }
+          }
+        },
+        "required": [
+          "categoryId"
+        ]
+      },
+      "PageMetaDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "totalPages": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "total",
+          "page",
+          "limit",
+          "totalPages"
+        ]
+      },
+      "UpdateArticleDto": {
+        "type": "object",
+        "properties": {
+          "coverImage": {
+            "type": "string",
+            "description": "URL of the article cover image. Pass `null` to remove the existing cover.",
+            "example": "https://cdn.example.com/articles/updated-cover.jpg",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "description": "New moderation status. Must be a valid transition from the current status.",
+            "enum": [
+              "DRAFT",
+              "PUBLISHED",
+              "UNDER_REVIEW",
+              "HIDDEN",
+              "BANNED"
+            ],
+            "example": "PUBLISHED"
+          },
+          "featured": {
+            "type": "boolean",
+            "description": "Set to `true` to feature the article, `false` to unfeature it.",
+            "example": true
+          },
+          "authorId": {
+            "type": "string",
+            "description": "UUID of the author user. Pass `null` to remove the author association.",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+            "nullable": true
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "UUID of the category to reassign the article to.",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "tagIds": {
+            "description": "Replacement list of tag UUIDs. Replaces all existing tag associations.",
+            "example": [
+              "tag-uuid-1",
+              "tag-uuid-3"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "moderationReason": {
+            "type": "string",
+            "description": "Human-readable reason for a moderation action (e.g. why the article was hidden or banned).",
+            "example": "Contains prohibited content."
+          },
+          "moderatorId": {
+            "type": "string",
+            "description": "External ID of the moderator performing the action.",
+            "example": "mod_user_abc123"
+          }
+        }
+      },
+      "CreateBannedWordDto": {
+        "type": "object",
+        "properties": {
+          "word": {
+            "type": "string",
+            "description": "The word to add to the banned word list (2–50 characters)",
+            "example": "spam",
+            "minLength": 2,
+            "maxLength": 50
+          }
+        },
+        "required": [
+          "word"
+        ]
+      },
+      "BannedWordDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier of the banned word entry",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "word": {
+            "type": "string",
+            "description": "The banned word",
+            "example": "spam"
+          },
+          "tenantId": {
+            "type": "string",
+            "description": "Tenant that owns this banned word",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          }
+        },
+        "required": [
+          "id",
+          "word",
+          "tenantId"
+        ]
+      },
+      "UpdateArticleTranslationDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Updated localized title of the article.",
+            "example": "Getting Started with NestJS – Revised"
+          },
+          "content": {
+            "type": "string",
+            "description": "Updated full HTML/Markdown body of the article.",
+            "example": "<p>NestJS is a progressive Node.js framework...</p>"
+          },
+          "excerpt": {
+            "type": "string",
+            "description": "Updated short plain-text summary shown in listing pages.",
+            "example": "An updated guide to building your first NestJS application."
+          },
+          "metaTitle": {
+            "type": "string",
+            "description": "Updated SEO meta title.",
+            "example": "NestJS Guide – Revised | My Blog"
+          },
+          "metaDescription": {
+            "type": "string",
+            "description": "Updated SEO meta description.",
+            "example": "Learn NestJS from scratch with this revised step-by-step tutorial."
+          }
+        }
+      },
+      "CreateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Display name of the category. The slug will be auto-generated from this value.",
+            "example": "Science"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional human-readable description of the category.",
+            "example": "Articles about science and research."
+          },
+          "color": {
+            "type": "string",
+            "description": "Optional hex colour associated with the category for UI display.",
+            "example": "#3B82F6"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CategoryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier of the category",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the category",
+            "example": "Science"
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL-friendly slug derived from the name",
+            "example": "science"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description of the category",
+            "example": "Articles about science and research."
+          },
+          "color": {
+            "type": "string",
+            "description": "Optional hex colour associated with the category",
+            "example": "#3B82F6"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the category was created",
+            "example": "2026-01-15T10:23:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the category was last updated",
+            "example": "2026-03-22T08:45:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CategoryListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier of the category",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the category",
+            "example": "Science"
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL-friendly slug derived from the name",
+            "example": "science"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description of the category",
+            "example": "Articles about science and research."
+          },
+          "color": {
+            "type": "string",
+            "description": "Optional hex colour associated with the category",
+            "example": "#3B82F6"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the category was created",
+            "example": "2026-01-15T10:23:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the category was last updated",
+            "example": "2026-03-22T08:45:00.000Z"
+          },
+          "articlesCount": {
+            "type": "number",
+            "description": "Number of articles associated with this category",
+            "example": 14
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "createdAt",
+          "updatedAt",
+          "articlesCount"
+        ]
+      },
+      "UpdateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "New display name for the category. The slug will be re-generated from this value.",
+            "example": "Science & Technology"
+          },
+          "description": {
+            "type": "string",
+            "description": "Updated description of the category.",
+            "example": "Articles covering science, technology and research."
+          },
+          "color": {
+            "type": "string",
+            "description": "Updated hex colour for the category.",
+            "example": "#10B981"
+          }
+        }
+      },
+      "CreateCommentDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateCommentDto": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "Updated comment content"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PUBLISHED",
+              "DRAFT",
+              "UNDER_REVIEW",
+              "HIDDEN",
+              "BANNED",
+              "VISIBLE"
+            ],
+            "description": "New status for the comment (admin only)"
+          }
+        }
+      },
+      "CreateReportDto": {
+        "type": "object",
+        "properties": {
+          "targetType": {
+            "type": "string",
+            "description": "Type of the reported target",
+            "enum": [
+              "ARTICLE",
+              "COMMENT",
+              "USER"
+            ],
+            "example": "COMMENT"
+          },
+          "targetId": {
+            "type": "string",
+            "description": "UUID of the reported target (article, comment or user)",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Short reason for the report",
+            "example": "Spam"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional additional details about the report",
+            "example": "This comment contains repeated promotional links."
+          },
+          "reporterId": {
+            "type": "string",
+            "description": "External ID of the user submitting the report",
+            "example": "user_abc123"
+          }
+        },
+        "required": [
+          "targetType",
+          "targetId",
+          "reason",
+          "reporterId"
+        ]
+      },
+      "UpdateReportStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "New status to set for the report",
+            "enum": [
+              "PENDING",
+              "REVIEWED",
+              "RESOLVED",
+              "DISMISSED"
+            ],
+            "example": "RESOLVED"
+          },
+          "moderatorNote": {
+            "type": "string",
+            "description": "Optional note left by the moderator explaining the decision",
+            "example": "Content removed – repeated ToS violations."
+          },
+          "moderatorId": {
+            "type": "string",
+            "description": "External ID of the staff member resolving the report",
+            "example": "mod_xyz789"
+          }
+        },
+        "required": [
+          "status",
+          "moderatorId"
+        ]
+      },
+      "CreateTagDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Display name of the tag. The slug will be auto-generated from this value.",
+            "example": "Technology"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "TenantDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the tenant",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the tenant",
+            "example": "Kaish DBD"
+          },
+          "slug": {
+            "type": "string",
+            "description": "Slug for the tenant, used in URLs",
+            "example": "kaish-dbd"
+          },
+          "description": {
+            "type": "string",
+            "description": "Tenant description"
+          },
+          "domain": {
+            "type": "string",
+            "description": "Tenant domain, used for routing and identification",
+            "example": "kaish-dbd.it"
+          },
+          "defaultLanguage": {
+            "type": "string",
+            "description": "Tenant default language",
+            "example": "it"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the tenant was created",
+            "example": "2026-01-15T10:23:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the tenant was last updated",
+            "example": "2026-03-22T08:45:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug"
+        ]
+      },
+      "TagCountDto": {
+        "type": "object",
+        "properties": {
+          "articles": {
+            "type": "number",
+            "description": "Number of articles associated with this tag",
+            "example": 42
+          }
+        },
+        "required": [
+          "articles"
+        ]
+      },
+      "TagDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the tag",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the tag",
+            "example": "Technology"
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL-friendly slug derived from the tag name",
+            "example": "technology"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the tag was created",
+            "example": "2026-01-15T10:23:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the tag was last updated",
+            "example": "2026-03-22T08:45:00.000Z"
+          },
+          "tenant": {
+            "description": "Tenant this tag belongs to (only included in certain admin responses)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TenantDto"
+              }
+            ]
+          },
+          "_count": {
+            "description": "Aggregated counts for related resources",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TagCountDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdateTagDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "New display name for the tag. The slug will be re-generated from this value.",
+            "example": "Science & Technology"
+          }
+        }
+      },
+      "UpsertUserDto": {
+        "type": "object",
+        "properties": {
+          "externalId": {
+            "type": "string",
+            "description": "External ID of the user (from your identity provider)",
+            "example": "user_abc123"
+          },
+          "username": {
+            "type": "string",
+            "description": "Display name / username of the user",
+            "example": "johndoe"
+          },
+          "language": {
+            "type": "string",
+            "description": "Preferred language code for the user (BCP 47)",
+            "example": "it"
+          },
+          "avatarUrl": {
+            "type": "string",
+            "description": "URL of the user's avatar image",
+            "example": "https://cdn.example.com/avatars/user_abc123.jpg"
+          }
+        },
+        "required": [
+          "externalId"
+        ]
+      },
+      "AdminCreateReportDto": {
+        "type": "object",
+        "properties": {
+          "targetType": {
+            "type": "string",
+            "description": "Type of the reported target",
+            "enum": [
+              "ARTICLE",
+              "COMMENT",
+              "USER"
+            ],
+            "example": "COMMENT"
+          },
+          "targetId": {
+            "type": "string",
+            "description": "UUID of the reported target (article, comment or user)",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Short reason for the report",
+            "example": "Spam"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional additional details about the report",
+            "example": "This comment contains repeated promotional links."
+          },
+          "status": {
+            "type": "string",
+            "description": "Initial status for the report. Defaults to PENDING if omitted.",
+            "enum": [
+              "PENDING",
+              "REVIEWED",
+              "RESOLVED",
+              "DISMISSED"
+            ],
+            "example": "RESOLVED"
+          },
+          "moderatorNote": {
+            "type": "string",
+            "description": "Optional moderator note recorded at creation time",
+            "example": "Content removed immediately – clear ToS violation."
+          }
+        },
+        "required": [
+          "targetType",
+          "targetId",
+          "reason"
+        ]
+      },
+      "AdminUpdateReportDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "New status to set for the report",
+            "enum": [
+              "PENDING",
+              "REVIEWED",
+              "RESOLVED",
+              "DISMISSED"
+            ],
+            "example": "RESOLVED"
+          },
+          "moderatorNote": {
+            "type": "string",
+            "description": "Optional note left by the moderator explaining the decision",
+            "example": "Content removed – repeated ToS violations."
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "UserListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Internal UUID of the user",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "externalId": {
+            "type": "string",
+            "description": "External ID from the identity provider",
+            "example": "user_abc123"
+          },
+          "tenantId": {
+            "type": "string",
+            "description": "UUID of the tenant this user belongs to",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "language": {
+            "type": "string",
+            "description": "Preferred language code (BCP 47)",
+            "example": "it"
+          },
+          "username": {
+            "type": "string",
+            "description": "Display name / username",
+            "example": "johndoe",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "description": "URL to the user's avatar image",
+            "example": "https://cdn.example.com/avatars/user_abc123.jpg",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "description": "Current moderation status of the user",
+            "enum": [
+              "ACTIVE",
+              "BANNED",
+              "SHADOW_BANNED"
+            ],
+            "example": "ACTIVE"
+          },
+          "role": {
+            "type": "string",
+            "description": "Role of the user within the tenant",
+            "enum": [
+              "TENANT_ADMIN",
+              "SUPER_MODERATOR",
+              "EDITOR",
+              "MODERATOR",
+              "MEMBER"
+            ],
+            "example": "MEMBER"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the user was created",
+            "example": "2026-01-15T10:23:00.000Z"
+          },
+          "articlesCount": {
+            "type": "number",
+            "description": "Total number of articles authored by the user",
+            "example": 12
+          },
+          "commentsCount": {
+            "type": "number",
+            "description": "Total number of comments authored by the user",
+            "example": 47
+          }
+        },
+        "required": [
+          "id",
+          "externalId",
+          "tenantId",
+          "language",
+          "status",
+          "role",
+          "createdAt",
+          "articlesCount",
+          "commentsCount"
+        ]
+      },
+      "UpdateUserStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "New moderation status for the user",
+            "enum": [
+              "ACTIVE",
+              "BANNED",
+              "SHADOW_BANNED"
+            ],
+            "example": "BANNED"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "UpdateUserRoleDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "description": "New role to assign to the user",
+            "enum": [
+              "TENANT_ADMIN",
+              "SUPER_MODERATOR",
+              "EDITOR",
+              "MODERATOR",
+              "MEMBER"
+            ],
+            "example": "MODERATOR"
+          }
+        },
+        "required": [
+          "role"
+        ]
+      }
+    }
+  }
+}
