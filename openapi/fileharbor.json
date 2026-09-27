@@ -2419,7 +2419,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminImageListResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2677,7 +2684,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminAvatarListResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2851,7 +2865,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminAlbumListResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -3048,7 +3069,14 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminRemoveImagesFromAlbumResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -3222,7 +3250,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Paginated creator list (email is never returned)"
+            "description": "Paginated creator list (email is never returned)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminCreatorListResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -3958,7 +3993,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminVideoListResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -4019,6 +4061,34 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "originalName": {
+                    "type": "string"
+                  },
+                  "isPrivate": {
+                    "type": "boolean"
+                  },
+                  "description": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "",
@@ -5854,6 +5924,185 @@
           }
         }
       },
+      "AdminListCreatorDto": {
+        "type": "object",
+        "properties": {
+          "externalId": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "externalId"
+        ]
+      },
+      "AdminListClientDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "domain": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "AdminImageListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "originalName": {
+            "type": "string"
+          },
+          "format": {
+            "type": "string"
+          },
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          },
+          "size": {
+            "type": "number"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "isPrivate": {
+            "type": "boolean"
+          },
+          "isOptimized": {
+            "type": "boolean"
+          },
+          "tinifyOptimized": {
+            "type": "boolean",
+            "description": "Whether image was compressed with Tinify API"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "views": {
+            "type": "number"
+          },
+          "downloads": {
+            "type": "number"
+          },
+          "storagePath": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "optimizedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "fullPath": {
+            "type": "string"
+          },
+          "isBookmarked": {
+            "type": "boolean",
+            "description": "Whether the requesting admin has bookmarked this image"
+          },
+          "creatorId": {
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/AdminListCreatorDto"
+          },
+          "client": {
+            "$ref": "#/components/schemas/AdminListClientDto"
+          }
+        },
+        "required": [
+          "id",
+          "clientId",
+          "originalName",
+          "format",
+          "width",
+          "height",
+          "size",
+          "mimeType",
+          "isPrivate",
+          "isOptimized",
+          "tinifyOptimized",
+          "tags",
+          "views",
+          "downloads",
+          "storagePath",
+          "createdAt",
+          "updatedAt",
+          "isBookmarked",
+          "creatorId",
+          "creator",
+          "client"
+        ]
+      },
+      "AdminPaginationResponseDto": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number"
+          },
+          "perPage": {
+            "type": "number"
+          },
+          "total": {
+            "type": "number"
+          },
+          "totalPages": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "page",
+          "perPage",
+          "total",
+          "totalPages"
+        ]
+      },
+      "AdminImageListResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminImageListItemDto"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/AdminPaginationResponseDto"
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
       "AdminClientCreatorClientDto": {
         "type": "object",
         "properties": {
@@ -6120,6 +6369,99 @@
           "compressionStats"
         ]
       },
+      "AdminAvatarListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "creatorId": {
+            "type": "string"
+          },
+          "format": {
+            "type": "string"
+          },
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          },
+          "size": {
+            "type": "number"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "isOptimized": {
+            "type": "boolean"
+          },
+          "storagePath": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "optimizedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "fullPath": {
+            "type": "string",
+            "nullable": true,
+            "description": "Public avatar URL; null when the creator has no externalId"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/AdminListCreatorDto"
+          },
+          "client": {
+            "$ref": "#/components/schemas/AdminListClientDto"
+          }
+        },
+        "required": [
+          "id",
+          "clientId",
+          "creatorId",
+          "format",
+          "width",
+          "height",
+          "size",
+          "mimeType",
+          "isOptimized",
+          "storagePath",
+          "createdAt",
+          "updatedAt",
+          "fullPath",
+          "creator",
+          "client"
+        ]
+      },
+      "AdminAvatarListResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminAvatarListItemDto"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/AdminPaginationResponseDto"
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
       "AdminAvatarResponseDto": {
         "type": "object",
         "properties": {
@@ -6319,6 +6661,97 @@
           "updatedAt"
         ]
       },
+      "AdminAlbumListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "externalAlbumId": {
+            "type": "string"
+          },
+          "isPublic": {
+            "type": "boolean"
+          },
+          "coverImageId": {
+            "type": "string"
+          },
+          "coverImageUrl": {
+            "type": "string",
+            "description": "Full URL to the cover image"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/AdminAlbumCreatorDto"
+          },
+          "totalItems": {
+            "type": "number",
+            "description": "Total items (images + videos) in the album"
+          },
+          "imageCount": {
+            "type": "number",
+            "description": "Number of images in the album"
+          },
+          "videoCount": {
+            "type": "number",
+            "description": "Number of videos in the album"
+          },
+          "activeTokens": {
+            "type": "number",
+            "description": "Number of active (non-expired) access tokens"
+          },
+          "creatorId": {
+            "type": "string"
+          },
+          "client": {
+            "$ref": "#/components/schemas/AdminListClientDto"
+          }
+        },
+        "required": [
+          "id",
+          "clientId",
+          "name",
+          "isPublic",
+          "createdAt",
+          "updatedAt",
+          "creatorId",
+          "client"
+        ]
+      },
+      "AdminAlbumListResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminAlbumListItemDto"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/AdminPaginationResponseDto"
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
       "AdminUpdateAlbumDto": {
         "type": "object",
         "properties": {
@@ -6344,6 +6777,31 @@
             "nullable": true
           }
         }
+      },
+      "AdminRemoveImagesFromAlbumResponseDto": {
+        "type": "object",
+        "properties": {
+          "albumId": {
+            "type": "string",
+            "description": "UUID of the album"
+          },
+          "removed": {
+            "type": "number",
+            "description": "Number of images removed"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "albumId",
+          "removed",
+          "success",
+          "message"
+        ]
       },
       "CreateCreatorAdminDto": {
         "type": "object",
@@ -6377,6 +6835,80 @@
         "required": [
           "externalId",
           "clientId"
+        ]
+      },
+      "CreatorListResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Internal creator UUID"
+          },
+          "externalId": {
+            "type": "string",
+            "description": "External creator ID from the client system"
+          },
+          "username": {
+            "type": "string"
+          },
+          "website": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "totalImages": {
+            "type": "number"
+          },
+          "totalAlbums": {
+            "type": "number"
+          },
+          "totalVideos": {
+            "type": "number"
+          },
+          "isBookmarked": {
+            "type": "boolean",
+            "description": "Whether the requesting admin has bookmarked this creator"
+          },
+          "avatarUrl": {
+            "type": "string"
+          },
+          "client": {
+            "$ref": "#/components/schemas/CreatorClientDto"
+          }
+        },
+        "required": [
+          "id",
+          "externalId",
+          "clientId",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "AdminCreatorListResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreatorListResponseDto"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/AdminPaginationResponseDto"
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
         ]
       },
       "UpdateCreatorAdminDto": {
@@ -6443,29 +6975,6 @@
           "readToken",
           "createdAt",
           "isExpired"
-        ]
-      },
-      "AdminPaginationResponseDto": {
-        "type": "object",
-        "properties": {
-          "page": {
-            "type": "number"
-          },
-          "perPage": {
-            "type": "number"
-          },
-          "total": {
-            "type": "number"
-          },
-          "totalPages": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "page",
-          "perPage",
-          "total",
-          "totalPages"
         ]
       },
       "AdminImageShareLinksListResponseDto": {
@@ -6733,6 +7242,24 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AdminVideoBookmarkResponseDto"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/AdminPaginationResponseDto"
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "AdminVideoListResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminVideoResponseDto"
             }
           },
           "pagination": {

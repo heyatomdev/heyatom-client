@@ -1250,11 +1250,107 @@ export interface components {
             /** @description One or more translation objects to create alongside the article. At least one translation (with the default language) is recommended. */
             translations?: components["schemas"]["CreateArticleTranslationDto"][];
         };
+        /** @enum {string} */
+        ContentStatus: "PUBLISHED" | "DRAFT" | "UNDER_REVIEW" | "HIDDEN" | "BANNED" | "VISIBLE";
+        ArticleCategorySummaryDto: {
+            id: string;
+            name: string;
+            slug: string;
+            description: string | null;
+            color: string | null;
+        };
+        /** @enum {string} */
+        UserStatus: "ACTIVE" | "BANNED" | "SHADOW_BANNED";
+        /** @enum {string} */
+        UserRole: "TENANT_ADMIN" | "SUPER_MODERATOR" | "EDITOR" | "MODERATOR" | "MEMBER";
+        ArticleAuthorSummaryDto: {
+            id: string;
+            username: string | null;
+            externalId: string;
+            status: components["schemas"]["UserStatus"];
+            role: components["schemas"]["UserRole"];
+        };
+        ArticleTagSummaryDto: {
+            id: string;
+            name: string;
+            slug: string;
+        };
+        ArticleCommentCountDto: {
+            commentsList: number;
+        };
+        ArticleTranslationDto: {
+            id: string;
+            /** @example en */
+            languageCode: string;
+            title: string;
+            content: string;
+            excerpt: string;
+            slug: string;
+            metaTitle: string | null;
+            metaDescription: string | null;
+            /** @description Estimated reading time in minutes */
+            readingTime: number;
+            articleId: string;
+            tenantId: string;
+        };
+        ArticleDto: {
+            id: string;
+            /** @description Cover image URL */
+            coverImage: string | null;
+            featured: boolean;
+            views: number;
+            likesCount: number;
+            commentsCount: number;
+            status: components["schemas"]["ContentStatus"];
+            authorId: string | null;
+            categoryId: string;
+            tenantId: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            category: components["schemas"]["ArticleCategorySummaryDto"];
+            author: components["schemas"]["ArticleAuthorSummaryDto"] | null;
+            tags: components["schemas"]["ArticleTagSummaryDto"][];
+            _count: components["schemas"]["ArticleCommentCountDto"];
+            translations: components["schemas"]["ArticleTranslationDto"][];
+        };
         PageMetaDto: {
             total: number;
             page: number;
             limit: number;
             totalPages: number;
+        };
+        ArticleTranslationSummaryDto: {
+            id: string;
+            title: string;
+            slug: string;
+            /** @example en */
+            languageCode: string;
+            excerpt: string;
+            readingTime: number;
+        };
+        ArticleListItemDto: {
+            id: string;
+            /** @description Cover image URL */
+            coverImage: string | null;
+            featured: boolean;
+            views: number;
+            likesCount: number;
+            commentsCount: number;
+            status: components["schemas"]["ContentStatus"];
+            authorId: string | null;
+            categoryId: string;
+            tenantId: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            category: components["schemas"]["ArticleCategorySummaryDto"];
+            author: components["schemas"]["ArticleAuthorSummaryDto"] | null;
+            tags: components["schemas"]["ArticleTagSummaryDto"][];
+            _count: components["schemas"]["ArticleCommentCountDto"];
+            translations: components["schemas"]["ArticleTranslationSummaryDto"][];
         };
         UpdateArticleDto: {
             /**
@@ -1353,22 +1449,9 @@ export interface components {
              */
             metaDescription?: string;
         };
-        CreateCategoryDto: {
-            /**
-             * @description Display name of the category. The slug will be auto-generated from this value.
-             * @example Science
-             */
-            name: string;
-            /**
-             * @description Optional human-readable description of the category.
-             * @example Articles about science and research.
-             */
-            description?: string;
-            /**
-             * @description Optional hex colour associated with the category for UI display.
-             * @example #3B82F6
-             */
-            color?: string;
+        BookmarkToggleResultDto: {
+            /** @description Whether the article is bookmarked after the toggle */
+            bookmarked: boolean;
         };
         CategoryDto: {
             /**
@@ -1408,130 +1491,6 @@ export interface components {
              * @example 2026-03-22T08:45:00.000Z
              */
             updatedAt: string;
-        };
-        CategoryListItemDto: {
-            /**
-             * @description Unique identifier of the category
-             * @example 123e4567-e89b-12d3-a456-426614174000
-             */
-            id: string;
-            /**
-             * @description Display name of the category
-             * @example Science
-             */
-            name: string;
-            /**
-             * @description URL-friendly slug derived from the name
-             * @example science
-             */
-            slug: string;
-            /**
-             * @description Optional description of the category
-             * @example Articles about science and research.
-             */
-            description?: string;
-            /**
-             * @description Optional hex colour associated with the category
-             * @example #3B82F6
-             */
-            color?: string;
-            /**
-             * Format: date-time
-             * @description Timestamp when the category was created
-             * @example 2026-01-15T10:23:00.000Z
-             */
-            createdAt: string;
-            /**
-             * Format: date-time
-             * @description Timestamp when the category was last updated
-             * @example 2026-03-22T08:45:00.000Z
-             */
-            updatedAt: string;
-            /**
-             * @description Number of articles associated with this category
-             * @example 14
-             */
-            articlesCount: number;
-        };
-        UpdateCategoryDto: {
-            /**
-             * @description New display name for the category. The slug will be re-generated from this value.
-             * @example Science & Technology
-             */
-            name?: string;
-            /**
-             * @description Updated description of the category.
-             * @example Articles covering science, technology and research.
-             */
-            description?: string;
-            /**
-             * @description Updated hex colour for the category.
-             * @example #10B981
-             */
-            color?: string;
-        };
-        CreateCommentDto: Record<string, unknown>;
-        UpdateCommentDto: {
-            /** @description Updated comment content */
-            content?: string;
-            /**
-             * @description New status for the comment (admin only)
-             * @enum {string}
-             */
-            status?: "PUBLISHED" | "DRAFT" | "UNDER_REVIEW" | "HIDDEN" | "BANNED" | "VISIBLE";
-        };
-        CreateReportDto: {
-            /**
-             * @description Type of the reported target
-             * @example COMMENT
-             * @enum {string}
-             */
-            targetType: "ARTICLE" | "COMMENT" | "USER";
-            /**
-             * @description UUID of the reported target (article, comment or user)
-             * @example 123e4567-e89b-12d3-a456-426614174000
-             */
-            targetId: string;
-            /**
-             * @description Short reason for the report
-             * @example Spam
-             */
-            reason: string;
-            /**
-             * @description Optional additional details about the report
-             * @example This comment contains repeated promotional links.
-             */
-            description?: string;
-            /**
-             * @description External ID of the user submitting the report
-             * @example user_abc123
-             */
-            reporterId: string;
-        };
-        UpdateReportStatusDto: {
-            /**
-             * @description New status to set for the report
-             * @example RESOLVED
-             * @enum {string}
-             */
-            status: "PENDING" | "REVIEWED" | "RESOLVED" | "DISMISSED";
-            /**
-             * @description Optional note left by the moderator explaining the decision
-             * @example Content removed – repeated ToS violations.
-             */
-            moderatorNote?: string;
-            /**
-             * @description External ID of the staff member resolving the report
-             * @example mod_xyz789
-             */
-            moderatorId: string;
-        };
-        CreateTagDto: {
-            /**
-             * @description Display name of the tag. The slug will be auto-generated from this value.
-             * @example Technology
-             */
-            name: string;
         };
         TenantDto: {
             /**
@@ -1614,6 +1573,302 @@ export interface components {
             /** @description Aggregated counts for related resources */
             _count?: components["schemas"]["TagCountDto"];
         };
+        BookmarkedArticleDto: {
+            id: string;
+            /** @description Cover image URL */
+            coverImage: string | null;
+            featured: boolean;
+            views: number;
+            likesCount: number;
+            commentsCount: number;
+            status: components["schemas"]["ContentStatus"];
+            authorId: string | null;
+            categoryId: string;
+            tenantId: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            category: components["schemas"]["CategoryDto"];
+            tags: components["schemas"]["TagDto"][];
+            translations: components["schemas"]["ArticleTranslationDto"][];
+        };
+        BookmarkListItemDto: {
+            id: string;
+            articleId: string;
+            /** @description Internal UUID of the user */
+            userId: string;
+            tenantId: string;
+            /** Format: date-time */
+            createdAt: string;
+            article: components["schemas"]["BookmarkedArticleDto"];
+        };
+        CreateCategoryDto: {
+            /**
+             * @description Display name of the category. The slug will be auto-generated from this value.
+             * @example Science
+             */
+            name: string;
+            /**
+             * @description Optional human-readable description of the category.
+             * @example Articles about science and research.
+             */
+            description?: string;
+            /**
+             * @description Optional hex colour associated with the category for UI display.
+             * @example #3B82F6
+             */
+            color?: string;
+        };
+        CategoryListItemDto: {
+            /**
+             * @description Unique identifier of the category
+             * @example 123e4567-e89b-12d3-a456-426614174000
+             */
+            id: string;
+            /**
+             * @description Display name of the category
+             * @example Science
+             */
+            name: string;
+            /**
+             * @description URL-friendly slug derived from the name
+             * @example science
+             */
+            slug: string;
+            /**
+             * @description Optional description of the category
+             * @example Articles about science and research.
+             */
+            description?: string;
+            /**
+             * @description Optional hex colour associated with the category
+             * @example #3B82F6
+             */
+            color?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the category was created
+             * @example 2026-01-15T10:23:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the category was last updated
+             * @example 2026-03-22T08:45:00.000Z
+             */
+            updatedAt: string;
+            /**
+             * @description Number of articles associated with this category
+             * @example 14
+             */
+            articlesCount: number;
+        };
+        UpdateCategoryDto: {
+            /**
+             * @description New display name for the category. The slug will be re-generated from this value.
+             * @example Science & Technology
+             */
+            name?: string;
+            /**
+             * @description Updated description of the category.
+             * @example Articles covering science, technology and research.
+             */
+            description?: string;
+            /**
+             * @description Updated hex colour for the category.
+             * @example #10B981
+             */
+            color?: string;
+        };
+        CreateCommentDto: {
+            /** @description UUID of the article being commented on */
+            articleId: string;
+            /** @description Comment text */
+            content: string;
+            /** @description External ID of the author (from your identity provider) */
+            authorExternalId: string;
+        };
+        UserDto: {
+            /** @description Internal UUID of the user */
+            id: string;
+            /** @description External ID from the identity provider */
+            externalId: string;
+            /** @description UUID of the tenant this user belongs to */
+            tenantId: string;
+            /**
+             * @description Preferred language code (BCP 47)
+             * @example it
+             */
+            language: string;
+            username: string | null;
+            avatarUrl: string | null;
+            status: components["schemas"]["UserStatus"];
+            role: components["schemas"]["UserRole"];
+            /** Format: date-time */
+            createdAt: string;
+        };
+        CommentDto: {
+            id: string;
+            /** @description Null on the public API while the comment is not VISIBLE */
+            content: string | null;
+            /** @description Internal UUID of the author */
+            authorId: string;
+            articleId: string;
+            tenantId: string;
+            status: components["schemas"]["ContentStatus"];
+            reportCount: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            author: components["schemas"]["UserDto"];
+        };
+        CommentTenantSummaryDto: {
+            id: string;
+            name: string;
+        };
+        CommentAuthorSummaryDto: {
+            id: string;
+            status: components["schemas"]["UserStatus"];
+            role: components["schemas"]["UserRole"];
+            /** Format: date-time */
+            createdAt: string;
+            username: string | null;
+            avatarUrl: string | null;
+        };
+        CommentListItemDto: {
+            id: string;
+            /** @description Null on the public API while the comment is not VISIBLE */
+            content: string | null;
+            /** @description Internal UUID of the author */
+            authorId: string;
+            articleId: string;
+            tenantId: string;
+            status: components["schemas"]["ContentStatus"];
+            reportCount: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            tenant: components["schemas"]["CommentTenantSummaryDto"];
+            author: components["schemas"]["CommentAuthorSummaryDto"];
+        };
+        UpdateCommentDto: {
+            /** @description Updated comment content */
+            content?: string;
+            /**
+             * @description New status for the comment (admin only)
+             * @enum {string}
+             */
+            status?: "PUBLISHED" | "DRAFT" | "UNDER_REVIEW" | "HIDDEN" | "BANNED" | "VISIBLE";
+        };
+        LikeToggleResultDto: {
+            /** @description Whether the user likes the article after the toggle */
+            liked: boolean;
+        };
+        ArticleInteractionStatusDto: {
+            liked: boolean;
+            bookmarked: boolean;
+        };
+        CreateReportDto: {
+            /**
+             * @description Type of the reported target
+             * @example COMMENT
+             * @enum {string}
+             */
+            targetType: "ARTICLE" | "COMMENT" | "USER";
+            /**
+             * @description UUID of the reported target (article, comment or user)
+             * @example 123e4567-e89b-12d3-a456-426614174000
+             */
+            targetId: string;
+            /**
+             * @description Short reason for the report
+             * @example Spam
+             */
+            reason: string;
+            /**
+             * @description Optional additional details about the report
+             * @example This comment contains repeated promotional links.
+             */
+            description?: string;
+            /**
+             * @description External ID of the user submitting the report
+             * @example user_abc123
+             */
+            reporterId: string;
+        };
+        /** @enum {string} */
+        ReportStatus: "PENDING" | "REVIEWED" | "RESOLVED" | "DISMISSED";
+        /** @enum {string} */
+        TargetType: "ARTICLE" | "COMMENT" | "USER";
+        ReportUserSummaryDto: {
+            externalId: string;
+            username: string | null;
+            avatarUrl: string | null;
+            role: components["schemas"]["UserRole"];
+            status: components["schemas"]["UserStatus"];
+        };
+        ReportTargetDto: {
+            id: string;
+            /** @description Article title, one-line comment preview, or username */
+            label: string;
+            /**
+             * @description Status of the target; null when it no longer exists
+             * @enum {string|null}
+             */
+            status: "PUBLISHED" | "DRAFT" | "UNDER_REVIEW" | "HIDDEN" | "BANNED" | "VISIBLE" | "ACTIVE" | "SHADOW_BANNED" | null;
+            /** @description Only for COMMENT targets */
+            articleId?: string;
+            /** @description True when the target id resolved to nothing */
+            missing?: boolean;
+        };
+        ReportDto: {
+            id: string;
+            /** @example SPAM */
+            reason: string;
+            description: string | null;
+            status: components["schemas"]["ReportStatus"];
+            targetType: components["schemas"]["TargetType"];
+            targetId: string;
+            /** @description External ID of the reporter */
+            reporterId: string;
+            /** @description External ID of the moderator */
+            moderatorId: string | null;
+            moderatorNote: string | null;
+            tenantId: string;
+            /** Format: date-time */
+            createdAt: string;
+            reporter: components["schemas"]["ReportUserSummaryDto"];
+            moderator: components["schemas"]["ReportUserSummaryDto"] | null;
+            target: components["schemas"]["ReportTargetDto"];
+        };
+        UpdateReportStatusDto: {
+            /**
+             * @description New status to set for the report
+             * @example RESOLVED
+             * @enum {string}
+             */
+            status: "PENDING" | "REVIEWED" | "RESOLVED" | "DISMISSED";
+            /**
+             * @description Optional note left by the moderator explaining the decision
+             * @example Content removed – repeated ToS violations.
+             */
+            moderatorNote?: string;
+            /**
+             * @description External ID of the staff member resolving the report
+             * @example mod_xyz789
+             */
+            moderatorId: string;
+        };
+        CreateTagDto: {
+            /**
+             * @description Display name of the tag. The slug will be auto-generated from this value.
+             * @example Technology
+             */
+            name: string;
+        };
         UpdateTagDto: {
             /**
              * @description New display name for the tag. The slug will be re-generated from this value.
@@ -1689,6 +1944,31 @@ export interface components {
              * @example Content removed – repeated ToS violations.
              */
             moderatorNote?: string;
+        };
+        /** @enum {string} */
+        AuditAction: "USER_CREATED" | "USER_UPDATED_ROLE" | "USER_STATUS_CHANGED" | "USER_DELETED" | "ARTICLE_CREATED" | "ARTICLE_UPDATED" | "ARTICLE_DELETED" | "ARTICLE_STATUS_CHANGED" | "COMMENT_CREATED" | "COMMENT_UPDATED" | "COMMENT_DELETED" | "COMMENT_STATUS_CHANGED" | "CATEGORY_CREATED" | "CATEGORY_UPDATED" | "CATEGORY_DELETED" | "TAG_CREATED" | "TAG_UPDATED" | "TAG_DELETED" | "REPORT_CREATED" | "REPORT_STATUS_CHANGED" | "BANNED_WORD_CREATED" | "BANNED_WORD_DELETED" | "ROLE_ASSIGNMENT_CHANGED";
+        /** @enum {string} */
+        AuditResourceType: "USER" | "ARTICLE" | "COMMENT" | "REPORT" | "BANNED_WORD" | "TAG" | "CATEGORY";
+        AuditLogDto: {
+            id: string;
+            /** Format: date-time */
+            timestamp: string;
+            tenantId: string;
+            /** @description External ID of the actor */
+            actorUserId: string;
+            /** @description Role of the actor at the time of the action */
+            actorRole: string;
+            action: components["schemas"]["AuditAction"];
+            resourceType: components["schemas"]["AuditResourceType"];
+            resourceId: string;
+            resourceName: string | null;
+            changesBefore: {
+                [key: string]: unknown;
+            } | null;
+            changesAfter: {
+                [key: string]: unknown;
+            } | null;
+            changeSummary: string | null;
         };
         UserListItemDto: {
             /**
@@ -1766,6 +2046,146 @@ export interface components {
              */
             role: "TENANT_ADMIN" | "SUPER_MODERATOR" | "EDITOR" | "MODERATOR" | "MEMBER";
         };
+        WebhookEventDto: {
+            id: string;
+            /** @example comment.moderated */
+            event: string;
+            /** @description Canonical payload delivered to the tenant */
+            payload: {
+                [key: string]: unknown;
+            };
+            tenantId: string;
+            /**
+             * Format: date-time
+             * @description Set once delivered
+             */
+            sentAt: string | null;
+            attempts: number;
+            lastError: string | null;
+            /** Format: date-time */
+            nextRetryAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        WebhookResendAllResultDto: {
+            /**
+             * @description Number of undelivered events reset
+             * @example 12
+             */
+            reset: number;
+        };
+        NotificationUserSummaryDto: {
+            id: string;
+            externalId: string;
+            username: string | null;
+            avatarUrl: string | null;
+        };
+        NotificationDto: {
+            id: string;
+            /** @example comment.moderated */
+            type: string;
+            title: string;
+            message: string;
+            userId: string;
+            tenantId: string;
+            sentToClient: boolean;
+            /** Format: date-time */
+            readAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            user: components["schemas"]["NotificationUserSummaryDto"];
+        };
+        DashboardTotalsDto: {
+            articlesPublished: number;
+            totalViews: number;
+            totalLikes: number;
+            totalComments: number;
+            totalBookmarks: number;
+        };
+        DashboardArticlesDto: {
+            total: number;
+            published: number;
+            draft: number;
+            underReview: number;
+            hidden: number;
+            banned: number;
+            featured: number;
+            /** @description Articles created within `days` */
+            newInPeriod: number;
+            /** @description Drafts untouched for 30+ days */
+            staleDrafts: number;
+        };
+        DashboardCommentsDto: {
+            total: number;
+            visible: number;
+            underReview: number;
+            hidden: number;
+            banned: number;
+        };
+        DashboardReportsDto: {
+            total: number;
+            pending: number;
+            reviewed: number;
+            resolved: number;
+            dismissed: number;
+        };
+        DashboardUsersDto: {
+            total: number;
+            active: number;
+            banned: number;
+            shadowBanned: number;
+        };
+        DashboardTaxonomyDto: {
+            categories: number;
+            tags: number;
+            bannedWords: number;
+        };
+        DashboardLanguageDto: {
+            /** @example en */
+            code: string;
+            translations: number;
+        };
+        DashboardTopArticleDto: {
+            id: string;
+            title: string | null;
+            slug: string | null;
+            languageCode: string | null;
+            views: number;
+            likesCount: number;
+            commentsCount: number;
+        };
+        DailyStatsDto: {
+            id: string;
+            /** Format: date-time */
+            date: string;
+            articlesPublished: number;
+            totalViews: number;
+            totalLikes: number;
+            totalComments: number;
+            totalBookmarks: number;
+            tenantId: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        DashboardStatsDto: {
+            /** @description Articuno version */
+            version: string;
+            /** @example 30 days */
+            period: string;
+            periodDays: number;
+            totals: components["schemas"]["DashboardTotalsDto"];
+            articles: components["schemas"]["DashboardArticlesDto"];
+            comments: components["schemas"]["DashboardCommentsDto"];
+            reports: components["schemas"]["DashboardReportsDto"];
+            users: components["schemas"]["DashboardUsersDto"];
+            taxonomy: components["schemas"]["DashboardTaxonomyDto"];
+            languages: components["schemas"]["DashboardLanguageDto"][];
+            topArticles: components["schemas"]["DashboardTopArticleDto"][];
+            /** @description One row per day within `days` */
+            history: components["schemas"]["DailyStatsDto"][];
+        };
     };
     responses: never;
     parameters: never;
@@ -1775,30 +2195,73 @@ export interface components {
 }
 export type CreateArticleTranslationDto = components['schemas']['CreateArticleTranslationDto'];
 export type CreateArticleDto = components['schemas']['CreateArticleDto'];
+export type ContentStatus = components['schemas']['ContentStatus'];
+export type ArticleCategorySummaryDto = components['schemas']['ArticleCategorySummaryDto'];
+export type UserStatus = components['schemas']['UserStatus'];
+export type UserRole = components['schemas']['UserRole'];
+export type ArticleAuthorSummaryDto = components['schemas']['ArticleAuthorSummaryDto'];
+export type ArticleTagSummaryDto = components['schemas']['ArticleTagSummaryDto'];
+export type ArticleCommentCountDto = components['schemas']['ArticleCommentCountDto'];
+export type ArticleTranslationDto = components['schemas']['ArticleTranslationDto'];
+export type ArticleDto = components['schemas']['ArticleDto'];
 export type PageMetaDto = components['schemas']['PageMetaDto'];
+export type ArticleTranslationSummaryDto = components['schemas']['ArticleTranslationSummaryDto'];
+export type ArticleListItemDto = components['schemas']['ArticleListItemDto'];
 export type UpdateArticleDto = components['schemas']['UpdateArticleDto'];
 export type CreateBannedWordDto = components['schemas']['CreateBannedWordDto'];
 export type BannedWordDto = components['schemas']['BannedWordDto'];
 export type UpdateArticleTranslationDto = components['schemas']['UpdateArticleTranslationDto'];
-export type CreateCategoryDto = components['schemas']['CreateCategoryDto'];
+export type BookmarkToggleResultDto = components['schemas']['BookmarkToggleResultDto'];
 export type CategoryDto = components['schemas']['CategoryDto'];
-export type CategoryListItemDto = components['schemas']['CategoryListItemDto'];
-export type UpdateCategoryDto = components['schemas']['UpdateCategoryDto'];
-export type CreateCommentDto = components['schemas']['CreateCommentDto'];
-export type UpdateCommentDto = components['schemas']['UpdateCommentDto'];
-export type CreateReportDto = components['schemas']['CreateReportDto'];
-export type UpdateReportStatusDto = components['schemas']['UpdateReportStatusDto'];
-export type CreateTagDto = components['schemas']['CreateTagDto'];
 export type TenantDto = components['schemas']['TenantDto'];
 export type TagCountDto = components['schemas']['TagCountDto'];
 export type TagDto = components['schemas']['TagDto'];
+export type BookmarkedArticleDto = components['schemas']['BookmarkedArticleDto'];
+export type BookmarkListItemDto = components['schemas']['BookmarkListItemDto'];
+export type CreateCategoryDto = components['schemas']['CreateCategoryDto'];
+export type CategoryListItemDto = components['schemas']['CategoryListItemDto'];
+export type UpdateCategoryDto = components['schemas']['UpdateCategoryDto'];
+export type CreateCommentDto = components['schemas']['CreateCommentDto'];
+export type UserDto = components['schemas']['UserDto'];
+export type CommentDto = components['schemas']['CommentDto'];
+export type CommentTenantSummaryDto = components['schemas']['CommentTenantSummaryDto'];
+export type CommentAuthorSummaryDto = components['schemas']['CommentAuthorSummaryDto'];
+export type CommentListItemDto = components['schemas']['CommentListItemDto'];
+export type UpdateCommentDto = components['schemas']['UpdateCommentDto'];
+export type LikeToggleResultDto = components['schemas']['LikeToggleResultDto'];
+export type ArticleInteractionStatusDto = components['schemas']['ArticleInteractionStatusDto'];
+export type CreateReportDto = components['schemas']['CreateReportDto'];
+export type ReportStatus = components['schemas']['ReportStatus'];
+export type TargetType = components['schemas']['TargetType'];
+export type ReportUserSummaryDto = components['schemas']['ReportUserSummaryDto'];
+export type ReportTargetDto = components['schemas']['ReportTargetDto'];
+export type ReportDto = components['schemas']['ReportDto'];
+export type UpdateReportStatusDto = components['schemas']['UpdateReportStatusDto'];
+export type CreateTagDto = components['schemas']['CreateTagDto'];
 export type UpdateTagDto = components['schemas']['UpdateTagDto'];
 export type UpsertUserDto = components['schemas']['UpsertUserDto'];
 export type AdminCreateReportDto = components['schemas']['AdminCreateReportDto'];
 export type AdminUpdateReportDto = components['schemas']['AdminUpdateReportDto'];
+export type AuditAction = components['schemas']['AuditAction'];
+export type AuditResourceType = components['schemas']['AuditResourceType'];
+export type AuditLogDto = components['schemas']['AuditLogDto'];
 export type UserListItemDto = components['schemas']['UserListItemDto'];
 export type UpdateUserStatusDto = components['schemas']['UpdateUserStatusDto'];
 export type UpdateUserRoleDto = components['schemas']['UpdateUserRoleDto'];
+export type WebhookEventDto = components['schemas']['WebhookEventDto'];
+export type WebhookResendAllResultDto = components['schemas']['WebhookResendAllResultDto'];
+export type NotificationUserSummaryDto = components['schemas']['NotificationUserSummaryDto'];
+export type NotificationDto = components['schemas']['NotificationDto'];
+export type DashboardTotalsDto = components['schemas']['DashboardTotalsDto'];
+export type DashboardArticlesDto = components['schemas']['DashboardArticlesDto'];
+export type DashboardCommentsDto = components['schemas']['DashboardCommentsDto'];
+export type DashboardReportsDto = components['schemas']['DashboardReportsDto'];
+export type DashboardUsersDto = components['schemas']['DashboardUsersDto'];
+export type DashboardTaxonomyDto = components['schemas']['DashboardTaxonomyDto'];
+export type DashboardLanguageDto = components['schemas']['DashboardLanguageDto'];
+export type DashboardTopArticleDto = components['schemas']['DashboardTopArticleDto'];
+export type DailyStatsDto = components['schemas']['DailyStatsDto'];
+export type DashboardStatsDto = components['schemas']['DashboardStatsDto'];
 export type $defs = Record<string, never>;
 export interface operations {
     StatusController_getStatus: {
@@ -1870,7 +2333,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: Record<string, unknown>[];
+                        data: components["schemas"]["ArticleListItemDto"][];
                         meta: components["schemas"]["PageMetaDto"];
                     };
                 };
@@ -1902,7 +2365,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ArticleDto"];
+                };
             };
             /** @description Validation error – invalid request body. */
             400: {
@@ -1940,7 +2405,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ArticleDto"];
+                };
             };
             /** @description Missing or invalid API key. */
             401: {
@@ -2014,7 +2481,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ArticleDto"];
+                };
             };
             /** @description Validation error or invalid status transition. */
             400: {
@@ -2171,7 +2640,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ArticleTranslationSummaryDto"][];
+                };
             };
             /** @description Missing or invalid API key. */
             401: {
@@ -2210,7 +2681,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ArticleTranslationDto"];
+                };
             };
             /** @description Validation error – invalid request body. */
             400: {
@@ -2261,7 +2734,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ArticleTranslationDto"];
+                };
             };
             /** @description Missing or invalid API key. */
             401: {
@@ -2339,7 +2814,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ArticleTranslationDto"];
+                };
             };
             /** @description Validation error – invalid request body. */
             400: {
@@ -2385,7 +2862,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BookmarkToggleResultDto"];
+                };
             };
             /** @description Missing X-User-Id header or invalid articleId. */
             400: {
@@ -2433,7 +2912,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: Record<string, unknown>[];
+                        data: components["schemas"]["BookmarkListItemDto"][];
                         meta: components["schemas"]["PageMetaDto"];
                     };
                 };
@@ -2682,7 +3161,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: Record<string, unknown>[];
+                        data: components["schemas"]["CommentListItemDto"][];
                         meta: components["schemas"]["PageMetaDto"];
                     };
                 };
@@ -2706,7 +3185,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CommentDto"];
+                };
             };
         };
     };
@@ -2714,16 +3195,22 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                /** @description UUID of the comment */
+                id: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
+            /** @description content is null while the comment is not VISIBLE */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CommentDto"];
+                };
             };
         };
     };
@@ -2731,7 +3218,10 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                /** @description UUID of the comment */
+                id: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
@@ -2748,7 +3238,10 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                /** @description UUID of the comment */
+                id: string;
+            };
             cookie?: never;
         };
         requestBody: {
@@ -2761,7 +3254,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CommentDto"];
+                };
             };
         };
     };
@@ -2786,7 +3281,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["LikeToggleResultDto"];
+                };
             };
             /** @description Missing X-User-Id header or invalid articleId. */
             400: {
@@ -2832,7 +3329,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ArticleInteractionStatusDto"];
+                };
             };
             /** @description Missing X-User-Id header or invalid articleId. */
             400: {
@@ -2888,7 +3387,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: Record<string, unknown>[];
+                        data: components["schemas"]["ReportDto"][];
                         meta: components["schemas"]["PageMetaDto"];
                     };
                 };
@@ -2920,7 +3419,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ReportDto"];
+                };
             };
             /** @description Validation error – invalid request body. */
             400: {
@@ -2966,7 +3467,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ReportDto"];
+                };
             };
             /** @description Validation error – invalid request body. */
             400: {
@@ -3216,7 +3719,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["UserDto"];
+                };
             };
             /** @description Validation error – invalid request body. */
             400: {
@@ -3439,7 +3944,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: Record<string, unknown>[];
+                        data: components["schemas"]["ArticleListItemDto"][];
                         meta: components["schemas"]["PageMetaDto"];
                     };
                 };
@@ -3495,7 +4000,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ArticleDto"];
+                };
             };
             /** @description Validation error, invalid JSON in `data` field, or FileHarbor not configured. */
             400: {
@@ -3530,7 +4037,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ArticleDto"];
+                };
             };
             /** @description Not authenticated – missing or expired session. */
             401: {
@@ -3628,7 +4137,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ArticleDto"];
+                };
             };
             /** @description Validation error, invalid JSON in `data` field, or invalid status transition. */
             400: {
@@ -3670,7 +4181,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ArticleTranslationSummaryDto"][];
+                };
             };
             /** @description Not authenticated – missing or expired session. */
             401: {
@@ -3709,7 +4222,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ArticleTranslationDto"];
+                };
             };
             /** @description Validation error – invalid request body. */
             400: {
@@ -3760,7 +4275,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ArticleTranslationDto"];
+                };
             };
             /** @description Not authenticated – missing or expired session. */
             401: {
@@ -3838,7 +4355,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ArticleTranslationDto"];
+                };
             };
             /** @description Validation error – invalid request body. */
             400: {
@@ -3908,7 +4427,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TagDto"];
+                };
             };
         };
     };
@@ -3928,7 +4449,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TagDto"];
+                };
             };
         };
     };
@@ -3972,7 +4495,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TagDto"];
+                };
             };
         };
     };
@@ -4019,7 +4544,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CategoryDto"];
+                };
             };
         };
     };
@@ -4039,7 +4566,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CategoryDto"];
+                };
             };
         };
     };
@@ -4083,7 +4612,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CategoryDto"];
+                };
             };
         };
     };
@@ -4226,7 +4757,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: Record<string, unknown>[];
+                        data: components["schemas"]["ReportDto"][];
                         meta: components["schemas"]["PageMetaDto"];
                     };
                 };
@@ -4258,7 +4789,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ReportDto"];
+                };
             };
             /** @description Validation error – invalid request body. */
             400: {
@@ -4300,7 +4833,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ReportDto"];
+                };
             };
             /** @description Not authenticated – missing or expired session. */
             401: {
@@ -4339,7 +4874,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ReportDto"];
+                };
             };
             /** @description Validation error – invalid request body. */
             400: {
@@ -4389,7 +4926,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: Record<string, unknown>[];
+                        data: components["schemas"]["AuditLogDto"][];
                         meta: components["schemas"]["PageMetaDto"];
                     };
                 };
@@ -4420,7 +4957,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AuditLogDto"];
+                };
             };
             /** @description Not authenticated – missing or expired session. */
             401: {
@@ -4654,7 +5193,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: Record<string, unknown>[];
+                        data: components["schemas"]["CommentListItemDto"][];
                         meta: components["schemas"]["PageMetaDto"];
                     };
                 };
@@ -4674,7 +5213,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description UUID of the comment */
-                id: unknown;
+                id: string;
             };
             cookie?: never;
         };
@@ -4685,7 +5224,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CommentDto"];
+                };
             };
             /** @description Not authenticated – missing or expired session. */
             401: {
@@ -4709,7 +5250,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description UUID of the comment to delete */
-                id: unknown;
+                id: string;
             };
             cookie?: never;
         };
@@ -4744,7 +5285,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description UUID of the comment to update */
-                id: unknown;
+                id: string;
             };
             cookie?: never;
         };
@@ -4759,7 +5300,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CommentDto"];
+                };
             };
             /** @description Validation error – invalid request body. */
             400: {
@@ -4807,7 +5350,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: Record<string, unknown>[];
+                        data: components["schemas"]["WebhookEventDto"][];
                         meta: components["schemas"]["PageMetaDto"];
                     };
                 };
@@ -4838,7 +5381,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["WebhookEventDto"];
+                };
             };
             /** @description Not authenticated – missing or expired session. */
             401: {
@@ -4873,7 +5418,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["WebhookEventDto"];
+                };
             };
             /** @description Event already delivered — resend not needed. */
             400: {
@@ -4913,7 +5460,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["WebhookResendAllResultDto"];
                 };
             };
             /** @description Not authenticated – missing or expired session. */
@@ -4950,7 +5497,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: Record<string, unknown>[];
+                        data: components["schemas"]["NotificationDto"][];
                         meta: components["schemas"]["PageMetaDto"];
                     };
                 };
@@ -4981,7 +5528,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["NotificationDto"];
+                };
             };
             /** @description Not authenticated – missing or expired session. */
             401: {
@@ -5014,7 +5563,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["DashboardStatsDto"];
+                };
             };
         };
     };

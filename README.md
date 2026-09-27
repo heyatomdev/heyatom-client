@@ -153,7 +153,7 @@ Timeouts default to 10 s per request and 60 s for uploads. Raw responses (`strea
 
 ## Types
 
-Types are generated, never written by hand. Each service's OpenAPI document is committed as `openapi/<service>.json`, and `openapi-typescript` turns it into `src/<service>/types.gen.ts`. Every subpath re-exports the result: `paths`, `components`, `operations`, and one alias per schema (`ImageResponseDto`, `CreateArticleDto`, and so on). Method inputs and outputs derive from `operations`. A route whose service documents no response schema returns `unknown`. The fix for that belongs in the service (`@ApiOkResponse({ type })`), followed by a regeneration. It does not belong here.
+Types are generated, never written by hand. Each service's OpenAPI document is committed as `openapi/<service>.json`, and `openapi-typescript` turns it into `src/<service>/types.gen.ts`. Every subpath re-exports the result: `paths`, `components`, `operations`, and one alias per schema (`ImageResponseDto`, `CreateArticleDto`, and so on). Method inputs and outputs derive from `operations`. Every client method has a typed JSON response and body, except the raw methods (`streamVideo`, `videoThumb`, `downloadImage`), which return a `Response`. If a service route ever ships without a response schema, its method returns `unknown`. The fix belongs in the service (`@ApiOkResponse({ type })`), followed by a regeneration. It does not belong here.
 
 ```bash
 pnpm openapi:dump   # runs `pnpm openapi:dump` in ../fileharbor and ../articuno-root/articuno

@@ -61,7 +61,14 @@
         },
         "responses": {
           "201": {
-            "description": "Article created successfully."
+            "description": "Article created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation error – invalid request body."
@@ -177,7 +184,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "type": "object"
+                        "$ref": "#/components/schemas/ArticleListItemDto"
                       }
                     },
                     "meta": {
@@ -231,7 +238,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Article found."
+            "description": "Article found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleDto"
+                }
+              }
+            }
           },
           "401": {
             "description": "Missing or invalid API key."
@@ -279,7 +293,14 @@
         },
         "responses": {
           "200": {
-            "description": "Article updated successfully."
+            "description": "Article updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation error or invalid status transition."
@@ -526,7 +547,14 @@
         },
         "responses": {
           "201": {
-            "description": "Translation created successfully."
+            "description": "Translation created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleTranslationDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation error – invalid request body."
@@ -568,7 +596,17 @@
         ],
         "responses": {
           "200": {
-            "description": "List of translations."
+            "description": "List of translations.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ArticleTranslationSummaryDto"
+                  }
+                }
+              }
+            }
           },
           "401": {
             "description": "Missing or invalid API key."
@@ -616,7 +654,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Translation found."
+            "description": "Translation found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleTranslationDto"
+                }
+              }
+            }
           },
           "401": {
             "description": "Missing or invalid API key."
@@ -672,7 +717,14 @@
         },
         "responses": {
           "200": {
-            "description": "Translation updated successfully."
+            "description": "Translation updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleTranslationDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation error – invalid request body."
@@ -776,7 +828,14 @@
         ],
         "responses": {
           "201": {
-            "description": "Bookmark toggled successfully."
+            "description": "Bookmark toggled successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookmarkToggleResultDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Missing X-User-Id header or invalid articleId."
@@ -857,7 +916,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "type": "object"
+                        "$ref": "#/components/schemas/BookmarkListItemDto"
                       }
                     },
                     "meta": {
@@ -1157,7 +1216,14 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommentDto"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1229,7 +1295,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "type": "object"
+                        "$ref": "#/components/schemas/CommentListItemDto"
                       }
                     },
                     "meta": {
@@ -1249,10 +1315,28 @@
     "/comments/{id}": {
       "get": {
         "operationId": "CommentsController_findOne",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the comment",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "content is null while the comment is not VISIBLE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommentDto"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1261,7 +1345,18 @@
       },
       "patch": {
         "operationId": "CommentsController_update",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the comment",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1274,7 +1369,14 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommentDto"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1283,7 +1385,18 @@
       },
       "delete": {
         "operationId": "CommentsController_remove",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the comment",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "204": {
             "description": ""
@@ -1329,7 +1442,14 @@
         ],
         "responses": {
           "201": {
-            "description": "Like toggled successfully."
+            "description": "Like toggled successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LikeToggleResultDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Missing X-User-Id header or invalid articleId."
@@ -1387,7 +1507,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Interaction status returned successfully."
+            "description": "Interaction status returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleInteractionStatusDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Missing X-User-Id header or invalid articleId."
@@ -1427,7 +1554,14 @@
         },
         "responses": {
           "201": {
-            "description": "Report submitted successfully."
+            "description": "Report submitted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation error – invalid request body."
@@ -1558,7 +1692,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "type": "object"
+                        "$ref": "#/components/schemas/ReportDto"
                       }
                     },
                     "meta": {
@@ -1612,7 +1746,14 @@
         },
         "responses": {
           "200": {
-            "description": "Report status updated successfully."
+            "description": "Report status updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation error – invalid request body."
@@ -1917,7 +2058,14 @@
         },
         "responses": {
           "201": {
-            "description": "User created or updated successfully."
+            "description": "User created or updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation error – invalid request body."
@@ -2217,7 +2365,14 @@
         },
         "responses": {
           "201": {
-            "description": "Article created successfully."
+            "description": "Article created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation error, invalid JSON in `data` field, or FileHarbor not configured."
@@ -2333,7 +2488,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "type": "object"
+                        "$ref": "#/components/schemas/ArticleListItemDto"
                       }
                     },
                     "meta": {
@@ -2377,7 +2532,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Article found."
+            "description": "Article found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleDto"
+                }
+              }
+            }
           },
           "401": {
             "description": "Not authenticated – missing or expired session."
@@ -2455,7 +2617,14 @@
         },
         "responses": {
           "200": {
-            "description": "Article updated successfully."
+            "description": "Article updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation error, invalid JSON in `data` field, or invalid status transition."
@@ -2542,7 +2711,14 @@
         },
         "responses": {
           "201": {
-            "description": "Translation created successfully."
+            "description": "Translation created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleTranslationDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation error – invalid request body."
@@ -2584,7 +2760,17 @@
         ],
         "responses": {
           "200": {
-            "description": "List of translations."
+            "description": "List of translations.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ArticleTranslationSummaryDto"
+                  }
+                }
+              }
+            }
           },
           "401": {
             "description": "Not authenticated – missing or expired session."
@@ -2632,7 +2818,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Translation found."
+            "description": "Translation found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleTranslationDto"
+                }
+              }
+            }
           },
           "401": {
             "description": "Not authenticated – missing or expired session."
@@ -2688,7 +2881,14 @@
         },
         "responses": {
           "200": {
-            "description": "Translation updated successfully."
+            "description": "Translation updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleTranslationDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation error – invalid request body."
@@ -2773,7 +2973,14 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2873,7 +3080,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2911,7 +3125,14 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2968,7 +3189,14 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -3058,7 +3286,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -3096,7 +3331,14 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -3311,7 +3553,14 @@
         },
         "responses": {
           "201": {
-            "description": "Report submitted successfully."
+            "description": "Report submitted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation error – invalid request body."
@@ -3442,7 +3691,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "type": "object"
+                        "$ref": "#/components/schemas/ReportDto"
                       }
                     },
                     "meta": {
@@ -3486,7 +3735,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Report found."
+            "description": "Report found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportDto"
+                }
+              }
+            }
           },
           "401": {
             "description": "Not authenticated – missing or expired session."
@@ -3534,7 +3790,14 @@
         },
         "responses": {
           "200": {
-            "description": "Report status updated successfully."
+            "description": "Report status updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation error – invalid request body."
@@ -3659,7 +3922,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "type": "object"
+                        "$ref": "#/components/schemas/AuditLogDto"
                       }
                     },
                     "meta": {
@@ -3703,7 +3966,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Audit log entry found."
+            "description": "Audit log entry found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditLogDto"
+                }
+              }
+            }
           },
           "401": {
             "description": "Not authenticated – missing or expired session."
@@ -4090,7 +4360,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "type": "object"
+                        "$ref": "#/components/schemas/CommentListItemDto"
                       }
                     },
                     "meta": {
@@ -4127,13 +4397,22 @@
             "in": "path",
             "description": "UUID of the comment",
             "schema": {
-              "example": "123e4567-e89b-12d3-a456-426614174000"
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Comment found."
+            "description": "Comment found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommentDto"
+                }
+              }
+            }
           },
           "401": {
             "description": "Not authenticated – missing or expired session."
@@ -4162,7 +4441,9 @@
             "in": "path",
             "description": "UUID of the comment to update",
             "schema": {
-              "example": "123e4567-e89b-12d3-a456-426614174000"
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -4178,7 +4459,14 @@
         },
         "responses": {
           "200": {
-            "description": "Comment updated successfully."
+            "description": "Comment updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommentDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation error – invalid request body."
@@ -4210,7 +4498,9 @@
             "in": "path",
             "description": "UUID of the comment to delete",
             "schema": {
-              "example": "123e4567-e89b-12d3-a456-426614174000"
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -4296,7 +4586,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "type": "object"
+                        "$ref": "#/components/schemas/WebhookEventDto"
                       }
                     },
                     "meta": {
@@ -4339,7 +4629,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Webhook event found."
+            "description": "Webhook event found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookEventDto"
+                }
+              }
+            }
           },
           "401": {
             "description": "Not authenticated – missing or expired session."
@@ -4376,7 +4673,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Webhook event reset — will be retried shortly."
+            "description": "Webhook event reset — will be retried shortly.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookEventDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Event already delivered — resend not needed."
@@ -4410,9 +4714,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "example": {
-                    "reset": 12
-                  }
+                  "$ref": "#/components/schemas/WebhookResendAllResultDto"
                 }
               }
             }
@@ -4502,7 +4804,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "type": "object"
+                        "$ref": "#/components/schemas/NotificationDto"
                       }
                     },
                     "meta": {
@@ -4545,7 +4847,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Notification found."
+            "description": "Notification found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationDto"
+                }
+              }
+            }
           },
           "401": {
             "description": "Not authenticated – missing or expired session."
@@ -4580,7 +4889,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardStatsDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -4715,6 +5031,281 @@
           "categoryId"
         ]
       },
+      "ContentStatus": {
+        "type": "string",
+        "enum": [
+          "PUBLISHED",
+          "DRAFT",
+          "UNDER_REVIEW",
+          "HIDDEN",
+          "BANNED",
+          "VISIBLE"
+        ]
+      },
+      "ArticleCategorySummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "color": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "description",
+          "color"
+        ]
+      },
+      "UserStatus": {
+        "type": "string",
+        "enum": [
+          "ACTIVE",
+          "BANNED",
+          "SHADOW_BANNED"
+        ]
+      },
+      "UserRole": {
+        "type": "string",
+        "enum": [
+          "TENANT_ADMIN",
+          "SUPER_MODERATOR",
+          "EDITOR",
+          "MODERATOR",
+          "MEMBER"
+        ]
+      },
+      "ArticleAuthorSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string",
+            "nullable": true
+          },
+          "externalId": {
+            "type": "string"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserStatus"
+              }
+            ]
+          },
+          "role": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserRole"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "externalId",
+          "status",
+          "role"
+        ]
+      },
+      "ArticleTagSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug"
+        ]
+      },
+      "ArticleCommentCountDto": {
+        "type": "object",
+        "properties": {
+          "commentsList": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "commentsList"
+        ]
+      },
+      "ArticleTranslationDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "languageCode": {
+            "type": "string",
+            "example": "en"
+          },
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "excerpt": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "metaTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "metaDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "readingTime": {
+            "type": "number",
+            "description": "Estimated reading time in minutes"
+          },
+          "articleId": {
+            "type": "string"
+          },
+          "tenantId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "languageCode",
+          "title",
+          "content",
+          "excerpt",
+          "slug",
+          "metaTitle",
+          "metaDescription",
+          "readingTime",
+          "articleId",
+          "tenantId"
+        ]
+      },
+      "ArticleDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "coverImage": {
+            "type": "string",
+            "nullable": true,
+            "description": "Cover image URL"
+          },
+          "featured": {
+            "type": "boolean"
+          },
+          "views": {
+            "type": "number"
+          },
+          "likesCount": {
+            "type": "number"
+          },
+          "commentsCount": {
+            "type": "number"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContentStatus"
+              }
+            ]
+          },
+          "authorId": {
+            "type": "string",
+            "nullable": true
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "tenantId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/ArticleCategorySummaryDto"
+          },
+          "author": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ArticleAuthorSummaryDto"
+              }
+            ]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArticleTagSummaryDto"
+            }
+          },
+          "_count": {
+            "$ref": "#/components/schemas/ArticleCommentCountDto"
+          },
+          "translations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArticleTranslationDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "coverImage",
+          "featured",
+          "views",
+          "likesCount",
+          "commentsCount",
+          "status",
+          "authorId",
+          "categoryId",
+          "tenantId",
+          "createdAt",
+          "updatedAt",
+          "category",
+          "author",
+          "tags",
+          "_count",
+          "translations"
+        ]
+      },
       "PageMetaDto": {
         "type": "object",
         "properties": {
@@ -4736,6 +5327,134 @@
           "page",
           "limit",
           "totalPages"
+        ]
+      },
+      "ArticleTranslationSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "languageCode": {
+            "type": "string",
+            "example": "en"
+          },
+          "excerpt": {
+            "type": "string"
+          },
+          "readingTime": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "slug",
+          "languageCode",
+          "excerpt",
+          "readingTime"
+        ]
+      },
+      "ArticleListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "coverImage": {
+            "type": "string",
+            "nullable": true,
+            "description": "Cover image URL"
+          },
+          "featured": {
+            "type": "boolean"
+          },
+          "views": {
+            "type": "number"
+          },
+          "likesCount": {
+            "type": "number"
+          },
+          "commentsCount": {
+            "type": "number"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContentStatus"
+              }
+            ]
+          },
+          "authorId": {
+            "type": "string",
+            "nullable": true
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "tenantId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/ArticleCategorySummaryDto"
+          },
+          "author": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ArticleAuthorSummaryDto"
+              }
+            ]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArticleTagSummaryDto"
+            }
+          },
+          "_count": {
+            "$ref": "#/components/schemas/ArticleCommentCountDto"
+          },
+          "translations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArticleTranslationSummaryDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "coverImage",
+          "featured",
+          "views",
+          "likesCount",
+          "commentsCount",
+          "status",
+          "authorId",
+          "categoryId",
+          "tenantId",
+          "createdAt",
+          "updatedAt",
+          "category",
+          "author",
+          "tags",
+          "_count",
+          "translations"
         ]
       },
       "UpdateArticleDto": {
@@ -4868,27 +5587,16 @@
           }
         }
       },
-      "CreateCategoryDto": {
+      "BookmarkToggleResultDto": {
         "type": "object",
         "properties": {
-          "name": {
-            "type": "string",
-            "description": "Display name of the category. The slug will be auto-generated from this value.",
-            "example": "Science"
-          },
-          "description": {
-            "type": "string",
-            "description": "Optional human-readable description of the category.",
-            "example": "Articles about science and research."
-          },
-          "color": {
-            "type": "string",
-            "description": "Optional hex colour associated with the category for UI display.",
-            "example": "#3B82F6"
+          "bookmarked": {
+            "type": "boolean",
+            "description": "Whether the article is bookmarked after the toggle"
           }
         },
         "required": [
-          "name"
+          "bookmarked"
         ]
       },
       "CategoryDto": {
@@ -4938,190 +5646,6 @@
           "slug",
           "createdAt",
           "updatedAt"
-        ]
-      },
-      "CategoryListItemDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Unique identifier of the category",
-            "example": "123e4567-e89b-12d3-a456-426614174000"
-          },
-          "name": {
-            "type": "string",
-            "description": "Display name of the category",
-            "example": "Science"
-          },
-          "slug": {
-            "type": "string",
-            "description": "URL-friendly slug derived from the name",
-            "example": "science"
-          },
-          "description": {
-            "type": "string",
-            "description": "Optional description of the category",
-            "example": "Articles about science and research."
-          },
-          "color": {
-            "type": "string",
-            "description": "Optional hex colour associated with the category",
-            "example": "#3B82F6"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string",
-            "description": "Timestamp when the category was created",
-            "example": "2026-01-15T10:23:00.000Z"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string",
-            "description": "Timestamp when the category was last updated",
-            "example": "2026-03-22T08:45:00.000Z"
-          },
-          "articlesCount": {
-            "type": "number",
-            "description": "Number of articles associated with this category",
-            "example": 14
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "slug",
-          "createdAt",
-          "updatedAt",
-          "articlesCount"
-        ]
-      },
-      "UpdateCategoryDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "New display name for the category. The slug will be re-generated from this value.",
-            "example": "Science & Technology"
-          },
-          "description": {
-            "type": "string",
-            "description": "Updated description of the category.",
-            "example": "Articles covering science, technology and research."
-          },
-          "color": {
-            "type": "string",
-            "description": "Updated hex colour for the category.",
-            "example": "#10B981"
-          }
-        }
-      },
-      "CreateCommentDto": {
-        "type": "object",
-        "properties": {}
-      },
-      "UpdateCommentDto": {
-        "type": "object",
-        "properties": {
-          "content": {
-            "type": "string",
-            "description": "Updated comment content"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "PUBLISHED",
-              "DRAFT",
-              "UNDER_REVIEW",
-              "HIDDEN",
-              "BANNED",
-              "VISIBLE"
-            ],
-            "description": "New status for the comment (admin only)"
-          }
-        }
-      },
-      "CreateReportDto": {
-        "type": "object",
-        "properties": {
-          "targetType": {
-            "type": "string",
-            "description": "Type of the reported target",
-            "enum": [
-              "ARTICLE",
-              "COMMENT",
-              "USER"
-            ],
-            "example": "COMMENT"
-          },
-          "targetId": {
-            "type": "string",
-            "description": "UUID of the reported target (article, comment or user)",
-            "example": "123e4567-e89b-12d3-a456-426614174000"
-          },
-          "reason": {
-            "type": "string",
-            "description": "Short reason for the report",
-            "example": "Spam"
-          },
-          "description": {
-            "type": "string",
-            "description": "Optional additional details about the report",
-            "example": "This comment contains repeated promotional links."
-          },
-          "reporterId": {
-            "type": "string",
-            "description": "External ID of the user submitting the report",
-            "example": "user_abc123"
-          }
-        },
-        "required": [
-          "targetType",
-          "targetId",
-          "reason",
-          "reporterId"
-        ]
-      },
-      "UpdateReportStatusDto": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "string",
-            "description": "New status to set for the report",
-            "enum": [
-              "PENDING",
-              "REVIEWED",
-              "RESOLVED",
-              "DISMISSED"
-            ],
-            "example": "RESOLVED"
-          },
-          "moderatorNote": {
-            "type": "string",
-            "description": "Optional note left by the moderator explaining the decision",
-            "example": "Content removed – repeated ToS violations."
-          },
-          "moderatorId": {
-            "type": "string",
-            "description": "External ID of the staff member resolving the report",
-            "example": "mod_xyz789"
-          }
-        },
-        "required": [
-          "status",
-          "moderatorId"
-        ]
-      },
-      "CreateTagDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Display name of the tag. The slug will be auto-generated from this value.",
-            "example": "Technology"
-          }
-        },
-        "required": [
-          "name"
         ]
       },
       "TenantDto": {
@@ -5243,6 +5767,783 @@
           "updatedAt"
         ]
       },
+      "BookmarkedArticleDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "coverImage": {
+            "type": "string",
+            "nullable": true,
+            "description": "Cover image URL"
+          },
+          "featured": {
+            "type": "boolean"
+          },
+          "views": {
+            "type": "number"
+          },
+          "likesCount": {
+            "type": "number"
+          },
+          "commentsCount": {
+            "type": "number"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContentStatus"
+              }
+            ]
+          },
+          "authorId": {
+            "type": "string",
+            "nullable": true
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "tenantId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/CategoryDto"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TagDto"
+            }
+          },
+          "translations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArticleTranslationDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "coverImage",
+          "featured",
+          "views",
+          "likesCount",
+          "commentsCount",
+          "status",
+          "authorId",
+          "categoryId",
+          "tenantId",
+          "createdAt",
+          "updatedAt",
+          "category",
+          "tags",
+          "translations"
+        ]
+      },
+      "BookmarkListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "articleId": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string",
+            "description": "Internal UUID of the user"
+          },
+          "tenantId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "article": {
+            "$ref": "#/components/schemas/BookmarkedArticleDto"
+          }
+        },
+        "required": [
+          "id",
+          "articleId",
+          "userId",
+          "tenantId",
+          "createdAt",
+          "article"
+        ]
+      },
+      "CreateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Display name of the category. The slug will be auto-generated from this value.",
+            "example": "Science"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional human-readable description of the category.",
+            "example": "Articles about science and research."
+          },
+          "color": {
+            "type": "string",
+            "description": "Optional hex colour associated with the category for UI display.",
+            "example": "#3B82F6"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CategoryListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier of the category",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the category",
+            "example": "Science"
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL-friendly slug derived from the name",
+            "example": "science"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description of the category",
+            "example": "Articles about science and research."
+          },
+          "color": {
+            "type": "string",
+            "description": "Optional hex colour associated with the category",
+            "example": "#3B82F6"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the category was created",
+            "example": "2026-01-15T10:23:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the category was last updated",
+            "example": "2026-03-22T08:45:00.000Z"
+          },
+          "articlesCount": {
+            "type": "number",
+            "description": "Number of articles associated with this category",
+            "example": 14
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "createdAt",
+          "updatedAt",
+          "articlesCount"
+        ]
+      },
+      "UpdateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "New display name for the category. The slug will be re-generated from this value.",
+            "example": "Science & Technology"
+          },
+          "description": {
+            "type": "string",
+            "description": "Updated description of the category.",
+            "example": "Articles covering science, technology and research."
+          },
+          "color": {
+            "type": "string",
+            "description": "Updated hex colour for the category.",
+            "example": "#10B981"
+          }
+        }
+      },
+      "CreateCommentDto": {
+        "type": "object",
+        "properties": {
+          "articleId": {
+            "type": "string",
+            "description": "UUID of the article being commented on"
+          },
+          "content": {
+            "type": "string",
+            "description": "Comment text"
+          },
+          "authorExternalId": {
+            "type": "string",
+            "description": "External ID of the author (from your identity provider)"
+          }
+        },
+        "required": [
+          "articleId",
+          "content",
+          "authorExternalId"
+        ]
+      },
+      "UserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Internal UUID of the user"
+          },
+          "externalId": {
+            "type": "string",
+            "description": "External ID from the identity provider"
+          },
+          "tenantId": {
+            "type": "string",
+            "description": "UUID of the tenant this user belongs to"
+          },
+          "language": {
+            "type": "string",
+            "description": "Preferred language code (BCP 47)",
+            "example": "it"
+          },
+          "username": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserStatus"
+              }
+            ]
+          },
+          "role": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserRole"
+              }
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "externalId",
+          "tenantId",
+          "language",
+          "username",
+          "avatarUrl",
+          "status",
+          "role",
+          "createdAt"
+        ]
+      },
+      "CommentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string",
+            "nullable": true,
+            "description": "Null on the public API while the comment is not VISIBLE"
+          },
+          "authorId": {
+            "type": "string",
+            "description": "Internal UUID of the author"
+          },
+          "articleId": {
+            "type": "string"
+          },
+          "tenantId": {
+            "type": "string"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContentStatus"
+              }
+            ]
+          },
+          "reportCount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "author": {
+            "$ref": "#/components/schemas/UserDto"
+          }
+        },
+        "required": [
+          "id",
+          "content",
+          "authorId",
+          "articleId",
+          "tenantId",
+          "status",
+          "reportCount",
+          "createdAt",
+          "updatedAt",
+          "author"
+        ]
+      },
+      "CommentTenantSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "CommentAuthorSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserStatus"
+              }
+            ]
+          },
+          "role": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserRole"
+              }
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "username": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "role",
+          "createdAt",
+          "username",
+          "avatarUrl"
+        ]
+      },
+      "CommentListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string",
+            "nullable": true,
+            "description": "Null on the public API while the comment is not VISIBLE"
+          },
+          "authorId": {
+            "type": "string",
+            "description": "Internal UUID of the author"
+          },
+          "articleId": {
+            "type": "string"
+          },
+          "tenantId": {
+            "type": "string"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContentStatus"
+              }
+            ]
+          },
+          "reportCount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "tenant": {
+            "$ref": "#/components/schemas/CommentTenantSummaryDto"
+          },
+          "author": {
+            "$ref": "#/components/schemas/CommentAuthorSummaryDto"
+          }
+        },
+        "required": [
+          "id",
+          "content",
+          "authorId",
+          "articleId",
+          "tenantId",
+          "status",
+          "reportCount",
+          "createdAt",
+          "updatedAt",
+          "tenant",
+          "author"
+        ]
+      },
+      "UpdateCommentDto": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "Updated comment content"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PUBLISHED",
+              "DRAFT",
+              "UNDER_REVIEW",
+              "HIDDEN",
+              "BANNED",
+              "VISIBLE"
+            ],
+            "description": "New status for the comment (admin only)"
+          }
+        }
+      },
+      "LikeToggleResultDto": {
+        "type": "object",
+        "properties": {
+          "liked": {
+            "type": "boolean",
+            "description": "Whether the user likes the article after the toggle"
+          }
+        },
+        "required": [
+          "liked"
+        ]
+      },
+      "ArticleInteractionStatusDto": {
+        "type": "object",
+        "properties": {
+          "liked": {
+            "type": "boolean"
+          },
+          "bookmarked": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "liked",
+          "bookmarked"
+        ]
+      },
+      "CreateReportDto": {
+        "type": "object",
+        "properties": {
+          "targetType": {
+            "type": "string",
+            "description": "Type of the reported target",
+            "enum": [
+              "ARTICLE",
+              "COMMENT",
+              "USER"
+            ],
+            "example": "COMMENT"
+          },
+          "targetId": {
+            "type": "string",
+            "description": "UUID of the reported target (article, comment or user)",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Short reason for the report",
+            "example": "Spam"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional additional details about the report",
+            "example": "This comment contains repeated promotional links."
+          },
+          "reporterId": {
+            "type": "string",
+            "description": "External ID of the user submitting the report",
+            "example": "user_abc123"
+          }
+        },
+        "required": [
+          "targetType",
+          "targetId",
+          "reason",
+          "reporterId"
+        ]
+      },
+      "ReportStatus": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "REVIEWED",
+          "RESOLVED",
+          "DISMISSED"
+        ]
+      },
+      "TargetType": {
+        "type": "string",
+        "enum": [
+          "ARTICLE",
+          "COMMENT",
+          "USER"
+        ]
+      },
+      "ReportUserSummaryDto": {
+        "type": "object",
+        "properties": {
+          "externalId": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserRole"
+              }
+            ]
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserStatus"
+              }
+            ]
+          }
+        },
+        "required": [
+          "externalId",
+          "username",
+          "avatarUrl",
+          "role",
+          "status"
+        ]
+      },
+      "ReportTargetDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string",
+            "description": "Article title, one-line comment preview, or username"
+          },
+          "status": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "PUBLISHED",
+              "DRAFT",
+              "UNDER_REVIEW",
+              "HIDDEN",
+              "BANNED",
+              "VISIBLE",
+              "ACTIVE",
+              "SHADOW_BANNED"
+            ],
+            "description": "Status of the target; null when it no longer exists"
+          },
+          "articleId": {
+            "type": "string",
+            "description": "Only for COMMENT targets"
+          },
+          "missing": {
+            "type": "boolean",
+            "description": "True when the target id resolved to nothing"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "status"
+        ]
+      },
+      "ReportDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "example": "SPAM"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ReportStatus"
+              }
+            ]
+          },
+          "targetType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TargetType"
+              }
+            ]
+          },
+          "targetId": {
+            "type": "string"
+          },
+          "reporterId": {
+            "type": "string",
+            "description": "External ID of the reporter"
+          },
+          "moderatorId": {
+            "type": "string",
+            "nullable": true,
+            "description": "External ID of the moderator"
+          },
+          "moderatorNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "tenantId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reporter": {
+            "$ref": "#/components/schemas/ReportUserSummaryDto"
+          },
+          "moderator": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ReportUserSummaryDto"
+              }
+            ]
+          },
+          "target": {
+            "$ref": "#/components/schemas/ReportTargetDto"
+          }
+        },
+        "required": [
+          "id",
+          "reason",
+          "description",
+          "status",
+          "targetType",
+          "targetId",
+          "reporterId",
+          "moderatorId",
+          "moderatorNote",
+          "tenantId",
+          "createdAt",
+          "reporter",
+          "moderator",
+          "target"
+        ]
+      },
+      "UpdateReportStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "New status to set for the report",
+            "enum": [
+              "PENDING",
+              "REVIEWED",
+              "RESOLVED",
+              "DISMISSED"
+            ],
+            "example": "RESOLVED"
+          },
+          "moderatorNote": {
+            "type": "string",
+            "description": "Optional note left by the moderator explaining the decision",
+            "example": "Content removed – repeated ToS violations."
+          },
+          "moderatorId": {
+            "type": "string",
+            "description": "External ID of the staff member resolving the report",
+            "example": "mod_xyz789"
+          }
+        },
+        "required": [
+          "status",
+          "moderatorId"
+        ]
+      },
+      "CreateTagDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Display name of the tag. The slug will be auto-generated from this value.",
+            "example": "Technology"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
       "UpdateTagDto": {
         "type": "object",
         "properties": {
@@ -5354,6 +6655,118 @@
         },
         "required": [
           "status"
+        ]
+      },
+      "AuditAction": {
+        "type": "string",
+        "enum": [
+          "USER_CREATED",
+          "USER_UPDATED_ROLE",
+          "USER_STATUS_CHANGED",
+          "USER_DELETED",
+          "ARTICLE_CREATED",
+          "ARTICLE_UPDATED",
+          "ARTICLE_DELETED",
+          "ARTICLE_STATUS_CHANGED",
+          "COMMENT_CREATED",
+          "COMMENT_UPDATED",
+          "COMMENT_DELETED",
+          "COMMENT_STATUS_CHANGED",
+          "CATEGORY_CREATED",
+          "CATEGORY_UPDATED",
+          "CATEGORY_DELETED",
+          "TAG_CREATED",
+          "TAG_UPDATED",
+          "TAG_DELETED",
+          "REPORT_CREATED",
+          "REPORT_STATUS_CHANGED",
+          "BANNED_WORD_CREATED",
+          "BANNED_WORD_DELETED",
+          "ROLE_ASSIGNMENT_CHANGED"
+        ]
+      },
+      "AuditResourceType": {
+        "type": "string",
+        "enum": [
+          "USER",
+          "ARTICLE",
+          "COMMENT",
+          "REPORT",
+          "BANNED_WORD",
+          "TAG",
+          "CATEGORY"
+        ]
+      },
+      "AuditLogDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "tenantId": {
+            "type": "string"
+          },
+          "actorUserId": {
+            "type": "string",
+            "description": "External ID of the actor"
+          },
+          "actorRole": {
+            "type": "string",
+            "description": "Role of the actor at the time of the action"
+          },
+          "action": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuditAction"
+              }
+            ]
+          },
+          "resourceType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuditResourceType"
+              }
+            ]
+          },
+          "resourceId": {
+            "type": "string"
+          },
+          "resourceName": {
+            "type": "string",
+            "nullable": true
+          },
+          "changesBefore": {
+            "type": "object",
+            "additionalProperties": true,
+            "nullable": true
+          },
+          "changesAfter": {
+            "type": "object",
+            "additionalProperties": true,
+            "nullable": true
+          },
+          "changeSummary": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "timestamp",
+          "tenantId",
+          "actorUserId",
+          "actorRole",
+          "action",
+          "resourceType",
+          "resourceId",
+          "resourceName",
+          "changesBefore",
+          "changesAfter",
+          "changeSummary"
         ]
       },
       "UserListItemDto": {
@@ -5478,6 +6891,487 @@
         },
         "required": [
           "role"
+        ]
+      },
+      "WebhookEventDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string",
+            "example": "comment.moderated"
+          },
+          "payload": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Canonical payload delivered to the tenant"
+          },
+          "tenantId": {
+            "type": "string"
+          },
+          "sentAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "description": "Set once delivered"
+          },
+          "attempts": {
+            "type": "number"
+          },
+          "lastError": {
+            "type": "string",
+            "nullable": true
+          },
+          "nextRetryAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "event",
+          "payload",
+          "tenantId",
+          "sentAt",
+          "attempts",
+          "lastError",
+          "nextRetryAt",
+          "createdAt"
+        ]
+      },
+      "WebhookResendAllResultDto": {
+        "type": "object",
+        "properties": {
+          "reset": {
+            "type": "number",
+            "description": "Number of undelivered events reset",
+            "example": 12
+          }
+        },
+        "required": [
+          "reset"
+        ]
+      },
+      "NotificationUserSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "externalId": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "externalId",
+          "username",
+          "avatarUrl"
+        ]
+      },
+      "NotificationDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "example": "comment.moderated"
+          },
+          "title": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "tenantId": {
+            "type": "string"
+          },
+          "sentToClient": {
+            "type": "boolean"
+          },
+          "readAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/NotificationUserSummaryDto"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "title",
+          "message",
+          "userId",
+          "tenantId",
+          "sentToClient",
+          "readAt",
+          "createdAt",
+          "user"
+        ]
+      },
+      "DashboardTotalsDto": {
+        "type": "object",
+        "properties": {
+          "articlesPublished": {
+            "type": "number"
+          },
+          "totalViews": {
+            "type": "number"
+          },
+          "totalLikes": {
+            "type": "number"
+          },
+          "totalComments": {
+            "type": "number"
+          },
+          "totalBookmarks": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "articlesPublished",
+          "totalViews",
+          "totalLikes",
+          "totalComments",
+          "totalBookmarks"
+        ]
+      },
+      "DashboardArticlesDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number"
+          },
+          "published": {
+            "type": "number"
+          },
+          "draft": {
+            "type": "number"
+          },
+          "underReview": {
+            "type": "number"
+          },
+          "hidden": {
+            "type": "number"
+          },
+          "banned": {
+            "type": "number"
+          },
+          "featured": {
+            "type": "number"
+          },
+          "newInPeriod": {
+            "type": "number",
+            "description": "Articles created within `days`"
+          },
+          "staleDrafts": {
+            "type": "number",
+            "description": "Drafts untouched for 30+ days"
+          }
+        },
+        "required": [
+          "total",
+          "published",
+          "draft",
+          "underReview",
+          "hidden",
+          "banned",
+          "featured",
+          "newInPeriod",
+          "staleDrafts"
+        ]
+      },
+      "DashboardCommentsDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number"
+          },
+          "visible": {
+            "type": "number"
+          },
+          "underReview": {
+            "type": "number"
+          },
+          "hidden": {
+            "type": "number"
+          },
+          "banned": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "total",
+          "visible",
+          "underReview",
+          "hidden",
+          "banned"
+        ]
+      },
+      "DashboardReportsDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number"
+          },
+          "pending": {
+            "type": "number"
+          },
+          "reviewed": {
+            "type": "number"
+          },
+          "resolved": {
+            "type": "number"
+          },
+          "dismissed": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "total",
+          "pending",
+          "reviewed",
+          "resolved",
+          "dismissed"
+        ]
+      },
+      "DashboardUsersDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number"
+          },
+          "active": {
+            "type": "number"
+          },
+          "banned": {
+            "type": "number"
+          },
+          "shadowBanned": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "total",
+          "active",
+          "banned",
+          "shadowBanned"
+        ]
+      },
+      "DashboardTaxonomyDto": {
+        "type": "object",
+        "properties": {
+          "categories": {
+            "type": "number"
+          },
+          "tags": {
+            "type": "number"
+          },
+          "bannedWords": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "categories",
+          "tags",
+          "bannedWords"
+        ]
+      },
+      "DashboardLanguageDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "en"
+          },
+          "translations": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "code",
+          "translations"
+        ]
+      },
+      "DashboardTopArticleDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "languageCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "views": {
+            "type": "number"
+          },
+          "likesCount": {
+            "type": "number"
+          },
+          "commentsCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "slug",
+          "languageCode",
+          "views",
+          "likesCount",
+          "commentsCount"
+        ]
+      },
+      "DailyStatsDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "date": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "articlesPublished": {
+            "type": "number"
+          },
+          "totalViews": {
+            "type": "number"
+          },
+          "totalLikes": {
+            "type": "number"
+          },
+          "totalComments": {
+            "type": "number"
+          },
+          "totalBookmarks": {
+            "type": "number"
+          },
+          "tenantId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "date",
+          "articlesPublished",
+          "totalViews",
+          "totalLikes",
+          "totalComments",
+          "totalBookmarks",
+          "tenantId",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "DashboardStatsDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "description": "Articuno version"
+          },
+          "period": {
+            "type": "string",
+            "example": "30 days"
+          },
+          "periodDays": {
+            "type": "number"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/DashboardTotalsDto"
+          },
+          "articles": {
+            "$ref": "#/components/schemas/DashboardArticlesDto"
+          },
+          "comments": {
+            "$ref": "#/components/schemas/DashboardCommentsDto"
+          },
+          "reports": {
+            "$ref": "#/components/schemas/DashboardReportsDto"
+          },
+          "users": {
+            "$ref": "#/components/schemas/DashboardUsersDto"
+          },
+          "taxonomy": {
+            "$ref": "#/components/schemas/DashboardTaxonomyDto"
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DashboardLanguageDto"
+            }
+          },
+          "topArticles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DashboardTopArticleDto"
+            }
+          },
+          "history": {
+            "description": "One row per day within `days`",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DailyStatsDto"
+            }
+          }
+        },
+        "required": [
+          "version",
+          "period",
+          "periodDays",
+          "totals",
+          "articles",
+          "comments",
+          "reports",
+          "users",
+          "taxonomy",
+          "languages",
+          "topArticles",
+          "history"
         ]
       }
     }

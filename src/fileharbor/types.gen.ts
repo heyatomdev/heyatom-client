@@ -1751,6 +1751,55 @@ export interface components {
              */
             bastionTenantSlug?: string | null;
         };
+        AdminListCreatorDto: {
+            externalId: string;
+            username?: string | null;
+        };
+        AdminListClientDto: {
+            name: string;
+            domain?: string | null;
+        };
+        AdminImageListItemDto: {
+            id: string;
+            clientId: string;
+            originalName: string;
+            format: string;
+            width: number;
+            height: number;
+            size: number;
+            mimeType: string;
+            isPrivate: boolean;
+            isOptimized: boolean;
+            /** @description Whether image was compressed with Tinify API */
+            tinifyOptimized: boolean;
+            tags: string[];
+            description?: string;
+            views: number;
+            downloads: number;
+            storagePath: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: date-time */
+            optimizedAt?: string;
+            fullPath?: string;
+            /** @description Whether the requesting admin has bookmarked this image */
+            isBookmarked: boolean;
+            creatorId: string;
+            creator: components["schemas"]["AdminListCreatorDto"];
+            client: components["schemas"]["AdminListClientDto"];
+        };
+        AdminPaginationResponseDto: {
+            page: number;
+            perPage: number;
+            total: number;
+            totalPages: number;
+        };
+        AdminImageListResponseDto: {
+            data: components["schemas"]["AdminImageListItemDto"][];
+            pagination: components["schemas"]["AdminPaginationResponseDto"];
+        };
         AdminClientCreatorClientDto: {
             id: string;
             name: string;
@@ -1843,6 +1892,32 @@ export interface components {
             /** @description Compression statistics */
             compressionStats: components["schemas"]["CompressionStatsDto"];
         };
+        AdminAvatarListItemDto: {
+            id: string;
+            clientId: string;
+            creatorId: string;
+            format: string;
+            width: number;
+            height: number;
+            size: number;
+            mimeType: string;
+            isOptimized: boolean;
+            storagePath: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: date-time */
+            optimizedAt?: string;
+            /** @description Public avatar URL; null when the creator has no externalId */
+            fullPath: string | null;
+            creator: components["schemas"]["AdminListCreatorDto"];
+            client: components["schemas"]["AdminListClientDto"];
+        };
+        AdminAvatarListResponseDto: {
+            data: components["schemas"]["AdminAvatarListItemDto"][];
+            pagination: components["schemas"]["AdminPaginationResponseDto"];
+        };
         AdminAvatarResponseDto: {
             id: string;
             clientId: string;
@@ -1933,6 +2008,36 @@ export interface components {
             /** @description Number of active (non-expired) access tokens */
             activeTokens?: number;
         };
+        AdminAlbumListItemDto: {
+            id: string;
+            clientId: string;
+            name: string;
+            description?: string;
+            externalAlbumId?: string;
+            isPublic: boolean;
+            coverImageId?: string;
+            /** @description Full URL to the cover image */
+            coverImageUrl?: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            creator?: components["schemas"]["AdminAlbumCreatorDto"];
+            /** @description Total items (images + videos) in the album */
+            totalItems?: number;
+            /** @description Number of images in the album */
+            imageCount?: number;
+            /** @description Number of videos in the album */
+            videoCount?: number;
+            /** @description Number of active (non-expired) access tokens */
+            activeTokens?: number;
+            creatorId: string;
+            client: components["schemas"]["AdminListClientDto"];
+        };
+        AdminAlbumListResponseDto: {
+            data: components["schemas"]["AdminAlbumListItemDto"][];
+            pagination: components["schemas"]["AdminPaginationResponseDto"];
+        };
         AdminUpdateAlbumDto: {
             /** @description Album name */
             name?: string;
@@ -1944,6 +2049,14 @@ export interface components {
             externalAlbumId?: string;
             /** @description Cover image ID (set to null to remove) */
             coverImageId?: string | null;
+        };
+        AdminRemoveImagesFromAlbumResponseDto: {
+            /** @description UUID of the album */
+            albumId: string;
+            /** @description Number of images removed */
+            removed: number;
+            success: boolean;
+            message: string;
         };
         CreateCreatorAdminDto: {
             /** @description External creator ID from the client system */
@@ -1961,6 +2074,30 @@ export interface components {
              * @example 00000000-0000-0000-0000-000000000000
              */
             clientId: string;
+        };
+        CreatorListResponseDto: {
+            /** @description Internal creator UUID */
+            id: string;
+            /** @description External creator ID from the client system */
+            externalId: string;
+            username?: string;
+            website?: string;
+            clientId: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            totalImages?: number;
+            totalAlbums?: number;
+            totalVideos?: number;
+            /** @description Whether the requesting admin has bookmarked this creator */
+            isBookmarked?: boolean;
+            avatarUrl?: string;
+            client?: components["schemas"]["CreatorClientDto"];
+        };
+        AdminCreatorListResponseDto: {
+            data: components["schemas"]["CreatorListResponseDto"][];
+            pagination: components["schemas"]["AdminPaginationResponseDto"];
         };
         UpdateCreatorAdminDto: {
             /** @description External creator ID from the client system */
@@ -1985,12 +2122,6 @@ export interface components {
             expiresAt?: string;
             /** @description True if the link is expired at response time */
             isExpired: boolean;
-        };
-        AdminPaginationResponseDto: {
-            page: number;
-            perPage: number;
-            total: number;
-            totalPages: number;
         };
         AdminImageShareLinksListResponseDto: {
             data: components["schemas"]["AdminImageShareLinkResponseDto"][];
@@ -2074,6 +2205,10 @@ export interface components {
         };
         AdminVideoBookmarkListResponseDto: {
             data: components["schemas"]["AdminVideoBookmarkResponseDto"][];
+            pagination: components["schemas"]["AdminPaginationResponseDto"];
+        };
+        AdminVideoListResponseDto: {
+            data: components["schemas"]["AdminVideoResponseDto"][];
             pagination: components["schemas"]["AdminPaginationResponseDto"];
         };
         StatsTrendDto: {
@@ -2208,6 +2343,11 @@ export type AdminClientResponseDto = components['schemas']['AdminClientResponseD
 export type AdminCreateClientDto = components['schemas']['AdminCreateClientDto'];
 export type AdminClientCreatedResponseDto = components['schemas']['AdminClientCreatedResponseDto'];
 export type AdminUpdateClientDto = components['schemas']['AdminUpdateClientDto'];
+export type AdminListCreatorDto = components['schemas']['AdminListCreatorDto'];
+export type AdminListClientDto = components['schemas']['AdminListClientDto'];
+export type AdminImageListItemDto = components['schemas']['AdminImageListItemDto'];
+export type AdminPaginationResponseDto = components['schemas']['AdminPaginationResponseDto'];
+export type AdminImageListResponseDto = components['schemas']['AdminImageListResponseDto'];
 export type AdminClientCreatorClientDto = components['schemas']['AdminClientCreatorClientDto'];
 export type AdminImageCreatorDto = components['schemas']['AdminImageCreatorDto'];
 export type AdminImageAlbumDto = components['schemas']['AdminImageAlbumDto'];
@@ -2216,15 +2356,21 @@ export type AdminUpdateImageDto = components['schemas']['AdminUpdateImageDto'];
 export type AdminDeleteResponseDto = components['schemas']['AdminDeleteResponseDto'];
 export type CompressionStatsDto = components['schemas']['CompressionStatsDto'];
 export type TinifyCompressionResponseDto = components['schemas']['TinifyCompressionResponseDto'];
+export type AdminAvatarListItemDto = components['schemas']['AdminAvatarListItemDto'];
+export type AdminAvatarListResponseDto = components['schemas']['AdminAvatarListResponseDto'];
 export type AdminAvatarResponseDto = components['schemas']['AdminAvatarResponseDto'];
 export type AdminCreateAlbumDto = components['schemas']['AdminCreateAlbumDto'];
 export type AdminAlbumCreatorDto = components['schemas']['AdminAlbumCreatorDto'];
 export type AdminAlbumResponseDto = components['schemas']['AdminAlbumResponseDto'];
+export type AdminAlbumListItemDto = components['schemas']['AdminAlbumListItemDto'];
+export type AdminAlbumListResponseDto = components['schemas']['AdminAlbumListResponseDto'];
 export type AdminUpdateAlbumDto = components['schemas']['AdminUpdateAlbumDto'];
+export type AdminRemoveImagesFromAlbumResponseDto = components['schemas']['AdminRemoveImagesFromAlbumResponseDto'];
 export type CreateCreatorAdminDto = components['schemas']['CreateCreatorAdminDto'];
+export type CreatorListResponseDto = components['schemas']['CreatorListResponseDto'];
+export type AdminCreatorListResponseDto = components['schemas']['AdminCreatorListResponseDto'];
 export type UpdateCreatorAdminDto = components['schemas']['UpdateCreatorAdminDto'];
 export type AdminImageShareLinkResponseDto = components['schemas']['AdminImageShareLinkResponseDto'];
-export type AdminPaginationResponseDto = components['schemas']['AdminPaginationResponseDto'];
 export type AdminImageShareLinksListResponseDto = components['schemas']['AdminImageShareLinksListResponseDto'];
 export type AdminBookmarkResponseDto = components['schemas']['AdminBookmarkResponseDto'];
 export type AdminBookmarkListResponseDto = components['schemas']['AdminBookmarkListResponseDto'];
@@ -2233,6 +2379,7 @@ export type AdminCreatorBookmarkResponseDto = components['schemas']['AdminCreato
 export type AdminVideoResponseDto = components['schemas']['AdminVideoResponseDto'];
 export type AdminVideoBookmarkResponseDto = components['schemas']['AdminVideoBookmarkResponseDto'];
 export type AdminVideoBookmarkListResponseDto = components['schemas']['AdminVideoBookmarkListResponseDto'];
+export type AdminVideoListResponseDto = components['schemas']['AdminVideoListResponseDto'];
 export type StatsTrendDto = components['schemas']['StatsTrendDto'];
 export type DailyDataPointDto = components['schemas']['DailyDataPointDto'];
 export type AdminStatsResponseDto = components['schemas']['AdminStatsResponseDto'];
@@ -3651,7 +3798,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AdminImageListResponseDto"];
+                };
             };
         };
     };
@@ -3874,7 +4023,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AdminAvatarListResponseDto"];
+                };
             };
         };
     };
@@ -3940,7 +4091,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AdminAlbumListResponseDto"];
+                };
             };
         };
     };
@@ -4104,7 +4257,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AdminRemoveImagesFromAlbumResponseDto"];
+                };
             };
         };
     };
@@ -4131,7 +4286,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AdminCreatorListResponseDto"];
+                };
             };
         };
     };
@@ -4578,7 +4735,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AdminVideoListResponseDto"];
+                };
             };
         };
     };
@@ -4666,7 +4825,16 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": {
+                    originalName?: string;
+                    isPrivate?: boolean;
+                    description?: string | null;
+                    tags?: string[];
+                };
+            };
+        };
         responses: {
             200: {
                 headers: {
