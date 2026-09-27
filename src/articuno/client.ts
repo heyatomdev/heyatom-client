@@ -12,7 +12,7 @@ type B<K extends keyof operations> = BodyOf<operations[K]>;
  * minted for `articuno` (`serviceTokenAuth(provider, 'articuno')`), whose
  * `tenantId` Articuno maps onto its tenant. Every call carries one; the client
  * throws before sending when `auth` yields neither, so no request can reach
- * Articuno unscoped. A user JWT is refused here — that is `ArticunoAdminClient`.
+ * Articuno unscoped. Articuno refuses a user JWT on this surface.
  *
  * Lists are `{ data, meta: { total, page, limit, totalPages } }`, paged with
  * `page` (1-based) and `limit` (max 100).

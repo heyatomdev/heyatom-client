@@ -12,18 +12,6 @@ export function apiKeyAuth(apiKey: string): AuthProvider {
   return () => headers;
 }
 
-/**
- * `Authorization: Bearer <token>`. A string, or a function called per request — e.g. the
- * Bastion user JWT a BFF forwards (Meridian → FileHarbor/Articuno admin surfaces).
- */
-export function bearerAuth(token: string | (() => string | Promise<string>)): AuthProvider {
-  return async () => {
-    const value = typeof token === 'function' ? await token() : token;
-    if (!value) throw new Error('bearerAuth: token is empty');
-    return { Authorization: `Bearer ${value}` };
-  };
-}
-
 /** What `serviceTokenAuth` needs: `ServiceTokenProvider` from `@heyatom/bastion-client` fits as-is. */
 export interface ServiceTokenSource {
   getToken(serviceSlug?: string): Promise<string>;
@@ -35,5 +23,9 @@ export interface ServiceTokenSource {
  * provider's job; this asks it on every request.
  */
 export function serviceTokenAuth(tokens: ServiceTokenSource, serviceSlug: string): AuthProvider {
-  return bearerAuth(() => tokens.getToken(serviceSlug));
+  return async () => {
+    const token = await tokens.getToken(serviceSlug);
+    if (!token) throw new Error('serviceTokenAuth: token provider returned an empty token');
+    return { Authorization: `Bearer ${token}` };
+  };
 }

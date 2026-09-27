@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { apiKeyAuth, bearerAuth, FileHarborAdminClient, FileHarborClient } from '../src/fileharbor/index.js';
+import { apiKeyAuth, FileHarborClient } from '../src/fileharbor/index.js';
 import { fakeFetch, json } from './helpers.js';
 
 describe('FileHarborClient', () => {
@@ -32,36 +32,5 @@ describe('FileHarborClient', () => {
     const form = calls[0].init.body as FormData;
     expect(form.get('externalUserId')).toBe('user-1');
     expect(calls[0].headers['X-User-Id']).toBeUndefined();
-  });
-});
-
-describe('FileHarborAdminClient', () => {
-  it('forwards the user Bearer and serialises list filters', async () => {
-    const { fetchImpl, calls } = fakeFetch(() => json(200, { data: [] }));
-    const admin = new FileHarborAdminClient({ baseUrl: 'http://fh', auth: bearerAuth('user-jwt'), fetch: fetchImpl });
-    await admin.listImages({ page: 2, tags: ['a', 'b'], clientId: undefined, sortOrder: 'desc' });
-    expect(calls[0].url).toBe('http://fh/admin/images?page=2&tags=a&tags=b&sortOrder=desc');
-    expect(calls[0].headers).toEqual({ Authorization: 'Bearer user-jwt' });
-  });
-
-  it('returns the raw Response of a stream and passes Range through', async () => {
-    const { fetchImpl, calls } = fakeFetch(() => new Response('bytes', { status: 206, headers: { 'content-range': 'bytes 0-4/10' } }));
-    const admin = new FileHarborAdminClient({ baseUrl: 'http://fh', auth: bearerAuth('t'), fetch: fetchImpl });
-    const res = await admin.streamVideo('v1', { headers: { Range: 'bytes=0-4' } });
-    expect(res.status).toBe(206);
-    expect(res.headers.get('content-range')).toBe('bytes 0-4/10');
-    expect(await res.text()).toBe('bytes');
-    expect(calls[0].headers.Range).toBe('bytes=0-4');
-    expect(calls[0].init.signal).toBeUndefined(); // no timeout on a stream unless asked
-  });
-
-  it('uploads several files under `files` and the self-service avatar with PUT', async () => {
-    const { fetchImpl, calls } = fakeFetch(() => json(201, []));
-    const admin = new FileHarborAdminClient({ baseUrl: 'http://fh', auth: bearerAuth('t'), fetch: fetchImpl });
-    const f = { data: new Uint8Array([1]), filename: 'a.jpg', contentType: 'image/jpeg' };
-    await admin.uploadImages([f, { ...f, filename: 'b.jpg' }], { clientId: 'c-1' });
-    expect((calls[0].init.body as FormData).getAll('files')).toHaveLength(2);
-    await admin.uploadMyAvatar(f);
-    expect([calls[1].init.method, calls[1].url]).toEqual(['PUT', 'http://fh/me/avatar']);
   });
 });

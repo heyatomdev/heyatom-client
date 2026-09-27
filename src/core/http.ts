@@ -15,9 +15,9 @@ export const silentLogger: HeyAtomLogger = {
 export interface HeyAtomClientOptions {
   /** Service base URL, including any prefix a reverse proxy adds (e.g. `http://fileharbor:3000/v2`). */
   baseUrl: string;
-  /** Called before every request; returns the credential headers. See `apiKeyAuth`, `bearerAuth`, `serviceTokenAuth`. */
+  /** Called before every request; returns the credential headers. See `apiKeyAuth`, `serviceTokenAuth`. */
   auth: AuthProvider;
-  /** Per-request timeout, default 10 000 ms. Uploads default to 60 000 ms, raw (streamed) calls to none. */
+  /** Per-request timeout, default 10 000 ms. Uploads default to 60 000 ms. */
   timeoutMs?: number;
   fetch?: typeof fetch;
   logger?: HeyAtomLogger;
@@ -26,7 +26,7 @@ export interface HeyAtomClientOptions {
 export interface RequestOptions {
   /** Sent as `X-User-Id`: the caller's own user id, for routes that attribute or scope by user. */
   userId?: string;
-  /** Extra headers (e.g. `Range` on a raw stream). Credential headers from `auth` always win. */
+  /** Extra headers. Credential headers from `auth` always win. */
   headers?: Record<string, string>;
   timeoutMs?: number;
   signal?: AbortSignal;
@@ -98,18 +98,13 @@ export class HeyAtomHttp {
     return this.json<T>(method, path, { body: form }, { ...opts, timeoutMs: opts.timeoutMs ?? Math.max(this.timeoutMs, UPLOAD_TIMEOUT_MS) });
   }
 
-  /** The upstream `Response`, body unread, for binary routes (stream, thumb, download). No timeout unless one is passed. */
-  raw(path: string, query?: Query, opts: RequestOptions = {}): Promise<Response> {
-    return this.send('GET', path, query, undefined, opts, opts.timeoutMs);
-  }
-
   private async send(
     method: string,
     path: string,
     query: Query | undefined,
     body: unknown,
     opts: RequestOptions,
-    timeoutMs: number | undefined,
+    timeoutMs: number,
   ): Promise<Response> {
     const credentials = await this.auth();
     const lower = Object.fromEntries(Object.entries(credentials).map(([k, v]) => [k.toLowerCase(), v]));
@@ -125,7 +120,7 @@ export class HeyAtomHttp {
     if (body !== undefined && !isForm) headers['Content-Type'] = 'application/json';
     Object.assign(headers, credentials);
 
-    const signals = [opts.signal, timeoutMs ? AbortSignal.timeout(timeoutMs) : undefined].filter((s): s is AbortSignal => !!s);
+    const signals = [opts.signal, AbortSignal.timeout(timeoutMs)].filter((s): s is AbortSignal => !!s);
 
     let res: Response;
     try {
@@ -133,7 +128,7 @@ export class HeyAtomHttp {
         method,
         headers,
         body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
-        signal: signals.length ? AbortSignal.any(signals) : undefined,
+        signal: AbortSignal.any(signals),
       });
     } catch (err) {
       this.logger.warn(`${this.service}: ${method} ${path} unreachable: ${(err as Error).message}`);

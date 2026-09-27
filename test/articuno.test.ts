@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BastionHttp, ServiceTokenProvider } from '@heyatom/bastion-client';
-import { apiKeyAuth, ArticunoAdminClient, ArticunoClient, bearerAuth, serviceTokenAuth } from '../src/articuno/index.js';
+import { apiKeyAuth, ArticunoClient, serviceTokenAuth } from '../src/articuno/index.js';
 import { fakeFetch, json } from './helpers.js';
 
 const b64 = (o: object) => Buffer.from(JSON.stringify(o)).toString('base64url');
@@ -51,27 +51,5 @@ describe('ArticunoClient', () => {
     const articuno = new ArticunoClient({ baseUrl: 'http://articuno', auth: () => ({ Authorization: 'Bearer ' }), fetch: fetchImpl });
     await expect(articuno.listArticles()).rejects.toThrow(/Articuno: auth returned no X-API-Key or Bearer/);
     expect(calls).toHaveLength(0);
-  });
-});
-
-describe('ArticunoAdminClient', () => {
-  it('creates an article as JSON, or as multipart data + coverImage when a cover is attached', async () => {
-    const { fetchImpl, calls } = fakeFetch(() => json(201, { id: 'a1' }));
-    const admin = new ArticunoAdminClient({ baseUrl: 'http://articuno', auth: bearerAuth('user-jwt'), fetch: fetchImpl });
-    const data = { categoryId: 'c1', translations: [{ languageCode: 'en', title: 'Hi', content: '...' }] } as never;
-
-    await admin.createArticle(data);
-    await admin.updateArticle('a1', { status: 'PUBLISHED' } as never, { data: new Uint8Array([1]), filename: 'c.png', contentType: 'image/png' });
-
-    expect([calls[0].url, calls[0].headers['Content-Type'], JSON.parse(calls[0].init.body as string)]).toEqual([
-      'http://articuno/admin/articles',
-      'application/json',
-      data,
-    ]);
-    const form = calls[1].init.body as FormData;
-    expect([calls[1].init.method, calls[1].url]).toEqual(['PATCH', 'http://articuno/admin/articles/a1']);
-    expect(JSON.parse(form.get('data') as string)).toEqual({ status: 'PUBLISHED' });
-    expect((form.get('coverImage') as File).name).toBe('c.png');
-    expect(calls[1].headers).toEqual({ Authorization: 'Bearer user-jwt' });
   });
 });

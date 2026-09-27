@@ -1,7 +1,7 @@
 # @heyatom/client — consumer SDK per FileHarbor, Articuno, Beacon
 
 Package npm unico con subpath export per servizio. Sostituisce i moduli client copiati a mano in
-dbdbuilds-api, shelfie-api, meridian, website4 (e sgweb). Gemello di `../bastion-client`
+dbdbuilds-api, shelfie-api, website4 (e sgweb). Gemello di `../bastion-client`
 (`@heyatom/bastion-client`): stessa struttura, stesso build, stessa filosofia. Leggerlo per primo.
 
 ## Decisioni già prese (non riaprire)
@@ -16,14 +16,14 @@ dbdbuilds-api, shelfie-api, meridian, website4 (e sgweb). Gemello di `../bastion
   ```
   Nessun export root che trascina tutto. Nest è peer dep opzionale, usata solo dai subpath `/nest`.
 - **Core su `fetch` nativo.** Niente axios, `@nestjs/axios`, `form-data`. Multipart con `FormData`/`Blob` nativi
-  (Node 18+). I consumer Nuxt/Nitro (meridian, website4) devono importare il core senza dipendenze Nest.
+  (Node 18+). I consumer Nuxt/Nitro (website4) devono importare il core senza dipendenze Nest.
 - **Auth pluggabile, non hardcoded.** Ogni client riceve `auth: () => Promise<Record<string,string>> | Record<string,string>`.
   Modi già in uso dai consumer, tutti da supportare con helper pronti:
   - FileHarbor: `X-API-Key` + `X-User-Id` (vedi `../docs/FILEHARBOR_INTEGRATION.md`)
   - Articuno: `X-API-Key` tenant **oppure** `Authorization: Bearer <service-client JWT>` mintato via
     `ServiceTokenProvider` di `@heyatom/bastion-client` (vedi `../dbdbuilds/projects/dbdbuilds-api/src/modules/articuno/articuno-client.service.ts`)
-  - Meridian: `Authorization: Bearer <user JWT>` inoltrato (vedi `../meridian/server/utils/fileharbor-proxy.ts`)
   `@heyatom/bastion-client` è peer dep opzionale, importata solo dall'helper bastion.
+- Admin routes (`/admin/*`, `/me/*`) are Meridian-only and stay out of the package.
 - **Tipi generati da OpenAPI, mai scritti a mano.** Tutti i servizi espongono Swagger su `/docs`
   (`/docs-json`). Pipeline: `openapi/<service>.json` committato → `openapi-typescript` → `src/<service>/types.gen.ts`
   committato. Script `pnpm gen:types`. Preferire uno script di dump nel servizio (boot Nest senza `listen`,
@@ -41,7 +41,7 @@ dbdbuilds-api, shelfie-api, meridian, website4 (e sgweb). Gemello di `../bastion
    `tsconfig*.json`, `vitest.config.ts`, `.github/workflows/{test,publish}.yml` copiati e adattati da `../bastion-client`.
 2. `openapi/fileharbor.json`, `openapi/articuno.json` + `types.gen.ts` generati.
 3. `src/fileharbor/`: client core (images, avatars, albums, videos, tags: copri le route che i consumer usano
-   oggi, elenco da dbdbuilds-api + shelfie-api + meridian) + `nest/` module.
+   oggi, elenco da dbdbuilds-api + shelfie-api) + `nest/` module.
 4. `src/articuno/`: client core (articles, categories, tags, comments, bookmarks, interactions, reports,
    translations, users: perimetro = `../dbdbuilds/projects/dbdbuilds-api/src/modules/articuno/services/`) + `nest/` module.
    Regola critica: ogni chiamata porta il `tenantId`/tenant scope; non passarlo = leak cross-tenant.

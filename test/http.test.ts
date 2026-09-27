@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { apiKeyAuth, bearerAuth, FileHarborClient, HeyAtomHttpError } from '../src/fileharbor/index.js';
+import { apiKeyAuth, FileHarborClient, HeyAtomHttpError, serviceTokenAuth } from '../src/fileharbor/index.js';
 import { fakeFetch, json } from './helpers.js';
 
 describe('shared transport', () => {
@@ -39,6 +39,6 @@ describe('shared transport', () => {
     await expect(fh.getClientStats()).rejects.toThrow(/no X-API-Key or Bearer/);
     expect(calls).toHaveLength(0);
     expect(() => apiKeyAuth('')).toThrow();
-    await expect(bearerAuth(() => '')()).rejects.toThrow(/empty/);
+    await expect(serviceTokenAuth({ getToken: async () => '' }, 'articuno')()).rejects.toThrow(/empty/);
   });
 });
