@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       '@heyatom/bastion-client':
-        specifier: ^0.4.0
-        version: 0.4.0(@nestjs/common@11.2.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.2.6(@nestjs/common@11.2.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(jose@6.2.12)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+        specifier: ^0.7.0
+        version: 0.7.0(@nestjs/common@11.2.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.2.6(@nestjs/common@11.2.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(jose@6.2.12)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/common':
         specifier: ^11.2.6
         version: 11.2.6(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -208,8 +208,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@heyatom/bastion-client@0.4.0':
-    resolution: {integrity: sha512-wWmDEF11NYFyic8B1jsbGY1sRYwXH/OoczUcFkFUHEI2tKFLsk0CF+uGpgG0xEvWPjyJFCXnNEhU+1ZhhhP+AQ==}
+  '@heyatom/bastion-client@0.7.0':
+    resolution: {integrity: sha512-o8D1RY6zjXs0HpOit4qU3aptx4EYNyphd/XCJO/2mO37agkn8dxBgNmQZpDO7DKRXAd/3V+bvxBykieLkPbMEw==}
     engines: {node: '>=20.19'}
     peerDependencies:
       '@nestjs/common': ^11.0.0
@@ -903,7 +903,7 @@ snapshots:
   '@esbuild/win32-x64@0.28.2':
     optional: true
 
-  '@heyatom/bastion-client@0.4.0(@nestjs/common@11.2.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.2.6(@nestjs/common@11.2.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(jose@6.2.12)(reflect-metadata@0.2.2)(rxjs@7.8.2)':
+  '@heyatom/bastion-client@0.7.0(@nestjs/common@11.2.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.2.6(@nestjs/common@11.2.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(jose@6.2.12)(reflect-metadata@0.2.2)(rxjs@7.8.2)':
     dependencies:
       jose: 6.2.12
     optionalDependencies:

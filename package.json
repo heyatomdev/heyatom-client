@@ -95,7 +95,7 @@
     }
   },
   "devDependencies": {
-    "@heyatom/bastion-client": "^0.4.0",
+    "@heyatom/bastion-client": "^0.7.0",
     "@nestjs/common": "^11.2.6",
     "@nestjs/core": "^11.2.6",
     "@types/node": "^26.6.3",
