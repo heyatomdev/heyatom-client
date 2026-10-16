@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       '@heyatom/bastion-client':
-        specifier: ^0.7.0
-        version: 0.7.0(@nestjs/common@11.2.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.2.6(@nestjs/common@11.2.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(jose@6.2.12)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+        specifier: ^0.8.0
+        version: 0.8.0(@nestjs/common@11.2.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.2.6(@nestjs/common@11.2.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/common':
         specifier: ^11.2.6
         version: 11.2.6(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -208,13 +208,12 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@heyatom/bastion-client@0.7.0':
-    resolution: {integrity: sha512-o8D1RY6zjXs0HpOit4qU3aptx4EYNyphd/XCJO/2mO37agkn8dxBgNmQZpDO7DKRXAd/3V+bvxBykieLkPbMEw==}
+  '@heyatom/bastion-client@0.8.0':
+    resolution: {integrity: sha512-TXTG0NJd+T54353H4ycI38ucITdwvKPqLMDp8Sw6czODVAngbdoaaRHvTfD8jqCLewjAl0tw/E3PhWt5iAZDKw==}
     engines: {node: '>=20.19'}
     peerDependencies:
       '@nestjs/common': ^11.0.0
       '@nestjs/core': ^11.0.0
-      jose: ^6.0.0
       reflect-metadata: ^0.2.0
       rxjs: ^7.0.0
     peerDependenciesMeta:
@@ -903,9 +902,7 @@ snapshots:
   '@esbuild/win32-x64@0.28.2':
     optional: true
 
-  '@heyatom/bastion-client@0.7.0(@nestjs/common@11.2.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.2.6(@nestjs/common@11.2.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(jose@6.2.12)(reflect-metadata@0.2.2)(rxjs@7.8.2)':
-    dependencies:
-      jose: 6.2.12
+  '@heyatom/bastion-client@0.8.0(@nestjs/common@11.2.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.2.6(@nestjs/common@11.2.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2)':
     optionalDependencies:
       '@nestjs/common': 11.2.6(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/core': 11.2.6(@nestjs/common@11.2.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2)
