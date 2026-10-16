@@ -1,6 +1,6 @@
 {
   "name": "@heyatom/client",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Consumer SDK for the HeyAtom platform services: FileHarbor and Articuno clients on native fetch, with optional NestJS modules",
   "license": "MIT",
   "author": "Andrea Tombolato <hey@heyatom.dev> (https://heyatom.dev)",
@@ -52,6 +52,16 @@
         "types": "./dist/cjs/articuno/nest/index.d.ts",
         "default": "./dist/cjs/articuno/nest/index.js"
       }
+    },
+    "./webhooks": {
+      "import": {
+        "types": "./dist/esm/webhooks/index.d.ts",
+        "default": "./dist/esm/webhooks/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/webhooks/index.d.ts",
+        "default": "./dist/cjs/webhooks/index.js"
+      }
     }
   },
   "typesVersions": {
@@ -67,6 +77,9 @@
       ],
       "articuno/nest": [
         "./dist/cjs/articuno/nest/index.d.ts"
+      ],
+      "webhooks": [
+        "./dist/cjs/webhooks/index.d.ts"
       ]
     }
   },

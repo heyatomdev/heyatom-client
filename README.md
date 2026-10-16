@@ -8,6 +8,7 @@ Consumer SDK for the HeyAtom platform services. It replaces the `src/modules/fil
 | `@heyatom/client/fileharbor/nest` | the above plus `HeyAtomFileHarborModule.forRoot / forRootAsync` |
 | `@heyatom/client/articuno` | `ArticunoClient` (public, tenant-scoped surface), auth helpers, generated types |
 | `@heyatom/client/articuno/nest` | the above plus `HeyAtomArticunoModule.forRoot / forRootAsync` |
+| `@heyatom/client/webhooks` | `verifyStandardWebhook`: receiving side of the platform's Standard Webhooks (Articuno, Gatherly) |
 
 There is no root export, so import a subpath. The core subpaths depend on nothing: they use native `fetch`, `FormData` and `Blob`, need Node ≥ 20.19, and run the same in Nuxt/Nitro. `@nestjs/common` is an optional peer, used only by `/nest`. `@heyatom/bastion-client` is an optional peer, needed only if you pass its `ServiceTokenProvider` to `serviceTokenAuth`. Ships CJS and ESM.
 
@@ -104,6 +105,25 @@ try {
 ```
 
 Timeouts default to 10 s per request and 60 s for uploads.
+
+## Webhooks
+
+Articuno and Gatherly sign deliveries with [Standard Webhooks](https://www.standardwebhooks.com/) (`signStandardWebhook` of `@heyatom/nest-common/webhooks`). Verify them on the raw body, before parsing:
+
+```ts
+import { verifyStandardWebhook } from '@heyatom/client/webhooks';
+
+const verified = verifyStandardWebhook({
+  rawBody: req.rawBody,                          // Buffer as received: NestFactory.create(AppModule, { rawBody: true })
+  headers: req.headers,                          // any case
+  secrets: [config.webhookSecret, config.previousWebhookSecret].filter(Boolean), // rotation
+  // toleranceSeconds: 300,
+});
+if (!verified) throw new UnauthorizedException();
+// dedupe on verified.id (`webhook-id`, stable across retries and resends)
+```
+
+The signed content is `<webhook-id>.<webhook-timestamp>.<raw body>`, HMAC-SHA256 keyed with the secret as a UTF-8 string (not a `whsec_` base64 key), sent as a space-separated list of `v1,<base64>`. Any secret matching any entry accepts. It returns `null` on a missing header, a non-numeric timestamp or one more than `toleranceSeconds` (default 300) from now, or no match. Comparison is constant-time. Depends only on `node:crypto`. The test uses the fixed vector of `nest-common/docs/usage.md`. Bastion deliveries use their own format: verify them with `@heyatom/bastion-client/webhooks`.
 
 ## Endpoints
 
