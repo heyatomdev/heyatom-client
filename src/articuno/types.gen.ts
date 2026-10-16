@@ -4,42 +4,6 @@
  */
 
 export interface paths {
-    "/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Health check
-         * @description Simple health check endpoint to verify the API is running.
-         */
-        get: operations["StatusController_getStatus"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/metrics": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["PrometheusController_index"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/articles": {
         parameters: {
             query?: never;
@@ -49,13 +13,13 @@ export interface paths {
         };
         /**
          * List articles
-         * @description Returns a paginated list of articles belonging to the current tenant. Supports optional filtering by status, category, tag, and featured flag.
+         * @description Returns a paginated list of PUBLISHED articles belonging to the current tenant. DRAFT articles are added only with `includeDrafts=true` (preview); UNDER_REVIEW, HIDDEN and BANNED articles are never returned. Supports optional filtering by category, tag, language and featured flag.
          */
         get: operations["ArticlesController_findAll"];
         put?: never;
         /**
          * Create an article
-         * @description Creates a new article for the current tenant. You may optionally include translations inline. Content is automatically checked for banned words; matching content will be created with a HIDDEN status.
+         * @description Creates a new DRAFT article for the current tenant. You may optionally include translations inline. Status cannot be set here: publishing goes through /admin/articles. Content is automatically checked for banned words; matching content will be created with a HIDDEN status.
          */
         post: operations["ArticlesController_create"];
         delete?: never;
@@ -73,7 +37,7 @@ export interface paths {
         };
         /**
          * Get an article by slug
-         * @description Returns a single article identified by its URL-friendly slug, including all translations.
+         * @description Returns a single PUBLISHED article identified by its URL-friendly slug, including all translations. A DRAFT article is resolved only with `includeDrafts=true` (preview); UNDER_REVIEW, HIDDEN and BANNED articles answer 404.
          */
         get: operations["ArticlesController_findOne"];
         put?: never;
@@ -103,7 +67,7 @@ export interface paths {
         head?: never;
         /**
          * Update an article
-         * @description Partially updates an article. Only provided fields are changed. Status changes are validated against the content status state machine.
+         * @description Partially updates an article. Only provided fields are changed. Status cannot be changed here: moderation goes through /admin/articles.
          */
         patch: operations["ArticlesController_update"];
         trace?: never;
@@ -161,7 +125,7 @@ export interface paths {
         };
         /**
          * List translations
-         * @description Returns all translations for an article, ordered by language code.
+         * @description Returns all translations for an article, ordered by language code. Only for PUBLISHED articles (DRAFT with `includeDrafts=true`); any other status answers 404.
          */
         get: operations["ArticleTranslationsController_findAll"];
         put?: never;
@@ -185,7 +149,7 @@ export interface paths {
         };
         /**
          * Get a translation by language
-         * @description Returns a single translation for the given article and BCP 47 language code.
+         * @description Returns a single translation for the given article and BCP 47 language code. Only for PUBLISHED articles (DRAFT with `includeDrafts=true`); any other status answers 404.
          */
         get: operations["ArticleTranslationsController_findOne"];
         put?: never;
@@ -307,7 +271,7 @@ export interface paths {
         head?: never;
         /**
          * Update a category
-         * @description Updates the name, description, or colour of an existing category. The slug is re-generated when the name changes.
+         * @description Updates the name, description, or colour of an existing category. The slug does not change.
          */
         patch: operations["CategoriesController_update"];
         trace?: never;
@@ -378,6 +342,26 @@ export interface paths {
         get: operations["InteractionsController_getArticleStatus"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/interactions/articles/{articleId}/view": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Count a view of an article
+         * @description Adds one to the article view counter. Call it server-side when the article page is served; No deduplication: filter bots and repeated views in the tenant site.
+         */
+        post: operations["InteractionsController_countView"];
         delete?: never;
         options?: never;
         head?: never;
@@ -491,7 +475,7 @@ export interface paths {
         head?: never;
         /**
          * Update a tag
-         * @description Updates the name (and consequently the slug) of an existing tag.
+         * @description Updates the name of an existing tag. The slug does not change.
          */
         patch: operations["TagsController_update"];
         trace?: never;
@@ -972,26 +956,6 @@ export interface paths {
         patch: operations["AdminUsersController_updateStatus"];
         trace?: never;
     };
-    "/admin/users/{id}/role": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Update user role
-         * @description Assigns a new role to a user within the tenant.
-         */
-        patch: operations["AdminUsersController_updateRole"];
-        trace?: never;
-    };
     "/admin/comments": {
         parameters: {
             query?: never;
@@ -1035,7 +999,7 @@ export interface paths {
         head?: never;
         /**
          * Update a comment (admin)
-         * @description Partially updates a comment (e.g. content or status). All statuses can be set by admins.
+         * @description Partially updates a comment (e.g. content or status). Status changes must be valid transitions (BANNED is terminal); new content is stripped of tags and checked for banned words.
          */
         patch: operations["AdminCommentsController_update"];
         trace?: never;
@@ -1111,49 +1075,9 @@ export interface paths {
         put?: never;
         /**
          * Reset all failed webhook events for the tenant
-         * @description Resets attempts, nextRetryAt and lastError to 0 / null for every undelivered event belonging to the current tenant. Use this after a temporary outage of the receiving system to trigger re-delivery of the entire backlog.
+         * @description Resets attempts, nextRetryAt and lastError to 0 / null for every undelivered event belonging to the current tenant, except events a worker is delivering right now. Use this after a temporary outage of the receiving system to trigger re-delivery of the entire backlog.
          */
         post: operations["AdminWebhooksController_resendAllFailed"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/admin/notifications": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List notifications
-         * @description Returns a paginated list of all notifications for the session tenant. Supports filtering by type, sentToClient and userId.
-         */
-        get: operations["AdminNotificationsController_findAll"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/admin/notifications/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get a notification by ID
-         * @description Returns the full detail of a single notification identified by its internal UUID.
-         */
-        get: operations["AdminNotificationsController_findOne"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1212,18 +1136,12 @@ export interface components {
              */
             metaDescription?: string;
         };
-        CreateArticleDto: {
+        PublicCreateArticleDto: {
             /**
              * @description URL of the article cover image. When creating via multipart/form-data, upload the file in the `coverImage` field instead.
              * @example https://cdn.example.com/articles/my-article-cover.jpg
              */
             coverImage?: string;
-            /**
-             * @description Initial moderation status of the article. Defaults to DRAFT when omitted.
-             * @example DRAFT
-             * @enum {string}
-             */
-            status?: "DRAFT" | "PUBLISHED" | "UNDER_REVIEW" | "HIDDEN" | "BANNED";
             /**
              * @description Whether the article should appear in featured/highlighted sections.
              * @example false
@@ -1305,6 +1223,11 @@ export interface components {
             authorId: string | null;
             categoryId: string;
             tenantId: string;
+            /**
+             * Format: date-time
+             * @description First publication; never cleared or moved
+             */
+            publishedAt: string | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -1342,6 +1265,11 @@ export interface components {
             authorId: string | null;
             categoryId: string;
             tenantId: string;
+            /**
+             * Format: date-time
+             * @description First publication; never cleared or moved
+             */
+            publishedAt: string | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -1352,18 +1280,12 @@ export interface components {
             _count: components["schemas"]["ArticleCommentCountDto"];
             translations: components["schemas"]["ArticleTranslationSummaryDto"][];
         };
-        UpdateArticleDto: {
+        PublicUpdateArticleDto: {
             /**
              * @description URL of the article cover image. Pass `null` to remove the existing cover.
              * @example https://cdn.example.com/articles/updated-cover.jpg
              */
             coverImage?: string | null;
-            /**
-             * @description New moderation status. Must be a valid transition from the current status.
-             * @example PUBLISHED
-             * @enum {string}
-             */
-            status?: "DRAFT" | "PUBLISHED" | "UNDER_REVIEW" | "HIDDEN" | "BANNED";
             /**
              * @description Set to `true` to feature the article, `false` to unfeature it.
              * @example true
@@ -1387,16 +1309,6 @@ export interface components {
              *     ]
              */
             tagIds?: string[];
-            /**
-             * @description Human-readable reason for a moderation action (e.g. why the article was hidden or banned).
-             * @example Contains prohibited content.
-             */
-            moderationReason?: string;
-            /**
-             * @description External ID of the moderator performing the action.
-             * @example mod_user_abc123
-             */
-            moderatorId?: string;
         };
         CreateBannedWordDto: {
             /**
@@ -1453,6 +1365,58 @@ export interface components {
             /** @description Whether the article is bookmarked after the toggle */
             bookmarked: boolean;
         };
+        BookmarkedArticleDto: {
+            id: string;
+            /** @description Cover image URL */
+            coverImage: string | null;
+            featured: boolean;
+            views: number;
+            likesCount: number;
+            commentsCount: number;
+            status: components["schemas"]["ContentStatus"];
+            authorId: string | null;
+            categoryId: string;
+            tenantId: string;
+            /**
+             * Format: date-time
+             * @description First publication; never cleared or moved
+             */
+            publishedAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            category: components["schemas"]["ArticleCategorySummaryDto"];
+            tags: components["schemas"]["ArticleTagSummaryDto"][];
+            translations: components["schemas"]["ArticleTranslationSummaryDto"][];
+        };
+        BookmarkListItemDto: {
+            id: string;
+            articleId: string;
+            /** @description Internal UUID of the user */
+            userId: string;
+            tenantId: string;
+            /** Format: date-time */
+            createdAt: string;
+            article: components["schemas"]["BookmarkedArticleDto"];
+        };
+        CreateCategoryDto: {
+            /**
+             * @description Display name of the category. The slug will be auto-generated from this value.
+             * @example Science
+             */
+            name: string;
+            /**
+             * @description Optional human-readable description of the category.
+             * @example Articles about science and research.
+             */
+            description?: string;
+            /**
+             * @description Optional hex colour associated with the category for UI display.
+             * @example #3B82F6
+             */
+            color?: string;
+        };
         CategoryDto: {
             /**
              * @description Unique identifier of the category
@@ -1491,134 +1455,6 @@ export interface components {
              * @example 2026-03-22T08:45:00.000Z
              */
             updatedAt: string;
-        };
-        TenantDto: {
-            /**
-             * @description Unique identifier for the tenant
-             * @example 123e4567-e89b-12d3-a456-426614174000
-             */
-            id: string;
-            /**
-             * @description Name of the tenant
-             * @example Kaish DBD
-             */
-            name: string;
-            /**
-             * @description Slug for the tenant, used in URLs
-             * @example kaish-dbd
-             */
-            slug: string;
-            /** @description Tenant description */
-            description?: string;
-            /**
-             * @description Tenant domain, used for routing and identification
-             * @example kaish-dbd.it
-             */
-            domain?: string;
-            /**
-             * @description Tenant default language
-             * @example it
-             */
-            defaultLanguage?: string;
-            /**
-             * Format: date-time
-             * @description Timestamp when the tenant was created
-             * @example 2026-01-15T10:23:00.000Z
-             */
-            createdAt?: string;
-            /**
-             * Format: date-time
-             * @description Timestamp when the tenant was last updated
-             * @example 2026-03-22T08:45:00.000Z
-             */
-            updatedAt?: string;
-        };
-        TagCountDto: {
-            /**
-             * @description Number of articles associated with this tag
-             * @example 42
-             */
-            articles: number;
-        };
-        TagDto: {
-            /**
-             * @description Unique identifier for the tag
-             * @example 123e4567-e89b-12d3-a456-426614174000
-             */
-            id: string;
-            /**
-             * @description Display name of the tag
-             * @example Technology
-             */
-            name: string;
-            /**
-             * @description URL-friendly slug derived from the tag name
-             * @example technology
-             */
-            slug: string;
-            /**
-             * Format: date-time
-             * @description Timestamp when the tag was created
-             * @example 2026-01-15T10:23:00.000Z
-             */
-            createdAt: string;
-            /**
-             * Format: date-time
-             * @description Timestamp when the tag was last updated
-             * @example 2026-03-22T08:45:00.000Z
-             */
-            updatedAt: string;
-            /** @description Tenant this tag belongs to (only included in certain admin responses) */
-            tenant?: components["schemas"]["TenantDto"];
-            /** @description Aggregated counts for related resources */
-            _count?: components["schemas"]["TagCountDto"];
-        };
-        BookmarkedArticleDto: {
-            id: string;
-            /** @description Cover image URL */
-            coverImage: string | null;
-            featured: boolean;
-            views: number;
-            likesCount: number;
-            commentsCount: number;
-            status: components["schemas"]["ContentStatus"];
-            authorId: string | null;
-            categoryId: string;
-            tenantId: string;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            category: components["schemas"]["CategoryDto"];
-            tags: components["schemas"]["TagDto"][];
-            translations: components["schemas"]["ArticleTranslationDto"][];
-        };
-        BookmarkListItemDto: {
-            id: string;
-            articleId: string;
-            /** @description Internal UUID of the user */
-            userId: string;
-            tenantId: string;
-            /** Format: date-time */
-            createdAt: string;
-            article: components["schemas"]["BookmarkedArticleDto"];
-        };
-        CreateCategoryDto: {
-            /**
-             * @description Display name of the category. The slug will be auto-generated from this value.
-             * @example Science
-             */
-            name: string;
-            /**
-             * @description Optional human-readable description of the category.
-             * @example Articles about science and research.
-             */
-            description?: string;
-            /**
-             * @description Optional hex colour associated with the category for UI display.
-             * @example #3B82F6
-             */
-            color?: string;
         };
         CategoryListItemDto: {
             /**
@@ -1666,7 +1502,7 @@ export interface components {
         };
         UpdateCategoryDto: {
             /**
-             * @description New display name for the category. The slug will be re-generated from this value.
+             * @description New display name for the category. The slug does not change.
              * @example Science & Technology
              */
             name?: string;
@@ -1684,7 +1520,7 @@ export interface components {
         CreateCommentDto: {
             /** @description UUID of the article being commented on */
             articleId: string;
-            /** @description Comment text */
+            /** @description Comment text, plain text (tags are stripped) */
             content: string;
             /** @description External ID of the author (from your identity provider) */
             authorExternalId: string;
@@ -1754,14 +1590,9 @@ export interface components {
             tenant: components["schemas"]["CommentTenantSummaryDto"];
             author: components["schemas"]["CommentAuthorSummaryDto"];
         };
-        UpdateCommentDto: {
-            /** @description Updated comment content */
+        PublicUpdateCommentDto: {
+            /** @description Updated comment content, plain text (tags are stripped) */
             content?: string;
-            /**
-             * @description New status for the comment (admin only)
-             * @enum {string}
-             */
-            status?: "PUBLISHED" | "DRAFT" | "UNDER_REVIEW" | "HIDDEN" | "BANNED" | "VISIBLE";
         };
         LikeToggleResultDto: {
             /** @description Whether the user likes the article after the toggle */
@@ -1869,9 +1700,90 @@ export interface components {
              */
             name: string;
         };
+        TenantDto: {
+            /**
+             * @description Unique identifier for the tenant
+             * @example 123e4567-e89b-12d3-a456-426614174000
+             */
+            id: string;
+            /**
+             * @description Name of the tenant
+             * @example Kaish DBD
+             */
+            name: string;
+            /**
+             * @description Slug for the tenant, used in URLs
+             * @example kaish-dbd
+             */
+            slug: string;
+            /** @description Tenant description */
+            description?: string;
+            /**
+             * @description Tenant domain, used for routing and identification
+             * @example kaish-dbd.it
+             */
+            domain?: string;
+            /**
+             * @description Tenant default language
+             * @example it
+             */
+            defaultLanguage?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the tenant was created
+             * @example 2026-01-15T10:23:00.000Z
+             */
+            createdAt?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the tenant was last updated
+             * @example 2026-03-22T08:45:00.000Z
+             */
+            updatedAt?: string;
+        };
+        TagCountDto: {
+            /**
+             * @description Number of articles associated with this tag
+             * @example 42
+             */
+            articles: number;
+        };
+        TagDto: {
+            /**
+             * @description Unique identifier for the tag
+             * @example 123e4567-e89b-12d3-a456-426614174000
+             */
+            id: string;
+            /**
+             * @description Display name of the tag
+             * @example Technology
+             */
+            name: string;
+            /**
+             * @description URL-friendly slug derived from the tag name
+             * @example technology
+             */
+            slug: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the tag was created
+             * @example 2026-01-15T10:23:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the tag was last updated
+             * @example 2026-03-22T08:45:00.000Z
+             */
+            updatedAt: string;
+            /** @description Tenant this tag belongs to (only included in certain admin responses) */
+            tenant?: components["schemas"]["TenantDto"];
+            /** @description Aggregated counts for related resources */
+            _count?: components["schemas"]["TagCountDto"];
+        };
         UpdateTagDto: {
             /**
-             * @description New display name for the tag. The slug will be re-generated from this value.
+             * @description New display name for the tag. The slug does not change.
              * @example Science & Technology
              */
             name?: string;
@@ -1897,6 +1809,72 @@ export interface components {
              * @example https://cdn.example.com/avatars/user_abc123.jpg
              */
             avatarUrl?: string;
+        };
+        AdminUpdateArticleTranslationDto: {
+            /**
+             * @description Updated localized title of the article.
+             * @example Getting Started with NestJS – Revised
+             */
+            title?: string;
+            /**
+             * @description Updated full HTML/Markdown body of the article.
+             * @example <p>NestJS is a progressive Node.js framework...</p>
+             */
+            content?: string;
+            /**
+             * @description Updated short plain-text summary shown in listing pages.
+             * @example An updated guide to building your first NestJS application.
+             */
+            excerpt?: string;
+            /**
+             * @description Updated SEO meta title.
+             * @example NestJS Guide – Revised | My Blog
+             */
+            metaTitle?: string;
+            /**
+             * @description Updated SEO meta description.
+             * @example Learn NestJS from scratch with this revised step-by-step tutorial.
+             */
+            metaDescription?: string;
+            /**
+             * @description New URL slug (lowercase alphanumeric words separated by hyphens). Old links stop working: change it only on purpose.
+             * @example science-and-technology
+             */
+            slug?: string;
+        };
+        AdminUpdateTagDto: {
+            /**
+             * @description New display name for the tag. The slug does not change.
+             * @example Science & Technology
+             */
+            name?: string;
+            /**
+             * @description New URL slug (lowercase alphanumeric words separated by hyphens). Old links stop working: change it only on purpose.
+             * @example science-and-technology
+             */
+            slug?: string;
+        };
+        AdminUpdateCategoryDto: {
+            /**
+             * @description New display name for the category. The slug does not change.
+             * @example Science & Technology
+             */
+            name?: string;
+            /**
+             * @description Updated description of the category.
+             * @example Articles covering science, technology and research.
+             */
+            description?: string;
+            /**
+             * @description Updated hex colour for the category.
+             * @example #10B981
+             */
+            color?: string;
+            /**
+             * @description New URL slug (lowercase alphanumeric words separated by hyphens). Old links stop working: change it only on purpose.
+             * @example science-and-technology
+             */
+            slug?: string;
         };
         AdminCreateReportDto: {
             /**
@@ -2038,13 +2016,14 @@ export interface components {
              */
             status: "ACTIVE" | "BANNED" | "SHADOW_BANNED";
         };
-        UpdateUserRoleDto: {
+        UpdateCommentDto: {
+            /** @description Updated comment content, plain text (tags are stripped) */
+            content?: string;
             /**
-             * @description New role to assign to the user
-             * @example MODERATOR
+             * @description New status for the comment (admin only). Must be a valid transition from the current status.
              * @enum {string}
              */
-            role: "TENANT_ADMIN" | "SUPER_MODERATOR" | "EDITOR" | "MODERATOR" | "MEMBER";
+            status?: "VISIBLE" | "UNDER_REVIEW" | "HIDDEN" | "BANNED";
         };
         WebhookEventDto: {
             id: string;
@@ -2073,27 +2052,6 @@ export interface components {
              * @example 12
              */
             reset: number;
-        };
-        NotificationUserSummaryDto: {
-            id: string;
-            externalId: string;
-            username: string | null;
-            avatarUrl: string | null;
-        };
-        NotificationDto: {
-            id: string;
-            /** @example comment.moderated */
-            type: string;
-            title: string;
-            message: string;
-            userId: string;
-            tenantId: string;
-            sentToClient: boolean;
-            /** Format: date-time */
-            readAt: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            user: components["schemas"]["NotificationUserSummaryDto"];
         };
         DashboardTotalsDto: {
             articlesPublished: number;
@@ -2194,7 +2152,7 @@ export interface components {
     pathItems: never;
 }
 export type CreateArticleTranslationDto = components['schemas']['CreateArticleTranslationDto'];
-export type CreateArticleDto = components['schemas']['CreateArticleDto'];
+export type PublicCreateArticleDto = components['schemas']['PublicCreateArticleDto'];
 export type ContentStatus = components['schemas']['ContentStatus'];
 export type ArticleCategorySummaryDto = components['schemas']['ArticleCategorySummaryDto'];
 export type UserStatus = components['schemas']['UserStatus'];
@@ -2207,18 +2165,15 @@ export type ArticleDto = components['schemas']['ArticleDto'];
 export type PageMetaDto = components['schemas']['PageMetaDto'];
 export type ArticleTranslationSummaryDto = components['schemas']['ArticleTranslationSummaryDto'];
 export type ArticleListItemDto = components['schemas']['ArticleListItemDto'];
-export type UpdateArticleDto = components['schemas']['UpdateArticleDto'];
+export type PublicUpdateArticleDto = components['schemas']['PublicUpdateArticleDto'];
 export type CreateBannedWordDto = components['schemas']['CreateBannedWordDto'];
 export type BannedWordDto = components['schemas']['BannedWordDto'];
 export type UpdateArticleTranslationDto = components['schemas']['UpdateArticleTranslationDto'];
 export type BookmarkToggleResultDto = components['schemas']['BookmarkToggleResultDto'];
-export type CategoryDto = components['schemas']['CategoryDto'];
-export type TenantDto = components['schemas']['TenantDto'];
-export type TagCountDto = components['schemas']['TagCountDto'];
-export type TagDto = components['schemas']['TagDto'];
 export type BookmarkedArticleDto = components['schemas']['BookmarkedArticleDto'];
 export type BookmarkListItemDto = components['schemas']['BookmarkListItemDto'];
 export type CreateCategoryDto = components['schemas']['CreateCategoryDto'];
+export type CategoryDto = components['schemas']['CategoryDto'];
 export type CategoryListItemDto = components['schemas']['CategoryListItemDto'];
 export type UpdateCategoryDto = components['schemas']['UpdateCategoryDto'];
 export type CreateCommentDto = components['schemas']['CreateCommentDto'];
@@ -2227,7 +2182,7 @@ export type CommentDto = components['schemas']['CommentDto'];
 export type CommentTenantSummaryDto = components['schemas']['CommentTenantSummaryDto'];
 export type CommentAuthorSummaryDto = components['schemas']['CommentAuthorSummaryDto'];
 export type CommentListItemDto = components['schemas']['CommentListItemDto'];
-export type UpdateCommentDto = components['schemas']['UpdateCommentDto'];
+export type PublicUpdateCommentDto = components['schemas']['PublicUpdateCommentDto'];
 export type LikeToggleResultDto = components['schemas']['LikeToggleResultDto'];
 export type ArticleInteractionStatusDto = components['schemas']['ArticleInteractionStatusDto'];
 export type CreateReportDto = components['schemas']['CreateReportDto'];
@@ -2238,8 +2193,14 @@ export type ReportTargetDto = components['schemas']['ReportTargetDto'];
 export type ReportDto = components['schemas']['ReportDto'];
 export type UpdateReportStatusDto = components['schemas']['UpdateReportStatusDto'];
 export type CreateTagDto = components['schemas']['CreateTagDto'];
+export type TenantDto = components['schemas']['TenantDto'];
+export type TagCountDto = components['schemas']['TagCountDto'];
+export type TagDto = components['schemas']['TagDto'];
 export type UpdateTagDto = components['schemas']['UpdateTagDto'];
 export type UpsertUserDto = components['schemas']['UpsertUserDto'];
+export type AdminUpdateArticleTranslationDto = components['schemas']['AdminUpdateArticleTranslationDto'];
+export type AdminUpdateTagDto = components['schemas']['AdminUpdateTagDto'];
+export type AdminUpdateCategoryDto = components['schemas']['AdminUpdateCategoryDto'];
 export type AdminCreateReportDto = components['schemas']['AdminCreateReportDto'];
 export type AdminUpdateReportDto = components['schemas']['AdminUpdateReportDto'];
 export type AuditAction = components['schemas']['AuditAction'];
@@ -2247,11 +2208,9 @@ export type AuditResourceType = components['schemas']['AuditResourceType'];
 export type AuditLogDto = components['schemas']['AuditLogDto'];
 export type UserListItemDto = components['schemas']['UserListItemDto'];
 export type UpdateUserStatusDto = components['schemas']['UpdateUserStatusDto'];
-export type UpdateUserRoleDto = components['schemas']['UpdateUserRoleDto'];
+export type UpdateCommentDto = components['schemas']['UpdateCommentDto'];
 export type WebhookEventDto = components['schemas']['WebhookEventDto'];
 export type WebhookResendAllResultDto = components['schemas']['WebhookResendAllResultDto'];
-export type NotificationUserSummaryDto = components['schemas']['NotificationUserSummaryDto'];
-export type NotificationDto = components['schemas']['NotificationDto'];
 export type DashboardTotalsDto = components['schemas']['DashboardTotalsDto'];
 export type DashboardArticlesDto = components['schemas']['DashboardArticlesDto'];
 export type DashboardCommentsDto = components['schemas']['DashboardCommentsDto'];
@@ -2264,53 +2223,11 @@ export type DailyStatsDto = components['schemas']['DailyStatsDto'];
 export type DashboardStatsDto = components['schemas']['DashboardStatsDto'];
 export type $defs = Record<string, never>;
 export interface operations {
-    StatusController_getStatus: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description API is operational */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example ok */
-                        status?: string;
-                    };
-                };
-            };
-        };
-    };
-    PrometheusController_index: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     ArticlesController_findAll: {
         parameters: {
             query?: {
                 page?: number;
                 limit?: number;
-                /** @description Filter articles by moderation status. */
-                status?: "DRAFT" | "PUBLISHED" | "UNDER_REVIEW" | "HIDDEN" | "BANNED";
                 /** @description Filter articles belonging to a specific category UUID. */
                 categoryId?: string;
                 /** @description Filter articles that have a specific tag UUID attached. */
@@ -2319,6 +2236,10 @@ export interface operations {
                 languageCode?: string;
                 /** @description Filter to only featured (`true`) or non-featured (`false`) articles. */
                 featured?: boolean;
+                /** @description Narrow the result to one status. Only PUBLISHED and DRAFT are accepted; DRAFT requires `includeDrafts=true`. */
+                status?: "PUBLISHED" | "DRAFT";
+                /** @description Also return DRAFT articles (tenant preview). Default `false`: only PUBLISHED. */
+                includeDrafts?: boolean;
             };
             header?: never;
             path?: never;
@@ -2338,6 +2259,13 @@ export interface operations {
                     };
                 };
             };
+            /** @description `status=DRAFT` without `includeDrafts=true`. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Missing or invalid API key. */
             401: {
                 headers: {
@@ -2356,7 +2284,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateArticleDto"];
+                "application/json": components["schemas"]["PublicCreateArticleDto"];
             };
         };
         responses: {
@@ -2388,6 +2316,8 @@ export interface operations {
     ArticlesController_findOne: {
         parameters: {
             query?: {
+                /** @description Also resolve a DRAFT article (tenant preview). Default `false`: only PUBLISHED; any other status answers 404. */
+                includeDrafts?: boolean;
                 /** @description BCP 47 language code. Returns only that translation instead of all translations. */
                 languageCode?: string;
             };
@@ -2416,7 +2346,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Article not found. */
+            /** @description Article not found or not visible to the public API. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -2472,7 +2402,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UpdateArticleDto"];
+                "application/json": components["schemas"]["PublicUpdateArticleDto"];
             };
         };
         responses: {
@@ -2625,7 +2555,10 @@ export interface operations {
     };
     ArticleTranslationsController_findAll: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Also resolve a DRAFT article (tenant preview). Default `false`: only PUBLISHED; any other status answers 404. */
+                includeDrafts?: boolean;
+            };
             header?: never;
             path: {
                 /** @description UUID of the article */
@@ -2717,7 +2650,10 @@ export interface operations {
     };
     ArticleTranslationsController_findOne: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Also resolve a DRAFT article (tenant preview). Default `false`: only PUBLISHED; any other status answers 404. */
+                includeDrafts?: boolean;
+            };
             header?: never;
             path: {
                 /** @description UUID of the article */
@@ -2880,7 +2816,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Article not found. */
+            /** @description Article not found or not PUBLISHED. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3145,8 +3081,8 @@ export interface operations {
                 limit?: number;
                 /** @description Filter comments by article id */
                 articleId?: string;
-                /** @description Filter comments by moderation status */
-                status?: "PUBLISHED" | "DRAFT" | "UNDER_REVIEW" | "HIDDEN" | "BANNED" | "VISIBLE";
+                /** @description Narrow the result to one moderation status. Only VISIBLE and UNDER_REVIEW are accepted; without it both are returned. */
+                status?: "VISIBLE" | "UNDER_REVIEW";
             };
             header?: never;
             path?: never;
@@ -3154,7 +3090,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Paginated list of comments. */
+            /** @description Paginated list of VISIBLE and UNDER_REVIEW comments of PUBLISHED articles. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3189,12 +3125,23 @@ export interface operations {
                     "application/json": components["schemas"]["CommentDto"];
                 };
             };
+            /** @description Article not found or not PUBLISHED. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     CommentsController_findOne: {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                "x-user-id": string;
+                /** @description External id of the end user. When it is the comment's author, the comment is returned whatever its status or its article status, with content. */
+                "X-User-Id"?: string;
+            };
             path: {
                 /** @description UUID of the comment */
                 id: string;
@@ -3211,6 +3158,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["CommentDto"];
                 };
+            };
+            /** @description Comment not found, HIDDEN/BANNED, or its article is not PUBLISHED (unless X-User-Id is the author). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -3246,7 +3200,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UpdateCommentDto"];
+                "application/json": components["schemas"]["PublicUpdateCommentDto"];
             };
         };
         responses: {
@@ -3264,9 +3218,9 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
-                /** @description External user ID required for all interaction endpoints */
-                "X-User-Id": string;
                 "x-user-id": string;
+                /** @description External user ID of the end user */
+                "X-User-Id": string;
             };
             path: {
                 /** @description UUID of the article to like/unlike */
@@ -3299,7 +3253,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Article not found. */
+            /** @description Article not found or not PUBLISHED. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3312,9 +3266,9 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
-                /** @description External user ID required for all interaction endpoints */
-                "X-User-Id": string;
                 "x-user-id": string;
+                /** @description External user ID of the end user */
+                "X-User-Id": string;
             };
             path: {
                 /** @description UUID of the article to check */
@@ -3347,7 +3301,49 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Article not found. */
+            /** @description Article not found or not PUBLISHED. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    InteractionsController_countView: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description UUID of the viewed article */
+                articleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description View counted. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid articleId. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Article not found or not PUBLISHED. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3920,8 +3916,6 @@ export interface operations {
             query?: {
                 page?: number;
                 limit?: number;
-                /** @description Filter articles by moderation status. */
-                status?: "DRAFT" | "PUBLISHED" | "UNDER_REVIEW" | "HIDDEN" | "BANNED";
                 /** @description Filter articles belonging to a specific category UUID. */
                 categoryId?: string;
                 /** @description Filter articles that have a specific tag UUID attached. */
@@ -3930,6 +3924,8 @@ export interface operations {
                 languageCode?: string;
                 /** @description Filter to only featured (`true`) or non-featured (`false`) articles. */
                 featured?: boolean;
+                /** @description Filter articles by moderation status. */
+                status?: "DRAFT" | "PUBLISHED" | "UNDER_REVIEW" | "HIDDEN" | "BANNED";
             };
             header?: never;
             path?: never;
@@ -4346,7 +4342,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UpdateArticleTranslationDto"];
+                "application/json": components["schemas"]["AdminUpdateArticleTranslationDto"];
             };
         };
         responses: {
@@ -4487,7 +4483,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UpdateTagDto"];
+                "application/json": components["schemas"]["AdminUpdateTagDto"];
             };
         };
         responses: {
@@ -4604,7 +4600,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UpdateCategoryDto"];
+                "application/json": components["schemas"]["AdminUpdateCategoryDto"];
             };
         };
         responses: {
@@ -5129,47 +5125,6 @@ export interface operations {
             };
         };
     };
-    AdminUsersController_updateRole: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Internal UUID of the user */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateUserRoleDto"];
-            };
-        };
-        responses: {
-            /** @description User role updated. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UserListItemDto"];
-                };
-            };
-            /** @description Not authenticated – missing or expired session. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description User not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     AdminCommentsController_findAll: {
         parameters: {
             query?: {
@@ -5443,6 +5398,13 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Event is being delivered right now — retry in a few minutes. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     AdminWebhooksController_resendAllFailed: {
@@ -5465,82 +5427,6 @@ export interface operations {
             };
             /** @description Not authenticated – missing or expired session. */
             401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AdminNotificationsController_findAll: {
-        parameters: {
-            query?: {
-                page?: number;
-                limit?: number;
-                /** @description Filter by notification type */
-                type?: string;
-                /** @description Filter by sentToClient status */
-                sentToClient?: boolean;
-                /** @description Filter by userId (internal UUID) */
-                userId?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Paginated list of notifications. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data: components["schemas"]["NotificationDto"][];
-                        meta: components["schemas"]["PageMetaDto"];
-                    };
-                };
-            };
-            /** @description Not authenticated – missing or expired session. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AdminNotificationsController_findOne: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Internal UUID of the notification */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Notification found. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["NotificationDto"];
-                };
-            };
-            /** @description Not authenticated – missing or expired session. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Notification not found. */
-            404: {
                 headers: {
                     [name: string]: unknown;
                 };

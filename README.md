@@ -138,16 +138,16 @@ The signed content is `<webhook-id>.<webhook-timestamp>.<raw body>`, HMAC-SHA256
 - Articles and translations: `listArticles`, `getArticle(slug)`, `listTranslations`, `getTranslation`
 - Categories and tags: `listCategories`, `getCategory(slug)`, `listTags`, `getTag(slug)`
 - Comments: `createComment`, `listComments`, `getComment`, `updateComment`, `deleteComment`
-- Interactions and bookmarks: `toggleLike`, `getInteractionStatus`, `toggleBookmark`, `listMyBookmarks`. `userId` is a required argument on all four.
+- Interactions and bookmarks: `toggleLike`, `getInteractionStatus`, `toggleBookmark`, `listMyBookmarks`. `userId` is a required argument on all four. `recordView(articleId)` counts one view of a PUBLISHED article (204, 404 otherwise), without `userId`; Articuno does not dedupe, so filter bots and repeats in the app.
 - Reports: `createReport`, `listReports`, `updateReportStatus`
 - Users: `syncUser`, `deleteUser`
 
 ## Types
 
-Types are generated, never written by hand, from the services' full specs (console routes included, though no client method calls them). Each service's OpenAPI document is committed as `openapi/<service>.json`, and `openapi-typescript` turns it into `src/<service>/types.gen.ts`. Every subpath re-exports the result: `paths`, `components`, `operations`, and one alias per schema (`ImageResponseDto`, `CreateArticleDto`, and so on). Method inputs and outputs derive from `operations`. Every client method has a typed JSON response and body. If a service route ever ships without a response schema, its method returns `unknown`. The fix belongs in the service (`@ApiOkResponse({ type })`), followed by a regeneration. It does not belong here.
+Types are generated, never written by hand, from the services' full specs (console routes included, though no client method calls them). Each service's OpenAPI document is committed as `openapi/<service>.json`, and `openapi-typescript` turns it into `src/<service>/types.gen.ts`. Every subpath re-exports the result: `paths`, `components`, `operations`, and one alias per schema (`ImageResponseDto`, `PublicCreateArticleDto`, and so on). Method inputs and outputs derive from `operations`. Every client method has a typed JSON response and body. If a service route ever ships without a response schema, its method returns `unknown`. The fix belongs in the service (`@ApiOkResponse({ type })`), followed by a regeneration. It does not belong here.
 
 ```bash
-pnpm openapi:dump   # runs `pnpm openapi:dump` in ../fileharbor and ../articuno-root/articuno
+pnpm openapi:dump   # runs `pnpm openapi:dump` in ../fileharbor and ../articuno
 pnpm gen:types      # openapi/*.json → src/*/types.gen.ts
 ```
 

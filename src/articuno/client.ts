@@ -81,6 +81,10 @@ export class ArticunoClient {
   getInteractionStatus(articleId: string, userId: string, opts?: RequestOptions) {
     return this.get<'InteractionsController_getArticleStatus'>(`/interactions/articles/${seg(articleId)}/status`, undefined, { ...opts, userId });
   }
+  /** One view of a PUBLISHED article (404 otherwise). No `userId`, no dedupe: filter bots and repeats in your app. */
+  recordView(articleId: string, opts?: RequestOptions) {
+    return this.http.json<Res<'InteractionsController_countView'>>('POST', `/interactions/articles/${seg(articleId)}/view`, {}, opts);
+  }
   toggleBookmark(articleId: string, userId: string, opts?: RequestOptions) {
     return this.http.json<Res<'BookmarksController_toggle'>>('POST', `/bookmarks/${seg(articleId)}`, {}, { ...opts, userId });
   }

@@ -1,52 +1,9 @@
 {
   "openapi": "3.0.0",
   "paths": {
-    "/status": {
-      "get": {
-        "description": "Simple health check endpoint to verify the API is running.",
-        "operationId": "StatusController_getStatus",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "API is operational",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "example": "ok"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "summary": "Health check",
-        "tags": [
-          "App"
-        ]
-      }
-    },
-    "/metrics": {
-      "get": {
-        "operationId": "PrometheusController_index",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "Prometheus"
-        ]
-      }
-    },
     "/articles": {
       "post": {
-        "description": "Creates a new article for the current tenant. You may optionally include translations inline. Content is automatically checked for banned words; matching content will be created with a HIDDEN status.",
+        "description": "Creates a new DRAFT article for the current tenant. You may optionally include translations inline. Status cannot be set here: publishing goes through /admin/articles. Content is automatically checked for banned words; matching content will be created with a HIDDEN status.",
         "operationId": "ArticlesController_create",
         "parameters": [],
         "requestBody": {
@@ -54,7 +11,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateArticleDto"
+                "$ref": "#/components/schemas/PublicCreateArticleDto"
               }
             }
           }
@@ -79,7 +36,7 @@
         },
         "security": [
           {
-            "x-api-key": []
+            "api-key": []
           }
         ],
         "summary": "Create an article",
@@ -88,7 +45,7 @@
         ]
       },
       "get": {
-        "description": "Returns a paginated list of articles belonging to the current tenant. Supports optional filtering by status, category, tag, and featured flag.",
+        "description": "Returns a paginated list of PUBLISHED articles belonging to the current tenant. DRAFT articles are added only with `includeDrafts=true` (preview); UNDER_REVIEW, HIDDEN and BANNED articles are never returned. Supports optional filtering by category, tag, language and featured flag.",
         "operationId": "ArticlesController_findAll",
         "parameters": [
           {
@@ -110,23 +67,6 @@
               "maximum": 100,
               "default": 20,
               "type": "number"
-            }
-          },
-          {
-            "name": "status",
-            "required": false,
-            "in": "query",
-            "description": "Filter articles by moderation status.",
-            "schema": {
-              "example": "PUBLISHED",
-              "type": "string",
-              "enum": [
-                "DRAFT",
-                "PUBLISHED",
-                "UNDER_REVIEW",
-                "HIDDEN",
-                "BANNED"
-              ]
             }
           },
           {
@@ -168,6 +108,30 @@
               "example": true,
               "type": "boolean"
             }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Narrow the result to one status. Only PUBLISHED and DRAFT are accepted; DRAFT requires `includeDrafts=true`.",
+            "schema": {
+              "example": "PUBLISHED",
+              "type": "string",
+              "enum": [
+                "PUBLISHED",
+                "DRAFT"
+              ]
+            }
+          },
+          {
+            "name": "includeDrafts",
+            "required": false,
+            "in": "query",
+            "description": "Also return DRAFT articles (tenant preview). Default `false`: only PUBLISHED.",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -195,13 +159,16 @@
               }
             }
           },
+          "400": {
+            "description": "`status=DRAFT` without `includeDrafts=true`."
+          },
           "401": {
             "description": "Missing or invalid API key."
           }
         },
         "security": [
           {
-            "x-api-key": []
+            "api-key": []
           }
         ],
         "summary": "List articles",
@@ -212,7 +179,7 @@
     },
     "/articles/{slug}": {
       "get": {
-        "description": "Returns a single article identified by its URL-friendly slug, including all translations.",
+        "description": "Returns a single PUBLISHED article identified by its URL-friendly slug, including all translations. A DRAFT article is resolved only with `includeDrafts=true` (preview); UNDER_REVIEW, HIDDEN and BANNED articles answer 404.",
         "operationId": "ArticlesController_findOne",
         "parameters": [
           {
@@ -223,6 +190,16 @@
             "schema": {
               "example": "getting-started-with-nestjs",
               "type": "string"
+            }
+          },
+          {
+            "name": "includeDrafts",
+            "required": false,
+            "in": "query",
+            "description": "Also resolve a DRAFT article (tenant preview). Default `false`: only PUBLISHED; any other status answers 404.",
+            "schema": {
+              "example": false,
+              "type": "boolean"
             }
           },
           {
@@ -251,12 +228,12 @@
             "description": "Missing or invalid API key."
           },
           "404": {
-            "description": "Article not found."
+            "description": "Article not found or not visible to the public API."
           }
         },
         "security": [
           {
-            "x-api-key": []
+            "api-key": []
           }
         ],
         "summary": "Get an article by slug",
@@ -267,7 +244,7 @@
     },
     "/articles/{id}": {
       "patch": {
-        "description": "Partially updates an article. Only provided fields are changed. Status changes are validated against the content status state machine.",
+        "description": "Partially updates an article. Only provided fields are changed. Status cannot be changed here: moderation goes through /admin/articles.",
         "operationId": "ArticlesController_update",
         "parameters": [
           {
@@ -286,7 +263,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateArticleDto"
+                "$ref": "#/components/schemas/PublicUpdateArticleDto"
               }
             }
           }
@@ -314,7 +291,7 @@
         },
         "security": [
           {
-            "x-api-key": []
+            "api-key": []
           }
         ],
         "summary": "Update an article",
@@ -350,7 +327,7 @@
         },
         "security": [
           {
-            "x-api-key": []
+            "api-key": []
           }
         ],
         "summary": "Delete an article",
@@ -397,7 +374,7 @@
         },
         "security": [
           {
-            "x-api-key": []
+            "api-key": []
           }
         ],
         "summary": "Add a banned word",
@@ -472,7 +449,7 @@
         },
         "security": [
           {
-            "x-api-key": []
+            "api-key": []
           }
         ],
         "summary": "List banned words",
@@ -510,7 +487,7 @@
         },
         "security": [
           {
-            "x-api-key": []
+            "api-key": []
           }
         ],
         "summary": "Remove a banned word",
@@ -571,7 +548,7 @@
         },
         "security": [
           {
-            "x-api-key": []
+            "api-key": []
           }
         ],
         "summary": "Add a translation",
@@ -580,7 +557,7 @@
         ]
       },
       "get": {
-        "description": "Returns all translations for an article, ordered by language code.",
+        "description": "Returns all translations for an article, ordered by language code. Only for PUBLISHED articles (DRAFT with `includeDrafts=true`); any other status answers 404.",
         "operationId": "ArticleTranslationsController_findAll",
         "parameters": [
           {
@@ -591,6 +568,16 @@
             "schema": {
               "example": "123e4567-e89b-12d3-a456-426614174000",
               "type": "string"
+            }
+          },
+          {
+            "name": "includeDrafts",
+            "required": false,
+            "in": "query",
+            "description": "Also resolve a DRAFT article (tenant preview). Default `false`: only PUBLISHED; any other status answers 404.",
+            "schema": {
+              "example": false,
+              "type": "boolean"
             }
           }
         ],
@@ -617,7 +604,7 @@
         },
         "security": [
           {
-            "x-api-key": []
+            "api-key": []
           }
         ],
         "summary": "List translations",
@@ -628,7 +615,7 @@
     },
     "/articles/{id}/translations/{languageCode}": {
       "get": {
-        "description": "Returns a single translation for the given article and BCP 47 language code.",
+        "description": "Returns a single translation for the given article and BCP 47 language code. Only for PUBLISHED articles (DRAFT with `includeDrafts=true`); any other status answers 404.",
         "operationId": "ArticleTranslationsController_findOne",
         "parameters": [
           {
@@ -649,6 +636,16 @@
             "schema": {
               "example": "en",
               "type": "string"
+            }
+          },
+          {
+            "name": "includeDrafts",
+            "required": false,
+            "in": "query",
+            "description": "Also resolve a DRAFT article (tenant preview). Default `false`: only PUBLISHED; any other status answers 404.",
+            "schema": {
+              "example": false,
+              "type": "boolean"
             }
           }
         ],
@@ -672,7 +669,7 @@
         },
         "security": [
           {
-            "x-api-key": []
+            "api-key": []
           }
         ],
         "summary": "Get a translation by language",
@@ -738,7 +735,7 @@
         },
         "security": [
           {
-            "x-api-key": []
+            "api-key": []
           }
         ],
         "summary": "Update a translation",
@@ -784,7 +781,7 @@
         },
         "security": [
           {
-            "x-api-key": []
+            "api-key": []
           }
         ],
         "summary": "Delete a translation",
@@ -844,7 +841,7 @@
             "description": "Missing or invalid API key."
           },
           "404": {
-            "description": "Article not found."
+            "description": "Article not found or not PUBLISHED."
           }
         },
         "security": [
@@ -983,7 +980,7 @@
         },
         "security": [
           {
-            "x-api-key": []
+            "api-key": []
           }
         ],
         "summary": "Create a category",
@@ -1048,7 +1045,7 @@
         },
         "security": [
           {
-            "x-api-key": []
+            "api-key": []
           }
         ],
         "summary": "List categories",
@@ -1094,7 +1091,7 @@
         },
         "security": [
           {
-            "x-api-key": []
+            "api-key": []
           }
         ],
         "summary": "Get a category by slug",
@@ -1105,7 +1102,7 @@
     },
     "/categories/{id}": {
       "patch": {
-        "description": "Updates the name, description, or colour of an existing category. The slug is re-generated when the name changes.",
+        "description": "Updates the name, description, or colour of an existing category. The slug does not change.",
         "operationId": "CategoriesController_update",
         "parameters": [
           {
@@ -1155,7 +1152,7 @@
         },
         "security": [
           {
-            "x-api-key": []
+            "api-key": []
           }
         ],
         "summary": "Update a category",
@@ -1191,7 +1188,7 @@
         },
         "security": [
           {
-            "x-api-key": []
+            "api-key": []
           }
         ],
         "summary": "Delete a category",
@@ -1224,6 +1221,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Article not found or not PUBLISHED."
           }
         },
         "tags": [
@@ -1267,23 +1267,19 @@
             "name": "status",
             "required": false,
             "in": "query",
-            "description": "Filter comments by moderation status",
+            "description": "Narrow the result to one moderation status. Only VISIBLE and UNDER_REVIEW are accepted; without it both are returned.",
             "schema": {
               "type": "string",
               "enum": [
-                "PUBLISHED",
-                "DRAFT",
-                "UNDER_REVIEW",
-                "HIDDEN",
-                "BANNED",
-                "VISIBLE"
+                "VISIBLE",
+                "UNDER_REVIEW"
               ]
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Paginated list of comments.",
+            "description": "Paginated list of VISIBLE and UNDER_REVIEW comments of PUBLISHED articles.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1325,6 +1321,23 @@
               "format": "uuid",
               "type": "string"
             }
+          },
+          {
+            "name": "x-user-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-User-Id",
+            "in": "header",
+            "description": "External id of the end user. When it is the comment's author, the comment is returned whatever its status or its article status, with content.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1337,6 +1350,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Comment not found, HIDDEN/BANNED, or its article is not PUBLISHED (unless X-User-Id is the author)."
           }
         },
         "tags": [
@@ -1362,7 +1378,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateCommentDto"
+                "$ref": "#/components/schemas/PublicUpdateCommentDto"
               }
             }
           }
@@ -1413,15 +1429,6 @@
         "operationId": "InteractionsController_toggleLikeArticle",
         "parameters": [
           {
-            "name": "X-User-Id",
-            "in": "header",
-            "description": "External user ID required for all interaction endpoints",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "articleId",
             "required": true,
             "in": "path",
@@ -1435,6 +1442,15 @@
             "name": "x-user-id",
             "required": true,
             "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-User-Id",
+            "in": "header",
+            "description": "External user ID of the end user",
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -1458,7 +1474,7 @@
             "description": "Missing or invalid API key."
           },
           "404": {
-            "description": "Article not found."
+            "description": "Article not found or not PUBLISHED."
           }
         },
         "security": [
@@ -1478,15 +1494,6 @@
         "operationId": "InteractionsController_getArticleStatus",
         "parameters": [
           {
-            "name": "X-User-Id",
-            "in": "header",
-            "description": "External user ID required for all interaction endpoints",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "articleId",
             "required": true,
             "in": "path",
@@ -1500,6 +1507,15 @@
             "name": "x-user-id",
             "required": true,
             "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-User-Id",
+            "in": "header",
+            "description": "External user ID of the end user",
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -1523,7 +1539,7 @@
             "description": "Missing or invalid API key."
           },
           "404": {
-            "description": "Article not found."
+            "description": "Article not found or not PUBLISHED."
           }
         },
         "security": [
@@ -1532,6 +1548,47 @@
           }
         ],
         "summary": "Get interaction status for an article",
+        "tags": [
+          "Interactions"
+        ]
+      }
+    },
+    "/interactions/articles/{articleId}/view": {
+      "post": {
+        "description": "Adds one to the article view counter. Call it server-side when the article page is served; No deduplication: filter bots and repeated views in the tenant site.",
+        "operationId": "InteractionsController_countView",
+        "parameters": [
+          {
+            "name": "articleId",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the viewed article",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "View counted."
+          },
+          "400": {
+            "description": "Invalid articleId."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "description": "Article not found or not PUBLISHED."
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Count a view of an article",
         "tags": [
           "Interactions"
         ]
@@ -1814,7 +1871,7 @@
         },
         "security": [
           {
-            "x-api-key": []
+            "api-key": []
           }
         ],
         "summary": "Create a tag",
@@ -1889,7 +1946,7 @@
         },
         "security": [
           {
-            "x-api-key": []
+            "api-key": []
           }
         ],
         "summary": "List tags",
@@ -1935,7 +1992,7 @@
         },
         "security": [
           {
-            "x-api-key": []
+            "api-key": []
           }
         ],
         "summary": "Get a tag by slug",
@@ -1946,7 +2003,7 @@
     },
     "/tags/{id}": {
       "patch": {
-        "description": "Updates the name (and consequently the slug) of an existing tag.",
+        "description": "Updates the name of an existing tag. The slug does not change.",
         "operationId": "TagsController_update",
         "parameters": [
           {
@@ -1996,7 +2053,7 @@
         },
         "security": [
           {
-            "x-api-key": []
+            "api-key": []
           }
         ],
         "summary": "Update a tag",
@@ -2032,7 +2089,7 @@
         },
         "security": [
           {
-            "x-api-key": []
+            "api-key": []
           }
         ],
         "summary": "Delete a tag",
@@ -2417,23 +2474,6 @@
             }
           },
           {
-            "name": "status",
-            "required": false,
-            "in": "query",
-            "description": "Filter articles by moderation status.",
-            "schema": {
-              "example": "PUBLISHED",
-              "type": "string",
-              "enum": [
-                "DRAFT",
-                "PUBLISHED",
-                "UNDER_REVIEW",
-                "HIDDEN",
-                "BANNED"
-              ]
-            }
-          },
-          {
             "name": "categoryId",
             "required": false,
             "in": "query",
@@ -2471,6 +2511,23 @@
             "schema": {
               "example": true,
               "type": "boolean"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter articles by moderation status.",
+            "schema": {
+              "example": "PUBLISHED",
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "PUBLISHED",
+                "UNDER_REVIEW",
+                "HIDDEN",
+                "BANNED"
+              ]
             }
           }
         ],
@@ -2874,7 +2931,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateArticleTranslationDto"
+                "$ref": "#/components/schemas/AdminUpdateArticleTranslationDto"
               }
             }
           }
@@ -3118,7 +3175,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateTagDto"
+                "$ref": "#/components/schemas/AdminUpdateTagDto"
               }
             }
           }
@@ -3324,7 +3381,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateCategoryDto"
+                "$ref": "#/components/schemas/AdminUpdateCategoryDto"
               }
             }
           }
@@ -4238,61 +4295,6 @@
         ]
       }
     },
-    "/admin/users/{id}/role": {
-      "patch": {
-        "description": "Assigns a new role to a user within the tenant.",
-        "operationId": "AdminUsersController_updateRole",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "Internal UUID of the user",
-            "schema": {
-              "example": "123e4567-e89b-12d3-a456-426614174000",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateUserRoleDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "User role updated.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserListItemDto"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Not authenticated – missing or expired session."
-          },
-          "404": {
-            "description": "User not found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Update user role",
-        "tags": [
-          "Admin / Users"
-        ]
-      }
-    },
     "/admin/comments": {
       "get": {
         "description": "Returns a paginated list of all comments for the session tenant. Without `status` every comment is returned regardless of moderation state. Supports filtering by articleId and status.",
@@ -4432,7 +4434,7 @@
         ]
       },
       "patch": {
-        "description": "Partially updates a comment (e.g. content or status). All statuses can be set by admins.",
+        "description": "Partially updates a comment (e.g. content or status). Status changes must be valid transitions (BANNED is terminal); new content is stripped of tags and checked for banned words.",
         "operationId": "AdminCommentsController_update",
         "parameters": [
           {
@@ -4690,6 +4692,9 @@
           },
           "404": {
             "description": "Webhook event not found."
+          },
+          "409": {
+            "description": "Event is being delivered right now — retry in a few minutes."
           }
         },
         "security": [
@@ -4705,7 +4710,7 @@
     },
     "/admin/webhooks/resend-all-failed": {
       "post": {
-        "description": "Resets attempts, nextRetryAt and lastError to 0 / null for every undelivered event belonging to the current tenant. Use this after a temporary outage of the receiving system to trigger re-delivery of the entire backlog.",
+        "description": "Resets attempts, nextRetryAt and lastError to 0 / null for every undelivered event belonging to the current tenant, except events a worker is delivering right now. Use this after a temporary outage of the receiving system to trigger re-delivery of the entire backlog.",
         "operationId": "AdminWebhooksController_resendAllFailed",
         "parameters": [],
         "responses": {
@@ -4731,146 +4736,6 @@
         "summary": "Reset all failed webhook events for the tenant",
         "tags": [
           "Admin / Webhooks"
-        ]
-      }
-    },
-    "/admin/notifications": {
-      "get": {
-        "description": "Returns a paginated list of all notifications for the session tenant. Supports filtering by type, sentToClient and userId.",
-        "operationId": "AdminNotificationsController_findAll",
-        "parameters": [
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "default": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "maximum": 100,
-              "default": 20,
-              "type": "number"
-            }
-          },
-          {
-            "name": "type",
-            "required": false,
-            "in": "query",
-            "description": "Filter by notification type",
-            "schema": {
-              "example": "comment.moderated",
-              "type": "string"
-            }
-          },
-          {
-            "name": "sentToClient",
-            "required": false,
-            "in": "query",
-            "description": "Filter by sentToClient status",
-            "schema": {
-              "example": false,
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "userId",
-            "required": false,
-            "in": "query",
-            "description": "Filter by userId (internal UUID)",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Paginated list of notifications.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "required": [
-                    "data",
-                    "meta"
-                  ],
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/NotificationDto"
-                      }
-                    },
-                    "meta": {
-                      "$ref": "#/components/schemas/PageMetaDto"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Not authenticated – missing or expired session."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "List notifications",
-        "tags": [
-          "Admin / Notifications"
-        ]
-      }
-    },
-    "/admin/notifications/{id}": {
-      "get": {
-        "description": "Returns the full detail of a single notification identified by its internal UUID.",
-        "operationId": "AdminNotificationsController_findOne",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "Internal UUID of the notification",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Notification found.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotificationDto"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Not authenticated – missing or expired session."
-          },
-          "404": {
-            "description": "Notification not found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get a notification by ID",
-        "tags": [
-          "Admin / Notifications"
         ]
       }
     },
@@ -4912,9 +4777,17 @@
   },
   "info": {
     "title": "Articuno",
-    "description": "",
-    "version": "1.2.0",
-    "contact": {}
+    "description": "Multi-tenant CMS management system built with NestJS, Prisma ORM, and PostgreSQL.",
+    "version": "1.2.3",
+    "contact": {
+      "name": "Andrea Tombolato",
+      "url": "https://heyatom.dev",
+      "email": "hey@heyatom.dev"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/heyatomdev/articuno/blob/main/README.md"
+    }
   },
   "tags": [],
   "servers": [],
@@ -4973,25 +4846,13 @@
           "excerpt"
         ]
       },
-      "CreateArticleDto": {
+      "PublicCreateArticleDto": {
         "type": "object",
         "properties": {
           "coverImage": {
             "type": "string",
             "description": "URL of the article cover image. When creating via multipart/form-data, upload the file in the `coverImage` field instead.",
             "example": "https://cdn.example.com/articles/my-article-cover.jpg"
-          },
-          "status": {
-            "type": "string",
-            "description": "Initial moderation status of the article. Defaults to DRAFT when omitted.",
-            "enum": [
-              "DRAFT",
-              "PUBLISHED",
-              "UNDER_REVIEW",
-              "HIDDEN",
-              "BANNED"
-            ],
-            "example": "DRAFT"
           },
           "featured": {
             "type": "boolean",
@@ -5250,6 +5111,12 @@
           "tenantId": {
             "type": "string"
           },
+          "publishedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "description": "First publication; never cleared or moved"
+          },
           "createdAt": {
             "format": "date-time",
             "type": "string"
@@ -5297,6 +5164,7 @@
           "authorId",
           "categoryId",
           "tenantId",
+          "publishedAt",
           "createdAt",
           "updatedAt",
           "category",
@@ -5401,6 +5269,12 @@
           "tenantId": {
             "type": "string"
           },
+          "publishedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "description": "First publication; never cleared or moved"
+          },
           "createdAt": {
             "format": "date-time",
             "type": "string"
@@ -5448,6 +5322,7 @@
           "authorId",
           "categoryId",
           "tenantId",
+          "publishedAt",
           "createdAt",
           "updatedAt",
           "category",
@@ -5457,7 +5332,7 @@
           "translations"
         ]
       },
-      "UpdateArticleDto": {
+      "PublicUpdateArticleDto": {
         "type": "object",
         "properties": {
           "coverImage": {
@@ -5465,18 +5340,6 @@
             "description": "URL of the article cover image. Pass `null` to remove the existing cover.",
             "example": "https://cdn.example.com/articles/updated-cover.jpg",
             "nullable": true
-          },
-          "status": {
-            "type": "string",
-            "description": "New moderation status. Must be a valid transition from the current status.",
-            "enum": [
-              "DRAFT",
-              "PUBLISHED",
-              "UNDER_REVIEW",
-              "HIDDEN",
-              "BANNED"
-            ],
-            "example": "PUBLISHED"
           },
           "featured": {
             "type": "boolean",
@@ -5504,16 +5367,6 @@
             "items": {
               "type": "string"
             }
-          },
-          "moderationReason": {
-            "type": "string",
-            "description": "Human-readable reason for a moderation action (e.g. why the article was hidden or banned).",
-            "example": "Contains prohibited content."
-          },
-          "moderatorId": {
-            "type": "string",
-            "description": "External ID of the moderator performing the action.",
-            "example": "mod_user_abc123"
           }
         }
       },
@@ -5599,174 +5452,6 @@
           "bookmarked"
         ]
       },
-      "CategoryDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Unique identifier of the category",
-            "example": "123e4567-e89b-12d3-a456-426614174000"
-          },
-          "name": {
-            "type": "string",
-            "description": "Display name of the category",
-            "example": "Science"
-          },
-          "slug": {
-            "type": "string",
-            "description": "URL-friendly slug derived from the name",
-            "example": "science"
-          },
-          "description": {
-            "type": "string",
-            "description": "Optional description of the category",
-            "example": "Articles about science and research."
-          },
-          "color": {
-            "type": "string",
-            "description": "Optional hex colour associated with the category",
-            "example": "#3B82F6"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string",
-            "description": "Timestamp when the category was created",
-            "example": "2026-01-15T10:23:00.000Z"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string",
-            "description": "Timestamp when the category was last updated",
-            "example": "2026-03-22T08:45:00.000Z"
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "slug",
-          "createdAt",
-          "updatedAt"
-        ]
-      },
-      "TenantDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Unique identifier for the tenant",
-            "example": "123e4567-e89b-12d3-a456-426614174000"
-          },
-          "name": {
-            "type": "string",
-            "description": "Name of the tenant",
-            "example": "Kaish DBD"
-          },
-          "slug": {
-            "type": "string",
-            "description": "Slug for the tenant, used in URLs",
-            "example": "kaish-dbd"
-          },
-          "description": {
-            "type": "string",
-            "description": "Tenant description"
-          },
-          "domain": {
-            "type": "string",
-            "description": "Tenant domain, used for routing and identification",
-            "example": "kaish-dbd.it"
-          },
-          "defaultLanguage": {
-            "type": "string",
-            "description": "Tenant default language",
-            "example": "it"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string",
-            "description": "Timestamp when the tenant was created",
-            "example": "2026-01-15T10:23:00.000Z"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string",
-            "description": "Timestamp when the tenant was last updated",
-            "example": "2026-03-22T08:45:00.000Z"
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "slug"
-        ]
-      },
-      "TagCountDto": {
-        "type": "object",
-        "properties": {
-          "articles": {
-            "type": "number",
-            "description": "Number of articles associated with this tag",
-            "example": 42
-          }
-        },
-        "required": [
-          "articles"
-        ]
-      },
-      "TagDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Unique identifier for the tag",
-            "example": "123e4567-e89b-12d3-a456-426614174000"
-          },
-          "name": {
-            "type": "string",
-            "description": "Display name of the tag",
-            "example": "Technology"
-          },
-          "slug": {
-            "type": "string",
-            "description": "URL-friendly slug derived from the tag name",
-            "example": "technology"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string",
-            "description": "Timestamp when the tag was created",
-            "example": "2026-01-15T10:23:00.000Z"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string",
-            "description": "Timestamp when the tag was last updated",
-            "example": "2026-03-22T08:45:00.000Z"
-          },
-          "tenant": {
-            "description": "Tenant this tag belongs to (only included in certain admin responses)",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TenantDto"
-              }
-            ]
-          },
-          "_count": {
-            "description": "Aggregated counts for related resources",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TagCountDto"
-              }
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "slug",
-          "createdAt",
-          "updatedAt"
-        ]
-      },
       "BookmarkedArticleDto": {
         "type": "object",
         "properties": {
@@ -5807,6 +5492,12 @@
           "tenantId": {
             "type": "string"
           },
+          "publishedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "description": "First publication; never cleared or moved"
+          },
           "createdAt": {
             "format": "date-time",
             "type": "string"
@@ -5816,18 +5507,18 @@
             "type": "string"
           },
           "category": {
-            "$ref": "#/components/schemas/CategoryDto"
+            "$ref": "#/components/schemas/ArticleCategorySummaryDto"
           },
           "tags": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/TagDto"
+              "$ref": "#/components/schemas/ArticleTagSummaryDto"
             }
           },
           "translations": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ArticleTranslationDto"
+              "$ref": "#/components/schemas/ArticleTranslationSummaryDto"
             }
           }
         },
@@ -5842,6 +5533,7 @@
           "authorId",
           "categoryId",
           "tenantId",
+          "publishedAt",
           "createdAt",
           "updatedAt",
           "category",
@@ -5905,6 +5597,55 @@
           "name"
         ]
       },
+      "CategoryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier of the category",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the category",
+            "example": "Science"
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL-friendly slug derived from the name",
+            "example": "science"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description of the category",
+            "example": "Articles about science and research."
+          },
+          "color": {
+            "type": "string",
+            "description": "Optional hex colour associated with the category",
+            "example": "#3B82F6"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the category was created",
+            "example": "2026-01-15T10:23:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the category was last updated",
+            "example": "2026-03-22T08:45:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
       "CategoryListItemDto": {
         "type": "object",
         "properties": {
@@ -5965,7 +5706,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "New display name for the category. The slug will be re-generated from this value.",
+            "description": "New display name for the category. The slug does not change.",
             "example": "Science & Technology"
           },
           "description": {
@@ -5989,7 +5730,8 @@
           },
           "content": {
             "type": "string",
-            "description": "Comment text"
+            "description": "Comment text, plain text (tags are stripped)",
+            "maxLength": 5000
           },
           "authorExternalId": {
             "type": "string",
@@ -6234,24 +5976,13 @@
           "author"
         ]
       },
-      "UpdateCommentDto": {
+      "PublicUpdateCommentDto": {
         "type": "object",
         "properties": {
           "content": {
             "type": "string",
-            "description": "Updated comment content"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "PUBLISHED",
-              "DRAFT",
-              "UNDER_REVIEW",
-              "HIDDEN",
-              "BANNED",
-              "VISIBLE"
-            ],
-            "description": "New status for the comment (admin only)"
+            "description": "Updated comment content, plain text (tags are stripped)",
+            "maxLength": 5000
           }
         }
       },
@@ -6544,12 +6275,131 @@
           "name"
         ]
       },
+      "TenantDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the tenant",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the tenant",
+            "example": "Kaish DBD"
+          },
+          "slug": {
+            "type": "string",
+            "description": "Slug for the tenant, used in URLs",
+            "example": "kaish-dbd"
+          },
+          "description": {
+            "type": "string",
+            "description": "Tenant description"
+          },
+          "domain": {
+            "type": "string",
+            "description": "Tenant domain, used for routing and identification",
+            "example": "kaish-dbd.it"
+          },
+          "defaultLanguage": {
+            "type": "string",
+            "description": "Tenant default language",
+            "example": "it"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the tenant was created",
+            "example": "2026-01-15T10:23:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the tenant was last updated",
+            "example": "2026-03-22T08:45:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug"
+        ]
+      },
+      "TagCountDto": {
+        "type": "object",
+        "properties": {
+          "articles": {
+            "type": "number",
+            "description": "Number of articles associated with this tag",
+            "example": 42
+          }
+        },
+        "required": [
+          "articles"
+        ]
+      },
+      "TagDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the tag",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the tag",
+            "example": "Technology"
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL-friendly slug derived from the tag name",
+            "example": "technology"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the tag was created",
+            "example": "2026-01-15T10:23:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the tag was last updated",
+            "example": "2026-03-22T08:45:00.000Z"
+          },
+          "tenant": {
+            "description": "Tenant this tag belongs to (only included in certain admin responses)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TenantDto"
+              }
+            ]
+          },
+          "_count": {
+            "description": "Aggregated counts for related resources",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TagCountDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
       "UpdateTagDto": {
         "type": "object",
         "properties": {
           "name": {
             "type": "string",
-            "description": "New display name for the tag. The slug will be re-generated from this value.",
+            "description": "New display name for the tag. The slug does not change.",
             "example": "Science & Technology"
           }
         }
@@ -6581,6 +6431,84 @@
         "required": [
           "externalId"
         ]
+      },
+      "AdminUpdateArticleTranslationDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Updated localized title of the article.",
+            "example": "Getting Started with NestJS – Revised"
+          },
+          "content": {
+            "type": "string",
+            "description": "Updated full HTML/Markdown body of the article.",
+            "example": "<p>NestJS is a progressive Node.js framework...</p>"
+          },
+          "excerpt": {
+            "type": "string",
+            "description": "Updated short plain-text summary shown in listing pages.",
+            "example": "An updated guide to building your first NestJS application."
+          },
+          "metaTitle": {
+            "type": "string",
+            "description": "Updated SEO meta title.",
+            "example": "NestJS Guide – Revised | My Blog"
+          },
+          "metaDescription": {
+            "type": "string",
+            "description": "Updated SEO meta description.",
+            "example": "Learn NestJS from scratch with this revised step-by-step tutorial."
+          },
+          "slug": {
+            "type": "string",
+            "description": "New URL slug (lowercase alphanumeric words separated by hyphens). Old links stop working: change it only on purpose.",
+            "example": "science-and-technology",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        }
+      },
+      "AdminUpdateTagDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "New display name for the tag. The slug does not change.",
+            "example": "Science & Technology"
+          },
+          "slug": {
+            "type": "string",
+            "description": "New URL slug (lowercase alphanumeric words separated by hyphens). Old links stop working: change it only on purpose.",
+            "example": "science-and-technology",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        }
+      },
+      "AdminUpdateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "New display name for the category. The slug does not change.",
+            "example": "Science & Technology"
+          },
+          "description": {
+            "type": "string",
+            "description": "Updated description of the category.",
+            "example": "Articles covering science, technology and research."
+          },
+          "color": {
+            "type": "string",
+            "description": "Updated hex colour for the category.",
+            "example": "#10B981"
+          },
+          "slug": {
+            "type": "string",
+            "description": "New URL slug (lowercase alphanumeric words separated by hyphens). Old links stop working: change it only on purpose.",
+            "example": "science-and-technology",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        }
       },
       "AdminCreateReportDto": {
         "type": "object",
@@ -6873,25 +6801,25 @@
           "status"
         ]
       },
-      "UpdateUserRoleDto": {
+      "UpdateCommentDto": {
         "type": "object",
         "properties": {
-          "role": {
+          "content": {
             "type": "string",
-            "description": "New role to assign to the user",
+            "description": "Updated comment content, plain text (tags are stripped)",
+            "maxLength": 5000
+          },
+          "status": {
+            "type": "string",
             "enum": [
-              "TENANT_ADMIN",
-              "SUPER_MODERATOR",
-              "EDITOR",
-              "MODERATOR",
-              "MEMBER"
+              "VISIBLE",
+              "UNDER_REVIEW",
+              "HIDDEN",
+              "BANNED"
             ],
-            "example": "MODERATOR"
+            "description": "New status for the comment (admin only). Must be a valid transition from the current status."
           }
-        },
-        "required": [
-          "role"
-        ]
+        }
       },
       "WebhookEventDto": {
         "type": "object",
@@ -6957,82 +6885,6 @@
         },
         "required": [
           "reset"
-        ]
-      },
-      "NotificationUserSummaryDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "externalId": {
-            "type": "string"
-          },
-          "username": {
-            "type": "string",
-            "nullable": true
-          },
-          "avatarUrl": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "id",
-          "externalId",
-          "username",
-          "avatarUrl"
-        ]
-      },
-      "NotificationDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "example": "comment.moderated"
-          },
-          "title": {
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
-          },
-          "userId": {
-            "type": "string"
-          },
-          "tenantId": {
-            "type": "string"
-          },
-          "sentToClient": {
-            "type": "boolean"
-          },
-          "readAt": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "user": {
-            "$ref": "#/components/schemas/NotificationUserSummaryDto"
-          }
-        },
-        "required": [
-          "id",
-          "type",
-          "title",
-          "message",
-          "userId",
-          "tenantId",
-          "sentToClient",
-          "readAt",
-          "createdAt",
-          "user"
         ]
       },
       "DashboardTotalsDto": {

@@ -25,6 +25,15 @@ describe('ArticunoClient', () => {
     expect(calls[1].headers['X-User-Id']).toBe('user-1');
   });
 
+  it('recordView posts without X-User-Id and resolves to undefined on 204', async () => {
+    const { fetchImpl, calls } = fakeFetch(() => new Response(null, { status: 204 }));
+    const articuno = new ArticunoClient({ baseUrl: 'http://articuno', auth: apiKeyAuth('tenant-key'), fetch: fetchImpl });
+
+    await expect(articuno.recordView('art/1')).resolves.toBeUndefined();
+    expect(calls[0]).toMatchObject({ url: 'http://articuno/interactions/articles/art%2F1/view', init: { method: 'POST' } });
+    expect(calls[0].headers['X-User-Id']).toBeUndefined();
+  });
+
   it('authenticates with a service-client token minted by bastion-client for articuno', async () => {
     const minted: unknown[] = [];
     const bastionFetch = (async (_url: string, init: RequestInit) => {
