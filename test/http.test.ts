@@ -42,3 +42,21 @@ describe('shared transport', () => {
     await expect(serviceTokenAuth({ getToken: async () => '' }, 'articuno')()).rejects.toThrow(/empty/);
   });
 });
+
+describe('validation errors and request id', () => {
+  it('prefers errors[] over a generic message, and exposes code and requestId', async () => {
+    const body = { statusCode: 400, code: 'VALIDATION_FAILED', message: 'Validation failed', errors: ['title must be a string'], requestId: 'r-1' };
+    const { fetchImpl } = fakeFetch(() => json(400, body));
+    const fh = new FileHarborClient({ baseUrl: 'http://fh', auth: apiKeyAuth('k'), fetch: fetchImpl });
+
+    const err = await fh.getClientStats().catch((e: unknown) => e);
+    expect(err).toMatchObject({ status: 400, message: 'title must be a string', code: 'VALIDATION_FAILED', requestId: 'r-1' });
+  });
+
+  it('sends requestId as X-Request-Id', async () => {
+    const { fetchImpl, calls } = fakeFetch();
+    const fh = new FileHarborClient({ baseUrl: 'http://fh', auth: apiKeyAuth('k'), fetch: fetchImpl });
+    await fh.getClientStats({ requestId: 'abc' });
+    expect(calls[0].headers['X-Request-Id']).toBe('abc');
+  });
+});

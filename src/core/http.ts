@@ -30,6 +30,8 @@ export interface RequestOptions {
   headers?: Record<string, string>;
   timeoutMs?: number;
   signal?: AbortSignal;
+  /** Sent as `X-Request-Id`: your own request id, so the service logs it as `clientRequestId`. */
+  requestId?: string;
 }
 
 /** A file for a multipart upload. `data` takes a Node `Buffer` (multer's `file.buffer`) as-is. */
@@ -43,7 +45,7 @@ export type Query = Record<string, string | number | boolean | readonly (string 
 
 /**
  * A non-2xx answer, or the service unreachable / timed out (`status` 503, `body` undefined).
- * `message` is the service's own `message` when it sent one.
+ * `message` is the validation detail (`errors[]`) when present, else the service's own `message`.
  */
 export class HeyAtomHttpError extends Error {
   constructor(
@@ -54,6 +56,18 @@ export class HeyAtomHttpError extends Error {
   ) {
     super(message);
     this.name = 'HeyAtomHttpError';
+  }
+
+  /** The service's stable error `code` (`NOT_FOUND`, `SLUG_TAKEN`, …), when it sent one. */
+  get code(): string | undefined {
+    const code = (this.body as { code?: unknown } | undefined)?.code;
+    return typeof code === 'string' ? code : undefined;
+  }
+
+  /** The service's own request id, for correlating logs. */
+  get requestId(): string | undefined {
+    const id = (this.body as { requestId?: unknown } | undefined)?.requestId;
+    return typeof id === 'string' ? id : undefined;
   }
 }
 
@@ -116,6 +130,7 @@ export class HeyAtomHttp {
 
     const headers: Record<string, string> = { ...opts.headers };
     if (opts.userId) headers['X-User-Id'] = opts.userId;
+    if (opts.requestId) headers['X-Request-Id'] = opts.requestId;
     const isForm = body instanceof FormData;
     if (body !== undefined && !isForm) headers['Content-Type'] = 'application/json';
     Object.assign(headers, credentials);
@@ -143,10 +158,14 @@ export class HeyAtomHttp {
       } catch {
         // non-JSON error body: keep the text
       }
-      const raw = (parsed as { message?: unknown } | undefined)?.message;
-      const message = Array.isArray(raw) ? raw.join(', ') : typeof raw === 'string' ? raw : `${this.service} error ${res.status}`;
-      this.logger.warn(`${this.service}: ${method} ${path} failed: ${res.status}`);
-      throw new HeyAtomHttpError(this.service, res.status, parsed, message);
+      // Standard bodies put the validation detail in `errors[]` and a generic `message`
+      // ("Validation failed"); older ones put it in `message` as an array.
+      const { errors, message: raw } = (parsed ?? {}) as { errors?: unknown; message?: unknown };
+      const detail = Array.isArray(errors) && errors.length ? errors : raw;
+      const message = Array.isArray(detail) ? detail.join(', ') : typeof detail === 'string' ? detail : `${this.service} error ${res.status}`;
+      const err = new HeyAtomHttpError(this.service, res.status, parsed, message);
+      this.logger.warn(`${this.service}: ${method} ${path} failed: ${res.status}${err.requestId ? ` (requestId ${err.requestId})` : ''}`);
+      throw err;
     }
     return res;
   }

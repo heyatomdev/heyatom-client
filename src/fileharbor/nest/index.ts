@@ -6,6 +6,7 @@ import type { ClientModuleAsyncOptions } from '../../nest/options.js';
 
 export * from '../index.js';
 export type { ClientModuleAsyncOptions } from '../../nest/options.js';
+export { toHttpException } from '../../nest/errors.js';
 
 export const FILEHARBOR_OPTIONS = Symbol('FILEHARBOR_OPTIONS');
 

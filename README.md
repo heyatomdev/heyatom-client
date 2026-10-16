@@ -25,7 +25,7 @@ serviceTokenAuth(provider, 'articuno') // Bearer service-client JWT from bastion
 
 A request never leaves the process without a credential. If `auth` yields neither a non-empty `X-API-Key` nor a `Bearer` token, the call throws before `fetch` runs. On Articuno the credential **is** the tenant scope: the tenant key, or the `tenantId` in the token. So an unscoped Articuno call is impossible by construction. Credential headers always override `opts.headers`.
 
-The per-call options are `{ userId?, headers?, timeoutMs?, signal? }`. `userId` is sent as `X-User-Id`.
+The per-call options are `{ userId?, requestId?, headers?, timeoutMs?, signal? }`. `userId` is sent as `X-User-Id`, `requestId` as `X-Request-Id` (pass your own request id, api standard §7).
 
 ## Core (Nuxt / Nitro, any runtime)
 
@@ -94,13 +94,18 @@ Both modules are global, so import each once in `AppModule`. They log failed cal
 
 ## Errors
 
-A non-2xx answer throws `HeyAtomHttpError { service, status, body, message }`. `message` is the service's own `message`, with arrays joined. When the service is unreachable or the call times out, the error has status `503` and `body: undefined`. The Nest modules do **not** turn these errors into `HttpException`s. An upstream 401 caused by a wrong API key must not reach your users as a 401. Map the errors you care about yourself:
+A non-2xx answer throws `HeyAtomHttpError { service, status, body, message, code, requestId }`. `message` is the validation detail (`errors[]` joined) when the service sent one, else its own `message`. `code` and `requestId` come from the error body. When the service is unreachable or the call times out, the error has status `503` and `body: undefined`.
+
+The errors are not `HttpException`s: unmapped, Nest answers 500. An upstream 401 caused by a wrong API key must not reach your users as a 401 either. Handle the statuses that mean something in your domain, then hand the rest to `toHttpException` (from the `/nest` subpaths), which maps 404 to 404 `NOT_FOUND`, 503/504 to 503 `UNAVAILABLE` and everything else to 502 `UPSTREAM`, without the upstream body:
 
 ```ts
+import { HeyAtomHttpError, toHttpException } from '@heyatom/client/fileharbor/nest';
+
 try {
   await this.fileharbor.deleteAvatar(userId);
 } catch (err) {
-  if (!(err instanceof HeyAtomHttpError && err.status === 404)) throw err;
+  if (err instanceof HeyAtomHttpError && err.status === 404) return;
+  throw toHttpException(err);
 }
 ```
 
