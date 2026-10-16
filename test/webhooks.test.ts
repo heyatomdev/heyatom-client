@@ -55,4 +55,9 @@ describe('verifyStandardWebhook', () => {
     }
     expect(verifyStandardWebhook({ rawBody, headers: headers(current), secrets: [], nowMs })).toBeNull();
   });
+
+  it('ignores whitespace-only secrets', () => {
+    expect(verifyStandardWebhook({ rawBody, headers: headers(current), secrets: [' '], nowMs })).toBeNull();
+    expect(verifyStandardWebhook({ rawBody, headers: headers(current), secrets: [' ', 'whsec-test-current'], nowMs })).toEqual({ id, timestamp });
+  });
 });

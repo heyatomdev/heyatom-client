@@ -37,7 +37,10 @@ export function verifyStandardWebhook(options: VerifyStandardWebhookOptions): Ve
   const id = header(options.headers, 'webhook-id');
   const ts = header(options.headers, 'webhook-timestamp');
   const signature = header(options.headers, 'webhook-signature');
-  const secrets = (Array.isArray(options.secrets) ? options.secrets : [options.secrets]).filter(Boolean);
+  const secrets = (Array.isArray(options.secrets) ? options.secrets : [options.secrets]).filter(
+    // A whitespace-only secret is a misconfiguration, never a key; the rest are used byte-exact.
+    (s) => typeof s === 'string' && s.trim() !== '',
+  );
   if (!id || !ts || !signature || secrets.length === 0 || !/^\d+$/.test(ts)) return null;
 
   const timestamp = Number(ts);
