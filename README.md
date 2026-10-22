@@ -1,38 +1,48 @@
 # @heyatom/client
 
-Consumer SDK for the HeyAtom platform services. It replaces the FileHarbor, Articuno, Beacon and Gatherly clients each app used to copy by hand. Twin of [`@heyatom/bastion-client`](https://github.com/heyatomdev/bastion-client).
+Client SDK for the HeyAtom platform services: FileHarbor (media), Articuno (content), Beacon
+(streams) and Gatherly (events). Typed clients on native `fetch`, optional NestJS modules, and
+Standard Webhooks verification. Twin of [`@heyatom/bastion-client`](https://www.npmjs.com/package/@heyatom/bastion-client).
+
+```bash
+pnpm add @heyatom/client
+```
+
+- Node ≥ 20.19. CJS and ESM builds. The core subpaths have no dependencies and run in any
+  runtime, Nuxt/Nitro included.
+- `/nest` subpaths: peer `@nestjs/common` 11.
+- `@heyatom/bastion-client` is an optional peer, only to pass its `ServiceTokenProvider` to
+  `serviceTokenAuth`.
 
 | Import | What |
 |---|---|
-| `@heyatom/client/fileharbor` | `FileHarborClient` (API-key surface), auth helpers, generated types |
-| `@heyatom/client/fileharbor/nest` | the above plus `HeyAtomFileHarborModule.forRoot / forRootAsync` |
-| `@heyatom/client/articuno` | `ArticunoClient` (public, tenant-scoped surface), auth helpers, generated types |
-| `@heyatom/client/articuno/nest` | the above plus `HeyAtomArticunoModule.forRoot / forRootAsync` |
-| `@heyatom/client/beacon` | `BeaconClient` (anonymous `/public` surface), `anonymousAuth`, generated types |
-| `@heyatom/client/beacon/nest` | the above plus `HeyAtomBeaconModule.forRoot / forRootAsync` |
-| `@heyatom/client/gatherly` | `GatherlyClient` (service-client surface), `serviceTokenAuth`, generated types |
-| `@heyatom/client/gatherly/nest` | the above plus `HeyAtomGatherlyModule.forRoot / forRootAsync` |
-| `@heyatom/client/webhooks` | `verifyStandardWebhook`: receiving side of the platform's Standard Webhooks (Articuno, Gatherly) |
+| `@heyatom/client/fileharbor` | `FileHarborClient`, auth helpers, generated types |
+| `@heyatom/client/articuno` | `ArticunoClient`, auth helpers, generated types |
+| `@heyatom/client/beacon` | `BeaconClient`, `anonymousAuth`, generated types |
+| `@heyatom/client/gatherly` | `GatherlyClient`, `serviceTokenAuth`, generated types |
+| `@heyatom/client/<service>/nest` | the above plus `HeyAtom<Service>Module.forRoot / forRootAsync` |
+| `@heyatom/client/webhooks` | `verifyStandardWebhook` |
 
-There is no root export, so import a subpath. The core subpaths depend on nothing: they use native `fetch`, `FormData` and `Blob`, need Node ≥ 20.19, and run the same in Nuxt/Nitro. `@nestjs/common` is an optional peer, used only by `/nest`. `@heyatom/bastion-client` is an optional peer, needed only if you pass its `ServiceTokenProvider` to `serviceTokenAuth`. Ships CJS and ESM.
-
-The package covers the routes consumer apps call. The console routes (`/admin/*`, `/me/*`) are Meridian-only and stay out of it. The package holds transport only: endpoints, auth headers, types and error mapping. Application policy stays in the app. That covers MIME allowlists, size limits, replacing an image and cleaning up the old one, and whether a 404 on delete counts as "already gone".
+There is no root export: import a subpath. The clients cover transport only (endpoints, auth
+headers, types, errors); validation, size limits and cleanup policies stay in your app.
 
 ## Auth
 
-Each client takes `auth`, a function that returns the credential headers and runs before every request:
+Each client takes `auth`, a function returning the credential headers, called before every request:
 
 ```ts
-apiKeyAuth(key)                        // X-API-Key: FileHarbor client key, or Articuno tenant key
-serviceTokenAuth(provider, 'articuno') // Bearer service-client JWT from bastion-client's ServiceTokenProvider ('gatherly' for Gatherly)
-anonymousAuth()                        // no credential: Beacon's /public only
+apiKeyAuth(key)                        // X-API-Key: FileHarbor client key or Articuno tenant key
+serviceTokenAuth(provider, 'articuno') // Bearer service-client token ('gatherly' for Gatherly)
+anonymousAuth()                        // no credential: BeaconClient only
 ```
 
-A request never leaves the process without a credential. If `auth` yields neither a non-empty `X-API-Key` nor a `Bearer` token, the call throws before `fetch` runs. On Articuno the credential **is** the tenant scope: the tenant key, or the `tenantId` in the token. So an unscoped Articuno call is impossible by construction. Credential headers always override `opts.headers`.
+A request never leaves the process without a credential: if `auth` yields neither a non-empty
+`X-API-Key` nor a `Bearer` token, the call throws before `fetch` runs. On Articuno the credential
+is the tenant scope. `anonymousAuth()` is accepted only by `BeaconClient`; any other client throws
+at construction when given it. Credential headers override `opts.headers`.
 
-`anonymousAuth()` is the one explicit exception, for a surface that takes no credential. Only `BeaconClient` accepts it: every other client throws at construction when given it. An `auth` that just returns `{}` is still refused, on Beacon too.
-
-The per-call options are `{ userId?, requestId?, headers?, timeoutMs?, signal? }`. `userId` is sent as `X-User-Id`, `requestId` as `X-Request-Id` (pass your own request id, api standard §7).
+Per-call options: `{ userId?, requestId?, headers?, timeoutMs?, signal? }`. `userId` is sent as
+`X-User-Id`, `requestId` as `X-Request-Id`.
 
 ## Core (Nuxt / Nitro, any runtime)
 
@@ -56,7 +66,8 @@ export default defineEventHandler((event) =>
 
 ```ts
 import { HeyAtomFileHarborModule, apiKeyAuth } from '@heyatom/client/fileharbor/nest';
-import { HeyAtomArticunoModule, serviceTokenAuth } from '@heyatom/client/articuno/nest';
+import { HeyAtomGatherlyModule, serviceTokenAuth } from '@heyatom/client/gatherly/nest';
+import { BastionHttp, ServiceTokenProvider } from '@heyatom/bastion-client';
 
 @Module({
   imports: [
@@ -67,43 +78,51 @@ import { HeyAtomArticunoModule, serviceTokenAuth } from '@heyatom/client/articun
         auth: apiKeyAuth(config.getOrThrow('FILEHARBOR_API_KEY')),
       }),
     }),
-    HeyAtomArticunoModule.forRootAsync({
-      inject: [ConfigService, BastionService],
-      useFactory: (config: ConfigService, bastion: BastionService) => ({
-        baseUrl: config.getOrThrow('ARTICUNO_BASE_URL'),
-        auth:
-          config.get('ARTICUNO_AUTH_MODE') === 'bastion'
-            ? serviceTokenAuth({ getToken: (slug) => bastion.serviceToken(slug) }, 'articuno')
-            : apiKeyAuth(config.getOrThrow('ARTICUNO_TENANT_API_KEY')),
-        timeoutMs: config.get('ARTICUNO_TIMEOUT_MS'),
-      }),
+    HeyAtomGatherlyModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
+        // one provider per process: it caches the token and renews it ahead of expiry
+        const tokens = new ServiceTokenProvider(new BastionHttp({ baseUrl: config.getOrThrow('BASTION_URL') }), {
+          apiKey: config.getOrThrow('BASTION_CLIENT_API_KEY'),
+          serviceSlug: 'gatherly',
+        });
+        return { baseUrl: config.getOrThrow('GATHERLY_URL'), auth: serviceTokenAuth(tokens, 'gatherly') };
+      },
     }),
   ],
 })
 export class AppModule {}
 
 @Injectable()
-export class BuildImagesService {
+export class ImagesService {
   constructor(private readonly fileharbor: FileHarborClient) {}
 
   upload(file: Express.Multer.File, userId: string) {
-    // allowlist + size checks are yours, before this call
+    // MIME allowlist and size checks are yours, before this call
     return this.fileharbor.uploadImage(
       { data: file.buffer, filename: file.originalname, contentType: file.mimetype },
-      { description: 'Build image' },
+      { description: 'Cover' },
       { userId },
     );
   }
 }
 ```
 
-Both modules are global, so import each once in `AppModule`. They log failed calls through Nest's `Logger`: method, path and status only, never headers or bodies. The core clients take a `logger` option and stay silent by default.
+The modules are global: import each once in `AppModule`. They log failed calls through Nest's
+`Logger` (method, path and status, never headers or bodies). The core clients take a `logger`
+option and are silent by default.
 
 ## Errors
 
-A non-2xx answer throws `HeyAtomHttpError { service, status, body, message, code, requestId }`. `message` is the validation detail (`errors[]` joined) when the service sent one, else its own `message`. `code` and `requestId` come from the error body. When the service is unreachable or the call times out, the error has status `503` and `body: undefined`.
+A non-2xx answer throws `HeyAtomHttpError { service, status, body, message, code, requestId }`.
+`message` is the validation detail when the service sent one, else its own message. An
+unreachable service or a timeout gives status `503` and `body: undefined`. Timeouts default to
+10 s, 60 s for uploads.
 
-The errors are not `HttpException`s: unmapped, Nest answers 500. An upstream 401 caused by a wrong API key must not reach your users as a 401 either. Handle the statuses that mean something in your domain, then hand the rest to `toHttpException` (from the `/nest` subpaths), which maps 404 to 404 `NOT_FOUND`, 503/504 to 503 `UNAVAILABLE` and everything else to 502 `UPSTREAM`, without the upstream body:
+The errors are not `HttpException`s. Handle the statuses that mean something in your domain, then
+pass the rest to `toHttpException` (from the `/nest` subpaths): 404 → 404 `NOT_FOUND`, 503/504 →
+503 `UNAVAILABLE`, anything else → 502 `UPSTREAM`, without the upstream body. An upstream 401 from
+a wrong API key must not reach your users as a 401.
 
 ```ts
 import { HeyAtomHttpError, toHttpException } from '@heyatom/client/fileharbor/nest';
@@ -116,79 +135,64 @@ try {
 }
 ```
 
-Timeouts default to 10 s per request and 60 s for uploads.
+## Clients
+
+**`FileHarborClient`** (API key): `uploadImage`, `updateImage`, `deleteImage`, `uploadAvatar`,
+`deleteAvatar`, `getClientStats`.
+
+**`ArticunoClient`** (tenant key or service-client token):
+- Articles: `listArticles`, `getArticle(slug)`, `listTranslations`, `getTranslation`
+- Categories and tags: `listCategories`, `getCategory(slug)`, `listTags`, `getTag(slug)`
+- Comments: `createComment`, `listComments`, `getComment`, `updateComment`, `deleteComment`
+- Interactions: `toggleLike`, `getInteractionStatus`, `toggleBookmark`, `listMyBookmarks` (all
+  take the `userId`); `recordView(articleId)` counts one view and does not dedupe
+- Reports: `createReport`, `listReports`, `updateReportStatus`
+- Users: `syncUser`, `deleteUser`
+
+**`BeaconClient`** (`anonymousAuth()`): `getCreator(name)`, `getTeam(slug)`, `getOrg(slug)`.
+Answers keep the `{ data }` envelope.
+
+**`GatherlyClient`** (service-client token): `listEvents`, `getEvent`, `getEventStats`,
+`addParticipant(eventId, body, { idempotencyKey })`. Answers keep the `{ data }` envelope
+(`{ data, meta }` for lists). `idempotencyKey` is sent as `Idempotency-Key`: a retry gets the
+original answer.
+
+`baseUrl` includes any prefix a reverse proxy adds in front of the service.
+
+## Types
+
+Types are generated from each service's OpenAPI document, never written by hand. Every subpath
+re-exports `paths`, `components`, `operations` and one alias per schema (`ImageResponseDto`,
+`EventDetailResponseDto`, …), plus type helpers such as `ResponseOf` (the response of an
+operation). Method inputs and outputs derive from them.
 
 ## Webhooks
 
-Articuno and Gatherly sign deliveries with [Standard Webhooks](https://www.standardwebhooks.com/) (`signStandardWebhook` of `@heyatom/nest-common/webhooks`). Verify them on the raw body, before parsing:
+Articuno and Gatherly sign deliveries with [Standard Webhooks](https://www.standardwebhooks.com/).
+Verify them on the raw body, before parsing:
 
 ```ts
 import { verifyStandardWebhook } from '@heyatom/client/webhooks';
 
 const verified = verifyStandardWebhook({
-  rawBody: req.rawBody,                          // Buffer as received: NestFactory.create(AppModule, { rawBody: true })
-  headers: req.headers,                          // any case
-  secrets: [config.webhookSecret, config.previousWebhookSecret].filter(Boolean), // rotation
+  rawBody: req.rawBody,  // Buffer as received: NestFactory.create(AppModule, { rawBody: true })
+  headers: req.headers,  // any case
+  secrets: [secret, previousSecret].filter(Boolean), // both accepted during a rotation
   // toleranceSeconds: 300,
 });
 if (!verified) throw new UnauthorizedException();
-// dedupe on verified.id (`webhook-id`, stable across retries and resends)
+// dedupe on verified.id (webhook-id, stable across retries)
 ```
 
-The signed content is `<webhook-id>.<webhook-timestamp>.<raw body>`, HMAC-SHA256 keyed with the secret as a UTF-8 string (not a `whsec_` base64 key), sent as a space-separated list of `v1,<base64>`. Any secret matching any entry accepts. It returns `null` on a missing header, a non-numeric timestamp or one more than `toleranceSeconds` (default 300) from now, or no match. Comparison is constant-time. Depends only on `node:crypto`. The test uses the fixed vector of `nest-common/docs/usage.md`. Bastion deliveries use their own format: verify them with `@heyatom/bastion-client/webhooks`.
+HMAC-SHA256 over `<webhook-id>.<webhook-timestamp>.<raw body>`, secret used as a UTF-8 string,
+any secret against any `v1` entry, constant-time comparison. Returns `null` on a missing header,
+a timestamp outside `toleranceSeconds` (default 300) or no match. Bastion webhooks use their own
+format: verify them with `@heyatom/bastion-client/webhooks`.
 
-## Endpoints
+## Changelog
 
-**`FileHarborClient`** (API key; `baseUrl` includes any proxy prefix, e.g. `/v2`): `uploadImage`, `updateImage`, `deleteImage`, `uploadAvatar`, `deleteAvatar`, `getClientStats`.
+See [CHANGELOG.md](CHANGELOG.md).
 
-**`BeaconClient`** (`anonymousAuth()`; `baseUrl` includes any prefix before `/public`, e.g. `/api`): `getCreator(name)`, `getTeam(slug)`, `getOrg(slug)`. Answers keep Beacon's `{ data }` envelope.
+## License
 
-**`GatherlyClient`** (service-client JWT for `gatherly`; its tenant selects the Gatherly client): `listEvents`, `getEvent`, `getEventStats`, `addParticipant(eventId, body, { idempotencyKey })`. Answers keep Gatherly's `{ data }` envelope (`{ data, meta }` for lists). `idempotencyKey` is sent as `Idempotency-Key`: Gatherly answers a retry with the cached response.
-
-**`ArticunoClient`** (tenant key or service-client JWT):
-- Articles and translations: `listArticles`, `getArticle(slug)`, `listTranslations`, `getTranslation`
-- Categories and tags: `listCategories`, `getCategory(slug)`, `listTags`, `getTag(slug)`
-- Comments: `createComment`, `listComments`, `getComment`, `updateComment`, `deleteComment`
-- Interactions and bookmarks: `toggleLike`, `getInteractionStatus`, `toggleBookmark`, `listMyBookmarks`. `userId` is a required argument on all four. `recordView(articleId)` counts one view of a PUBLISHED article (204, 404 otherwise), without `userId`; Articuno does not dedupe, so filter bots and repeats in the app.
-- Reports: `createReport`, `listReports`, `updateReportStatus`
-- Users: `syncUser`, `deleteUser`
-
-## Types
-
-Types are generated, never written by hand, from the services' full specs (console routes included, though no client method calls them). Each service's OpenAPI document is committed as `openapi/<service>.json`, and `openapi-typescript` turns it into `src/<service>/types.gen.ts`. Every subpath re-exports the result: `paths`, `components`, `operations`, and one alias per schema (`ImageResponseDto`, `PublicCreateArticleDto`, and so on). Method inputs and outputs derive from `operations`. Every client method has a typed JSON response and body. If a route ships without a response schema, its method returns `unknown`. The fix belongs in the service (`@ApiOkResponse({ type })`), followed by a regeneration. It does not belong here.
-
-A service whose `TransformInterceptor` wraps bodies in `{ data }` must document the envelope, not the bare DTO (Beacon's and Gatherly's `ApiOkData`), or the generated types lie about the shape on the wire.
-
-```bash
-pnpm openapi:dump   # runs `pnpm openapi:dump` in ../fileharbor, ../articuno, ../beacon and ../gatherly
-pnpm gen:types      # openapi/*.json → src/*/types.gen.ts
-pnpm check:api      # after a service release: fails if an operation a client calls changed
-```
-
-`check:api` dumps each service's spec from the sibling repo and compares, for every operation a client calls, its path, method, definition and every schema it reaches against the committed spec. Routes the clients don't call are only counted. `info.version` is not a signal: services add routes without bumping it.
-
-Each service's `openapi:dump` (`scripts/openapi-dump.ts`) boots the Nest app without `listen()` and without `init()`, so `onModuleInit` never runs and Prisma never connects. Dummy values fill the required env vars. It then writes `SwaggerModule.createDocument` to a file. It needs no database and no running instance, and the output is deterministic.
-
-## Migrating from a copied module
-
-**shelfie-api `modules/fileharbor`**: drop the module and import `HeyAtomFileHarborModule.forRootAsync` with `baseUrl: \`${FILEHARBOR_URL}/v2\``. Then change the calls:
-- `uploadImage(file, userId)` becomes `fileharbor.uploadImage({ data: file.buffer, filename: file.originalname, contentType: file.mimetype }, {}, { userId })`
-- Keep the MIME and size checks in the app.
-- `deleteImage` now throws on failure. Keep the old `.catch(warn)` at the call site if you want the swallow.
-
-**dbdbuilds-api `modules/fileharbor`**: `FileHarborService` keeps its policy: `validateImageFile`, `deleteImageSafely`, `uploadImageIfProvided`, URL-to-id extraction and `uploadAvatarFromUrl`. Only its HTTP calls move to the client:
-- `HttpService.post('/images', form)` becomes `uploadImage(file, { description }, { userId: externalId })`. The `creatorId` form field and `X-User-Id` are equivalent to FileHarbor, but the field is missing from the OpenAPI spec, so the typed path is `userId`.
-- `/avatars` calls become `uploadAvatar(userId, file)` and `deleteAvatar(userId)`.
-- `/client/stats` becomes `getClientStats()`.
-- `error.response?.status` becomes `err.status`, with `err instanceof HeyAtomHttpError`.
-- `@nestjs/axios`, `form-data` and `rxjs` `firstValueFrom` go away. Env: `FILE_HARBOR_URL`, `FILE_HARBOR_API_KEY`.
-
-**dbdbuilds-api `modules/articuno`**: `ArticunoClient` plus the nine `services/*` collapse into one injected `ArticunoClient`. Pass `ARTICUNO_AUTH_MODE` through as in the Nest example above. The method names map one-to-one:
-- `findAll` becomes `listArticles`, `findBySlug` becomes `getArticle`, `toggle` becomes `toggleBookmark`, `findMine` becomes `listMyBookmarks`, `sync` becomes `syncUser`, and so on.
-- `ArticunoTagsService.findBySlug` called `/tags/slug/:slug`, which Articuno does not serve (always 404). `findOne(id)` hit `/tags/:slug` with an id. Both become `getTag(slug)`. `ArticunoCategoriesService.findOne(id)` has the same problem and becomes `getCategory(slug)`.
-
-**dbdbuilds-api `modules/beacon`**: drop `BeaconClientService` and import `HeyAtomBeaconModule` with `auth: anonymousAuth()` and `baseUrl: BEACON_URL`. `beacon.get('/teams/x')` becomes `getTeam('x')`, likewise `getOrg` and `getCreator`. The old service unwrapped `{ data }`; the client keeps it, so read `.data`. `beacon.types.ts` goes away in favour of the generated types (`PublicTeamDetailDto`, …).
-
-**sgweb `server/utils/gatherly.ts`**: keep the module-level `ServiceTokenProvider` and build `new GatherlyClient({ baseUrl: gatherlyUrl, auth: serviceTokenAuth(tokens, 'gatherly') })`. `gatherlyFetch` becomes `listEvents`, `getEvent`, `getEventStats` and `addParticipant(id, body, { idempotencyKey })`. The caching and the error sanitizing for the browser stay in the app; `gatherly.types.ts` goes away in favour of the generated types (`EventDetailResponseDto`, …).
-
-Herald clients are out of scope for this release.
+MIT

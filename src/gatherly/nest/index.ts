@@ -15,11 +15,15 @@ export const GATHERLY_OPTIONS = Symbol('GATHERLY_OPTIONS');
  * `auth` is a Bastion service-client token minted for `gatherly`; its tenant is the scope.
  * ```ts
  * HeyAtomGatherlyModule.forRootAsync({
- *   inject: [ConfigService, ServiceTokenProvider],
- *   useFactory: (config: ConfigService, tokens: ServiceTokenProvider) => ({
- *     baseUrl: config.getOrThrow('GATHERLY_URL'),
- *     auth: serviceTokenAuth(tokens, 'gatherly'),
- *   }),
+ *   inject: [ConfigService],
+ *   useFactory: (config: ConfigService) => {
+ *     // ServiceTokenProvider of @heyatom/bastion-client, one per process
+ *     const tokens = new ServiceTokenProvider(new BastionHttp({ baseUrl: config.getOrThrow('BASTION_URL') }), {
+ *       apiKey: config.getOrThrow('BASTION_CLIENT_API_KEY'),
+ *       serviceSlug: 'gatherly',
+ *     });
+ *     return { baseUrl: config.getOrThrow('GATHERLY_URL'), auth: serviceTokenAuth(tokens, 'gatherly') };
+ *   },
  * })
  * ```
  */

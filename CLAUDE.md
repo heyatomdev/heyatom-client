@@ -50,7 +50,7 @@ dbdbuilds-api, shelfie-api, website4 (e sgweb). Gemello di `../bastion-client`
    Regola critica: ogni chiamata porta il `tenantId`/tenant scope; non passarlo = leak cross-tenant.
 5. Test vitest per client core con `fetch` mockato (pattern in `../bastion-client/test/`), smoke DI per i moduli Nest
    (`../bastion-client/scripts/di-smoke.cjs`).
-6. `README.md`: install, uso core (Nuxt) e Nest, migrazione da modulo copiato.
+6. `README.md` (pubblico, su npm): install, uso core (Nuxt) e Nest. Migrazione e interni in `docs/ARCHITECTURE.md`.
 
 Non in fase 1: Herald, migrazione dei consumer (arriva dopo, repo per repo).
 
@@ -73,3 +73,7 @@ Non in fase 1: Herald, migrazione dei consumer (arriva dopo, repo per repo).
 - pnpm, TypeScript strict, ESM-first con `.js` negli import relativi (come bastion-client).
 - Nessun `console.log`; logger iniettabile come `nest-logger.ts` di bastion-client.
 - Commit su `main`, Conventional Commits.
+- **Documentazione.** `README.md` e `CHANGELOG.md` finiscono su npm: solo uso, in inglese, niente
+  nomi di repo/app interne, path del monorepo, piani o note di migrazione. Interni, pipeline dei
+  tipi, `check:api`, migrazione dei consumer e rilascio stanno in `docs/ARCHITECTURE.md` (come
+  `../bastion-client`). Ogni rilascio aggiorna `CHANGELOG.md`.
