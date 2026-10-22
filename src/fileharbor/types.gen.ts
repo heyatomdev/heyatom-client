@@ -4,22 +4,6 @@
  */
 
 export interface paths {
-    "/metrics": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["PrometheusController_index"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/client/stats": {
         parameters: {
             query?: never;
@@ -32,26 +16,6 @@ export interface paths {
          * @description Get statistics for the authenticated client including image count, album count, storage usage, and top downloaded images.
          */
         get: operations["ClientController_getStats"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/client/admin/stats": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get global statistics (admin)
-         * @description Get aggregated statistics across all clients: total image count and total disk usage. Requires X-Admin-Secret header.
-         */
-        get: operations["ClientController_getGlobalStats"];
         put?: never;
         post?: never;
         delete?: never;
@@ -107,7 +71,7 @@ export interface paths {
         head?: never;
         /**
          * Update image metadata
-         * @description Update tags, description, or other metadata. Only owner can update.
+         * @description Update tags, description or isPrivate. Only the owner (X-User-Id) can update.
          */
         patch: operations["ImageController_updateImage"];
         trace?: never;
@@ -207,7 +171,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/avatars/{externalUserId}": {
+    "/avatars/{clientRef}/{externalUserId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -216,7 +180,28 @@ export interface paths {
         };
         /**
          * Get creator avatar (public endpoint)
-         * @description Retrieve creator avatar by external creator ID. Query parameters: info (return JSON metadata), thumb (return thumbnail), download (force download), t (timestamp for cache busting)
+         * @description Retrieve a creator avatar. clientRef is the client domain, or its id when it has none (the url/fullPath returned by the API already carry it). Query parameters: info (return JSON metadata), thumb (return thumbnail), format (webp | jpeg | png, default webp; converted on the fly, combinable with thumb), download (force download), t (timestamp for cache busting)
+         */
+        get: operations["AvatarController_getClientAvatar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/avatars/{externalUserId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get creator avatar (deprecated)
+         * @deprecated
+         * @description Deprecated: use GET /avatars/{clientRef}/{externalUserId}. An external id is unique only within a client: without an X-API-Key this route serves it only when exactly one client has a creator with that id, and 404s otherwise.
          */
         get: operations["AvatarController_getAvatar"];
         put?: never;
@@ -387,7 +372,7 @@ export interface paths {
         };
         /**
          * Readiness probe
-         * @description Checks database connectivity. Returns 200 when the service is ready to accept traffic, 503 otherwise.
+         * @description Checks database connectivity and the storage volume (writable, free space above HEALTH_DISK_MIN_FREE_MB). Returns 200 when the service is ready to accept traffic, 503 otherwise.
          */
         get: operations["HealthController_ready"];
         put?: never;
@@ -561,6 +546,26 @@ export interface paths {
         patch: operations["ImagesAdminController_updateImage"];
         trace?: never;
     };
+    "/admin/images/bulk-delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Delete many images in one request (admin)
+         * @description Up to 100 ids. Each image is deleted on its own: one that is missing or on a client the admin cannot see lands in `failed` (both read as "Image not found", so the answer leaks nothing) and the rest go ahead.
+         */
+        post: operations["ImagesAdminController_bulkDeleteImages"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/images/{id}/download": {
         parameters: {
             query?: never;
@@ -573,6 +578,26 @@ export interface paths {
          * @description Download the original image file for any image. Admin JWT replaces the API key. Increments the download counter.
          */
         get: operations["ImagesAdminController_downloadImage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/images/{id}/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Serve image file inline (admin)
+         * @description Image bytes for the console, private images included. Admin JWT replaces the API key. Counts neither a view nor a download, and never answers with the permission-denied placeholder: no access is a 403.
+         */
+        get: operations["ImagesAdminController_getImageFile"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1003,18 +1028,6 @@ export interface components {
              */
             uploadedLast7Days: number;
         };
-        GlobalStatsResponseDto: {
-            /**
-             * @description Total number of images across all clients
-             * @example 1042
-             */
-            totalImages: number;
-            /**
-             * @description Total storage used in bytes across all clients
-             * @example 10485760
-             */
-            totalStorage: number;
-        };
         ImageResponseDto: {
             /**
              * @description Unique image identifier (UUID)
@@ -1109,17 +1122,17 @@ export interface components {
             createdAt: string;
             /**
              * @description URL to access the image
-             * @example /v2/images/b2ce77c1-3836-4e28-807f-51f929e12423
+             * @example /images/b2ce77c1-3836-4e28-807f-51f929e12423
              */
             url: string;
             /**
              * @description URL to access the thumbnail
-             * @example /v2/images/b2ce77c1-3836-4e28-807f-51f929e12423?thumb=true
+             * @example /images/b2ce77c1-3836-4e28-807f-51f929e12423?thumb=true
              */
             thumbnailUrl?: string;
             /**
              * @description Full URL to access the image (baseUrl + url)
-             * @example http://localhost:3000/v2/images/b2ce77c1-3836-4e28-807f-51f929e12423
+             * @example http://localhost:3000/images/b2ce77c1-3836-4e28-807f-51f929e12423
              */
             fullPath: string;
         };
@@ -1165,6 +1178,8 @@ export interface components {
              * @example Beautiful sunset over the mountains
              */
             description?: string;
+            /** @description Make the image private or public. Bytes already served public may stay in browser and shared caches until they expire. */
+            isPrivate?: boolean;
         };
         CreateShareLinkDto: {
             /**
@@ -1203,7 +1218,7 @@ export interface components {
             expiresAt?: string;
             /**
              * @description Full URL to access the shared image
-             * @example /v2/images/shared/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+             * @example /images/b2ce77c1-3836-4e28-807f-51f929e12423?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
              */
             shareUrl: string;
         };
@@ -1330,17 +1345,17 @@ export interface components {
             createdAt: string;
             /**
              * @description URL to access the avatar
-             * @example /v2/avatars/creator-123
+             * @example /avatars/creator-123
              */
             url: string;
             /**
              * @description URL to access the avatar thumbnail
-             * @example /v2/avatars/creator-123?thumb=true
+             * @example /avatars/creator-123?thumb=true
              */
             thumbnailUrl?: string;
             /**
              * @description Full URL to access the avatar (baseUrl + url)
-             * @example http://localhost:3000/v2/avatars/creator-123
+             * @example http://localhost:3000/avatars/creator-123
              */
             fullPath: string;
         };
@@ -1443,7 +1458,7 @@ export interface components {
             videoCount?: number;
             /**
              * @description Cover image URL (first image in the album)
-             * @example http://localhost:3000/v2/images/b2ce77c1-3836-4e28-807f-51f929e12423
+             * @example http://localhost:3000/images/b2ce77c1-3836-4e28-807f-51f929e12423
              */
             coverUrl?: string;
             /** @description Array of images in the album */
@@ -1596,7 +1611,7 @@ export interface components {
             expiresAt?: string | null;
             /**
              * @description URL to access the album with the token
-             * @example /v2/albums/shared/abc123-xyz789-token
+             * @example /albums/shared/abc123-xyz789-token
              */
             url: string;
         };
@@ -1648,6 +1663,10 @@ export interface components {
             domain?: string;
             active: boolean;
             webhookEnabled: boolean;
+            /**
+             * @description Discord webhook URL, token masked
+             * @example https://discord.com/api/webhooks/123456/****
+             */
             webhookUrl?: string;
             /** @description Whether Tinify compression is enabled for this client */
             tinifyActive: boolean;
@@ -1698,6 +1717,10 @@ export interface components {
             domain?: string;
             active: boolean;
             webhookEnabled: boolean;
+            /**
+             * @description Discord webhook URL, token masked
+             * @example https://discord.com/api/webhooks/123456/****
+             */
             webhookUrl?: string;
             /** @description Whether Tinify compression is enabled for this client */
             tinifyActive: boolean;
@@ -1735,7 +1758,7 @@ export interface components {
             active?: boolean;
             /** @description Enable or disable webhook notifications */
             webhookEnabled?: boolean;
-            /** @description Discord webhook URL (set to null to remove) */
+            /** @description Discord webhook URL, https://discord.com/api/webhooks/<id>/<token> (set to null to remove) */
             webhookUrl?: string;
             /** @description Enable or disable Tinify compression for this client */
             tinifyActive?: boolean;
@@ -1859,6 +1882,18 @@ export interface components {
             tags?: string[];
             /** @description Image description (set to null to remove) */
             description?: string;
+        };
+        AdminBulkDeleteDto: {
+            /** @description Ids of the images to delete */
+            ids: string[];
+        };
+        AdminBulkDeleteFailureDto: {
+            id: string;
+            message: string;
+        };
+        AdminBulkDeleteResponseDto: {
+            deleted: string[];
+            failed: components["schemas"]["AdminBulkDeleteFailureDto"][];
         };
         AdminDeleteResponseDto: {
             success: boolean;
@@ -2302,7 +2337,6 @@ export interface components {
     pathItems: never;
 }
 export type ClientStatsResponseDto = components['schemas']['ClientStatsResponseDto'];
-export type GlobalStatsResponseDto = components['schemas']['GlobalStatsResponseDto'];
 export type ImageResponseDto = components['schemas']['ImageResponseDto'];
 export type PaginationMetaDto = components['schemas']['PaginationMetaDto'];
 export type ListImagesResponseDto = components['schemas']['ListImagesResponseDto'];
@@ -2353,6 +2387,9 @@ export type AdminImageCreatorDto = components['schemas']['AdminImageCreatorDto']
 export type AdminImageAlbumDto = components['schemas']['AdminImageAlbumDto'];
 export type AdminImageResponseDto = components['schemas']['AdminImageResponseDto'];
 export type AdminUpdateImageDto = components['schemas']['AdminUpdateImageDto'];
+export type AdminBulkDeleteDto = components['schemas']['AdminBulkDeleteDto'];
+export type AdminBulkDeleteFailureDto = components['schemas']['AdminBulkDeleteFailureDto'];
+export type AdminBulkDeleteResponseDto = components['schemas']['AdminBulkDeleteResponseDto'];
 export type AdminDeleteResponseDto = components['schemas']['AdminDeleteResponseDto'];
 export type CompressionStatsDto = components['schemas']['CompressionStatsDto'];
 export type TinifyCompressionResponseDto = components['schemas']['TinifyCompressionResponseDto'];
@@ -2390,23 +2427,6 @@ export type TagsResponseDto = components['schemas']['TagsResponseDto'];
 export type MeAvatarStatusDto = components['schemas']['MeAvatarStatusDto'];
 export type $defs = Record<string, never>;
 export interface operations {
-    PrometheusController_index: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     ClientController_getStats: {
         parameters: {
             query?: never;
@@ -2423,32 +2443,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ClientStatsResponseDto"];
                 };
-            };
-        };
-    };
-    ClientController_getGlobalStats: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GlobalStatsResponseDto"];
-                };
-            };
-            /** @description Invalid or missing admin secret */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -2542,13 +2536,13 @@ export interface operations {
                 download?: boolean;
                 /** @description Return JSON metadata instead of image file */
                 info?: boolean;
-                /** @description Target width in pixels (maintains aspect ratio if height not specified) */
+                /** @description Target width in pixels (maintains aspect ratio if height not specified). Rounded up to the next step of 16, 32, 48, 64, 96, 128, 160, 192, 256, 320, 384, 480, 640, 768, 960, 1080, 1280, 1440, 1600, 1920, 2560, 3200, 3840, 4096 */
                 width?: number;
-                /** @description Target height in pixels (maintains aspect ratio if width not specified) */
+                /** @description Target height in pixels (maintains aspect ratio if width not specified). Rounded up to the same steps as width */
                 height?: number;
                 /** @description Output format */
                 format?: "webp" | "jpeg" | "png";
-                /** @description Image quality (1-100) */
+                /** @description Image quality (1-100), rounded to the nearest of 40, 60, 75, 85, 100 */
                 quality?: number;
                 /** @description Share token for accessing private images or read token for public share links */
                 token?: string;
@@ -2919,6 +2913,45 @@ export interface operations {
             };
         };
     };
+    AvatarController_getClientAvatar: {
+        parameters: {
+            query?: {
+                /** @description Return thumbnail version of the avatar */
+                thumb?: boolean;
+                /** @description Return only metadata (JSON) instead of the file */
+                info?: boolean;
+                /** @description Force file download with Content-Disposition header */
+                download?: boolean;
+                /** @description Output format. Avatars are stored as WebP; jpeg/png are converted on the fly */
+                format?: "webp" | "jpeg" | "png";
+                /** @description Timestamp for cache busting (ignored by server, used by browser to force reload) */
+                t?: string;
+            };
+            header?: never;
+            path: {
+                clientRef: string;
+                externalUserId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Avatar file or metadata */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Client or avatar not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     AvatarController_getAvatar: {
         parameters: {
             query?: {
@@ -2928,6 +2961,8 @@ export interface operations {
                 info?: boolean;
                 /** @description Force file download with Content-Disposition header */
                 download?: boolean;
+                /** @description Output format. Avatars are stored as WebP; jpeg/png are converted on the fly */
+                format?: "webp" | "jpeg" | "png";
                 /** @description Timestamp for cache busting (ignored by server, used by browser to force reload) */
                 t?: string;
             };
@@ -2946,7 +2981,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Avatar not found */
+            /** @description Avatar not found or ambiguous */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3779,6 +3814,8 @@ export interface operations {
                 albumId?: string;
                 /** @description Search by original filename */
                 name?: string;
+                /** @description Only private (true) or only public (false) files */
+                isPrivate?: "true" | "false";
                 /** @description Sort field */
                 sortBy?: "createdAt" | "size" | "originalName" | "views" | "downloads";
                 /** @description Sort order */
@@ -3925,6 +3962,29 @@ export interface operations {
             };
         };
     };
+    ImagesAdminController_bulkDeleteImages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminBulkDeleteDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminBulkDeleteResponseDto"];
+                };
+            };
+        };
+    };
     ImagesAdminController_downloadImage: {
         parameters: {
             query?: {
@@ -3955,6 +4015,43 @@ export interface operations {
             };
             /** @description Admin has no access to the given client */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ImagesAdminController_getImageFile: {
+        parameters: {
+            query?: {
+                /** @description Serve thumbnail instead of original */
+                thumb?: boolean;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Image file, inline, `Cache-Control: private, max-age=300` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Admin has no access to the given client */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Image not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4010,6 +4107,8 @@ export interface operations {
             query?: {
                 clientId?: string;
                 creatorId?: string;
+                /** @description Creator's externalId or username, contains, case-insensitive */
+                search?: string;
                 page?: number;
                 perPage?: number;
             };
@@ -4719,6 +4818,8 @@ export interface operations {
                 creatorId?: string;
                 albumId?: string;
                 name?: string;
+                /** @description Only private (true) or only public (false) files */
+                isPrivate?: "true" | "false";
                 sortBy?: "createdAt" | "size" | "originalName" | "views" | "downloads";
                 sortOrder?: "asc" | "desc";
                 page?: number;

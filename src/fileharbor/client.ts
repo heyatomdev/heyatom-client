@@ -1,5 +1,5 @@
 import { HeyAtomHttp, seg, toFormData, type FileInput, type HeyAtomClientOptions, type RequestOptions } from '../core/http.js';
-import type { FormFieldsOf, ResponseOf } from '../core/openapi.js';
+import type { BodyOf, FormFieldsOf, ResponseOf } from '../core/openapi.js';
 import type { operations } from './types.gen.js';
 
 type Op<K extends keyof operations> = operations[K];
@@ -22,6 +22,11 @@ export class FileHarborClient {
   /** `POST /images` — multipart `file` plus metadata. */
   uploadImage(file: FileInput, fields: FormFieldsOf<Op<'ImageController_uploadImage'>> = {}, opts?: RequestOptions) {
     return this.http.upload<ResponseOf<Op<'ImageController_uploadImage'>>>('POST', '/images', toFormData('file', [file], fields), opts);
+  }
+
+  /** `PATCH /images/:imageId` — tags, description, isPrivate; only the owner (`opts.userId`). */
+  updateImage(imageId: string, body: BodyOf<Op<'ImageController_updateImage'>>, opts?: RequestOptions) {
+    return this.http.json<ResponseOf<Op<'ImageController_updateImage'>>>('PATCH', `/images/${seg(imageId)}`, { body }, opts);
   }
 
   /** `DELETE /images/:imageId`. */

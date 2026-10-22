@@ -132,7 +132,7 @@ The signed content is `<webhook-id>.<webhook-timestamp>.<raw body>`, HMAC-SHA256
 
 ## Endpoints
 
-**`FileHarborClient`** (API key; `baseUrl` includes any proxy prefix, e.g. `/v2`): `uploadImage`, `deleteImage`, `uploadAvatar`, `deleteAvatar`, `getClientStats`.
+**`FileHarborClient`** (API key; `baseUrl` includes any proxy prefix, e.g. `/v2`): `uploadImage`, `updateImage`, `deleteImage`, `uploadAvatar`, `deleteAvatar`, `getClientStats`.
 
 **`ArticunoClient`** (tenant key or service-client JWT):
 - Articles and translations: `listArticles`, `getArticle(slug)`, `listTranslations`, `getTranslation`

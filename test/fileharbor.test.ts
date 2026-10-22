@@ -25,6 +25,20 @@ describe('FileHarborClient', () => {
     expect(form.get('description')).toBe('Build image');
   });
 
+  it('updates an image as JSON PATCH, as its owner', async () => {
+    const { fetchImpl, calls } = fakeFetch(() => json(200, { id: 'img/1', isPrivate: true }));
+    const fh = new FileHarborClient({ baseUrl: 'http://fh/v2', auth: apiKeyAuth('k'), fetch: fetchImpl });
+
+    const res = await fh.updateImage('img/1', { isPrivate: true }, { userId: 'user-9' });
+
+    expect(res.isPrivate).toBe(true);
+    const { url, init, headers } = calls[0];
+    expect(url).toBe('http://fh/v2/images/img%2F1');
+    expect(init.method).toBe('PATCH');
+    expect(headers['X-User-Id']).toBe('user-9');
+    expect(JSON.parse(init.body as string)).toEqual({ isPrivate: true });
+  });
+
   it('uploads an avatar with externalUserId in the form, not the header', async () => {
     const { fetchImpl, calls } = fakeFetch(() => json(201, { id: 'av' }));
     const fh = new FileHarborClient({ baseUrl: 'http://fh', auth: apiKeyAuth('k'), fetch: fetchImpl });

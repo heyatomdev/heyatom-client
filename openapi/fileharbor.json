@@ -1,20 +1,6 @@
 {
   "openapi": "3.0.0",
   "paths": {
-    "/metrics": {
-      "get": {
-        "operationId": "PrometheusController_index",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "Prometheus"
-        ]
-      }
-    },
     "/client/stats": {
       "get": {
         "description": "Get statistics for the authenticated client including image count, album count, storage usage, and top downloaded images.",
@@ -33,37 +19,6 @@
           }
         },
         "summary": "Get client statistics",
-        "tags": [
-          "Client"
-        ]
-      }
-    },
-    "/client/admin/stats": {
-      "get": {
-        "description": "Get aggregated statistics across all clients: total image count and total disk usage. Requires X-Admin-Secret header.",
-        "operationId": "ClientController_getGlobalStats",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GlobalStatsResponseDto"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Invalid or missing admin secret"
-          }
-        },
-        "security": [
-          {
-            "x-admin-secret": []
-          }
-        ],
-        "summary": "Get global statistics (admin)",
         "tags": [
           "Client"
         ]
@@ -263,9 +218,10 @@
             "name": "width",
             "required": false,
             "in": "query",
-            "description": "Target width in pixels (maintains aspect ratio if height not specified)",
+            "description": "Target width in pixels (maintains aspect ratio if height not specified). Rounded up to the next step of 16, 32, 48, 64, 96, 128, 160, 192, 256, 320, 384, 480, 640, 768, 960, 1080, 1280, 1440, 1600, 1920, 2560, 3200, 3840, 4096",
             "schema": {
               "minimum": 1,
+              "maximum": 4096,
               "example": 800,
               "type": "number"
             }
@@ -274,9 +230,10 @@
             "name": "height",
             "required": false,
             "in": "query",
-            "description": "Target height in pixels (maintains aspect ratio if width not specified)",
+            "description": "Target height in pixels (maintains aspect ratio if width not specified). Rounded up to the same steps as width",
             "schema": {
               "minimum": 1,
+              "maximum": 4096,
               "example": 600,
               "type": "number"
             }
@@ -300,7 +257,7 @@
             "name": "quality",
             "required": false,
             "in": "query",
-            "description": "Image quality (1-100)",
+            "description": "Image quality (1-100), rounded to the nearest of 40, 60, 75, 85, 100",
             "schema": {
               "minimum": 1,
               "maximum": 100,
@@ -361,7 +318,7 @@
         ]
       },
       "patch": {
-        "description": "Update tags, description, or other metadata. Only owner can update.",
+        "description": "Update tags, description or isPrivate. Only the owner (X-User-Id) can update.",
         "operationId": "ImageController_updateImage",
         "parameters": [
           {
@@ -751,9 +708,106 @@
         ]
       }
     },
+    "/avatars/{clientRef}/{externalUserId}": {
+      "get": {
+        "description": "Retrieve a creator avatar. clientRef is the client domain, or its id when it has none (the url/fullPath returned by the API already carry it). Query parameters: info (return JSON metadata), thumb (return thumbnail), format (webp | jpeg | png, default webp; converted on the fly, combinable with thumb), download (force download), t (timestamp for cache busting)",
+        "operationId": "AvatarController_getClientAvatar",
+        "parameters": [
+          {
+            "name": "clientRef",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "externalUserId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "thumb",
+            "required": false,
+            "in": "query",
+            "description": "Return thumbnail version of the avatar",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "info",
+            "required": false,
+            "in": "query",
+            "description": "Return only metadata (JSON) instead of the file",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "download",
+            "required": false,
+            "in": "query",
+            "description": "Force file download with Content-Disposition header",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "format",
+            "required": false,
+            "in": "query",
+            "description": "Output format. Avatars are stored as WebP; jpeg/png are converted on the fly",
+            "schema": {
+              "default": "webp",
+              "type": "string",
+              "enum": [
+                "webp",
+                "jpeg",
+                "png"
+              ]
+            }
+          },
+          {
+            "name": "t",
+            "required": false,
+            "in": "query",
+            "description": "Timestamp for cache busting (ignored by server, used by browser to force reload)",
+            "schema": {
+              "example": "1768848792396",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Avatar file or metadata"
+          },
+          "404": {
+            "description": "Client or avatar not found"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get creator avatar (public endpoint)",
+        "tags": [
+          "Avatars"
+        ]
+      }
+    },
     "/avatars/{externalUserId}": {
       "get": {
-        "description": "Retrieve creator avatar by external creator ID. Query parameters: info (return JSON metadata), thumb (return thumbnail), download (force download), t (timestamp for cache busting)",
+        "deprecated": true,
+        "description": "Deprecated: use GET /avatars/{clientRef}/{externalUserId}. An external id is unique only within a client: without an X-API-Key this route serves it only when exactly one client has a creator with that id, and 404s otherwise.",
         "operationId": "AvatarController_getAvatar",
         "parameters": [
           {
@@ -795,6 +849,21 @@
             }
           },
           {
+            "name": "format",
+            "required": false,
+            "in": "query",
+            "description": "Output format. Avatars are stored as WebP; jpeg/png are converted on the fly",
+            "schema": {
+              "default": "webp",
+              "type": "string",
+              "enum": [
+                "webp",
+                "jpeg",
+                "png"
+              ]
+            }
+          },
+          {
             "name": "t",
             "required": false,
             "in": "query",
@@ -810,7 +879,7 @@
             "description": "Avatar file or metadata"
           },
           "404": {
-            "description": "Avatar not found"
+            "description": "Avatar not found or ambiguous"
           }
         },
         "security": [
@@ -818,7 +887,7 @@
             "api-key": []
           }
         ],
-        "summary": "Get creator avatar (public endpoint)",
+        "summary": "Get creator avatar (deprecated)",
         "tags": [
           "Avatars"
         ]
@@ -1552,7 +1621,7 @@
     },
     "/health/ready": {
       "get": {
-        "description": "Checks database connectivity. Returns 200 when the service is ready to accept traffic, 503 otherwise.",
+        "description": "Checks database connectivity and the storage volume (writable, free space above HEALTH_DISK_MIN_FREE_MB). Returns 200 when the service is ready to accept traffic, 503 otherwise.",
         "operationId": "HealthController_ready",
         "parameters": [],
         "responses": {
@@ -2362,6 +2431,19 @@
             }
           },
           {
+            "name": "isPrivate",
+            "required": false,
+            "in": "query",
+            "description": "Only private (true) or only public (false) files",
+            "schema": {
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          },
+          {
             "name": "sortBy",
             "required": false,
             "in": "query",
@@ -2554,6 +2636,44 @@
         ]
       }
     },
+    "/admin/images/bulk-delete": {
+      "post": {
+        "description": "Up to 100 ids. Each image is deleted on its own: one that is missing or on a client the admin cannot see lands in `failed` (both read as \"Image not found\", so the answer leaks nothing) and the rest go ahead.",
+        "operationId": "ImagesAdminController_bulkDeleteImages",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminBulkDeleteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminBulkDeleteResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete many images in one request (admin)",
+        "tags": [
+          "Admin - Images"
+        ]
+      }
+    },
     "/admin/images/{id}/download": {
       "get": {
         "description": "Download the original image file for any image. Admin JWT replaces the API key. Increments the download counter.",
@@ -2594,6 +2714,51 @@
           }
         ],
         "summary": "Download image file (admin)",
+        "tags": [
+          "Admin - Images"
+        ]
+      }
+    },
+    "/admin/images/{id}/file": {
+      "get": {
+        "description": "Image bytes for the console, private images included. Admin JWT replaces the API key. Counts neither a view nor a download, and never answers with the permission-denied placeholder: no access is a 403.",
+        "operationId": "ImagesAdminController_getImageFile",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "thumb",
+            "required": false,
+            "in": "query",
+            "description": "Serve thumbnail instead of original",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Image file, inline, `Cache-Control: private, max-age=300`"
+          },
+          "403": {
+            "description": "Admin has no access to the given client"
+          },
+          "404": {
+            "description": "Image not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Serve image file inline (admin)",
         "tags": [
           "Admin - Images"
         ]
@@ -2661,6 +2826,15 @@
             "name": "creatorId",
             "required": false,
             "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Creator's externalId or username, contains, case-insensitive",
             "schema": {
               "type": "string"
             }
@@ -3939,6 +4113,19 @@
             }
           },
           {
+            "name": "isPrivate",
+            "required": false,
+            "in": "query",
+            "description": "Only private (true) or only public (false) files",
+            "schema": {
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          },
+          {
             "name": "sortBy",
             "required": false,
             "in": "query",
@@ -4420,9 +4607,17 @@
   },
   "info": {
     "title": "FileHarbor 2.0",
-    "description": "",
-    "version": "3.1.1",
-    "contact": {}
+    "description": "Multi-tenant image management system API",
+    "version": "3.5.0",
+    "contact": {
+      "name": "Andrea Tombolato",
+      "url": "https://heyatom.dev",
+      "email": "hey@heyatom.dev"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/heyatomdev/fileharbor/blob/main/README.md"
+    }
   },
   "tags": [],
   "servers": [],
@@ -4469,25 +4664,6 @@
           "totalAlbums",
           "totalStorage",
           "uploadedLast7Days"
-        ]
-      },
-      "GlobalStatsResponseDto": {
-        "type": "object",
-        "properties": {
-          "totalImages": {
-            "type": "number",
-            "example": 1042,
-            "description": "Total number of images across all clients"
-          },
-          "totalStorage": {
-            "type": "number",
-            "example": 10485760,
-            "description": "Total storage used in bytes across all clients"
-          }
-        },
-        "required": [
-          "totalImages",
-          "totalStorage"
         ]
       },
       "ImageResponseDto": {
@@ -4595,17 +4771,17 @@
           "url": {
             "type": "string",
             "description": "URL to access the image",
-            "example": "/v2/images/b2ce77c1-3836-4e28-807f-51f929e12423"
+            "example": "/images/b2ce77c1-3836-4e28-807f-51f929e12423"
           },
           "thumbnailUrl": {
             "type": "string",
             "description": "URL to access the thumbnail",
-            "example": "/v2/images/b2ce77c1-3836-4e28-807f-51f929e12423?thumb=true"
+            "example": "/images/b2ce77c1-3836-4e28-807f-51f929e12423?thumb=true"
           },
           "fullPath": {
             "type": "string",
             "description": "Full URL to access the image (baseUrl + url)",
-            "example": "http://localhost:3000/v2/images/b2ce77c1-3836-4e28-807f-51f929e12423"
+            "example": "http://localhost:3000/images/b2ce77c1-3836-4e28-807f-51f929e12423"
           }
         },
         "required": [
@@ -4702,6 +4878,10 @@
             "type": "string",
             "description": "Image description",
             "example": "Beautiful sunset over the mountains"
+          },
+          "isPrivate": {
+            "type": "boolean",
+            "description": "Make the image private or public. Bytes already served public may stay in browser and shared caches until they expire."
           }
         }
       },
@@ -4748,7 +4928,7 @@
           "shareUrl": {
             "type": "string",
             "description": "Full URL to access the shared image",
-            "example": "/v2/images/shared/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+            "example": "/images/b2ce77c1-3836-4e28-807f-51f929e12423?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
           }
         },
         "required": [
@@ -4987,17 +5167,17 @@
           "url": {
             "type": "string",
             "description": "URL to access the avatar",
-            "example": "/v2/avatars/creator-123"
+            "example": "/avatars/creator-123"
           },
           "thumbnailUrl": {
             "type": "string",
             "description": "URL to access the avatar thumbnail",
-            "example": "/v2/avatars/creator-123?thumb=true"
+            "example": "/avatars/creator-123?thumb=true"
           },
           "fullPath": {
             "type": "string",
             "description": "Full URL to access the avatar (baseUrl + url)",
-            "example": "http://localhost:3000/v2/avatars/creator-123"
+            "example": "http://localhost:3000/avatars/creator-123"
           }
         },
         "required": [
@@ -5129,7 +5309,7 @@
           "coverUrl": {
             "type": "string",
             "description": "Cover image URL (first image in the album)",
-            "example": "http://localhost:3000/v2/images/b2ce77c1-3836-4e28-807f-51f929e12423"
+            "example": "http://localhost:3000/images/b2ce77c1-3836-4e28-807f-51f929e12423"
           },
           "images": {
             "description": "Array of images in the album",
@@ -5251,6 +5431,7 @@
         "type": "object",
         "properties": {
           "items": {
+            "maxItems": 100,
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AddAlbumItemDto"
@@ -5307,6 +5488,7 @@
         "type": "object",
         "properties": {
           "items": {
+            "maxItems": 100,
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RemoveAlbumItemDto"
@@ -5519,7 +5701,7 @@
           "url": {
             "type": "string",
             "description": "URL to access the album with the token",
-            "example": "/v2/albums/shared/abc123-xyz789-token"
+            "example": "/albums/shared/abc123-xyz789-token"
           }
         },
         "required": [
@@ -5701,7 +5883,9 @@
             "type": "boolean"
           },
           "webhookUrl": {
-            "type": "string"
+            "type": "string",
+            "description": "Discord webhook URL, token masked",
+            "example": "https://discord.com/api/webhooks/123456/****"
           },
           "tinifyActive": {
             "type": "boolean",
@@ -5812,7 +5996,9 @@
             "type": "boolean"
           },
           "webhookUrl": {
-            "type": "string"
+            "type": "string",
+            "description": "Discord webhook URL, token masked",
+            "example": "https://discord.com/api/webhooks/123456/****"
           },
           "tinifyActive": {
             "type": "boolean",
@@ -5898,7 +6084,7 @@
           },
           "webhookUrl": {
             "type": "string",
-            "description": "Discord webhook URL (set to null to remove)"
+            "description": "Discord webhook URL, https://discord.com/api/webhooks/<id>/<token> (set to null to remove)"
           },
           "tinifyActive": {
             "type": "boolean",
@@ -6297,6 +6483,59 @@
             "description": "Image description (set to null to remove)"
           }
         }
+      },
+      "AdminBulkDeleteDto": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "maxItems": 100,
+            "description": "Ids of the images to delete",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "required": [
+          "ids"
+        ]
+      },
+      "AdminBulkDeleteFailureDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "message"
+        ]
+      },
+      "AdminBulkDeleteResponseDto": {
+        "type": "object",
+        "properties": {
+          "deleted": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "failed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminBulkDeleteFailureDto"
+            }
+          }
+        },
+        "required": [
+          "deleted",
+          "failed"
+        ]
       },
       "AdminDeleteResponseDto": {
         "type": "object",
