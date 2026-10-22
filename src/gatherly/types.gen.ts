@@ -838,6 +838,110 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        EventTranslationResponseDto: {
+            id: string;
+            eventId: string;
+            /** @example it */
+            locale: string;
+            title: string;
+            description?: string | null;
+        };
+        TagResponseDto: {
+            id: string;
+            clientId: string;
+            slug: string;
+            /**
+             * @example {
+             *       "it": "Competitivo",
+             *       "en": "Competitive"
+             *     }
+             */
+            label?: {
+                [key: string]: string;
+            } | null;
+            /**
+             * @description Present on admin list with withUsage=true
+             * @example {
+             *       "events": 3
+             *     }
+             */
+            _count?: Record<string, unknown>;
+        };
+        EventTagResponseDto: {
+            eventId: string;
+            tagId: string;
+            tag: components["schemas"]["TagResponseDto"];
+        };
+        CategoryTranslationResponseDto: {
+            /** @example it */
+            locale: string;
+            name: string;
+        };
+        CategoryResponseDto: {
+            id: string;
+            clientId: string;
+            color?: string | null;
+            icon?: string | null;
+            translations: components["schemas"]["CategoryTranslationResponseDto"][];
+            /**
+             * @description Present on list/detail only
+             * @example {
+             *       "events": 3
+             *     }
+             */
+            _count?: Record<string, unknown>;
+        };
+        RecurrenceRuleResponseDto: {
+            id: string;
+            /** @example FREQ=WEEKLY;BYDAY=MO */
+            rule: string;
+            /** Format: date-time */
+            endDate?: string | null;
+            count?: number | null;
+        };
+        EventResponseDto: {
+            id: string;
+            clientId: string;
+            /** @example it */
+            defaultLocale: string;
+            authorId: string;
+            authorName: string;
+            authorEmail?: string | null;
+            /** Format: date-time */
+            startTime: string;
+            /** Format: date-time */
+            endTime?: string | null;
+            /** @example Europe/Rome */
+            timezone: string;
+            /** @enum {string} */
+            status: "DRAFT" | "PUBLISHED" | "CANCELLED" | "COMPLETED";
+            type?: string | null;
+            coverImageUrl?: string | null;
+            categoryId?: string | null;
+            locationName?: string | null;
+            locationAddress?: string | null;
+            locationUrl?: string | null;
+            isOnline: boolean;
+            maxParticipants?: number | null;
+            isPublic: boolean;
+            /**
+             * @description Decimal, serialized as a string
+             * @example 12.50
+             */
+            price?: string | null;
+            /** @example EUR */
+            currency?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            recurrenceRuleId?: string | null;
+            parentEventId?: string | null;
+            translations: components["schemas"]["EventTranslationResponseDto"][];
+            tags: components["schemas"]["EventTagResponseDto"][];
+            category?: components["schemas"]["CategoryResponseDto"] | null;
+            recurrenceRule?: components["schemas"]["RecurrenceRuleResponseDto"] | null;
+        };
         EventTranslationDto: {
             /** @example it */
             locale: string;
@@ -881,6 +985,145 @@ export interface components {
             limit: number;
             totalPages: number;
         };
+        ParticipantCountDto: {
+            /** @description Seats taken: REGISTERED + CONFIRMED + ATTENDED */
+            participants: number;
+        };
+        EventWithCountResponseDto: {
+            id: string;
+            clientId: string;
+            /** @example it */
+            defaultLocale: string;
+            authorId: string;
+            authorName: string;
+            authorEmail?: string | null;
+            /** Format: date-time */
+            startTime: string;
+            /** Format: date-time */
+            endTime?: string | null;
+            /** @example Europe/Rome */
+            timezone: string;
+            /** @enum {string} */
+            status: "DRAFT" | "PUBLISHED" | "CANCELLED" | "COMPLETED";
+            type?: string | null;
+            coverImageUrl?: string | null;
+            categoryId?: string | null;
+            locationName?: string | null;
+            locationAddress?: string | null;
+            locationUrl?: string | null;
+            isOnline: boolean;
+            maxParticipants?: number | null;
+            isPublic: boolean;
+            /**
+             * @description Decimal, serialized as a string
+             * @example 12.50
+             */
+            price?: string | null;
+            /** @example EUR */
+            currency?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            recurrenceRuleId?: string | null;
+            parentEventId?: string | null;
+            translations: components["schemas"]["EventTranslationResponseDto"][];
+            tags: components["schemas"]["EventTagResponseDto"][];
+            category?: components["schemas"]["CategoryResponseDto"] | null;
+            recurrenceRule?: components["schemas"]["RecurrenceRuleResponseDto"] | null;
+            _count: components["schemas"]["ParticipantCountDto"];
+        };
+        ChildEventResponseDto: {
+            id: string;
+            /** Format: date-time */
+            startTime: string;
+            /** @enum {string} */
+            status: "DRAFT" | "PUBLISHED" | "CANCELLED" | "COMPLETED";
+            _count: components["schemas"]["ParticipantCountDto"];
+        };
+        EventDetailResponseDto: {
+            id: string;
+            clientId: string;
+            /** @example it */
+            defaultLocale: string;
+            authorId: string;
+            authorName: string;
+            authorEmail?: string | null;
+            /** Format: date-time */
+            startTime: string;
+            /** Format: date-time */
+            endTime?: string | null;
+            /** @example Europe/Rome */
+            timezone: string;
+            /** @enum {string} */
+            status: "DRAFT" | "PUBLISHED" | "CANCELLED" | "COMPLETED";
+            type?: string | null;
+            coverImageUrl?: string | null;
+            categoryId?: string | null;
+            locationName?: string | null;
+            locationAddress?: string | null;
+            locationUrl?: string | null;
+            isOnline: boolean;
+            maxParticipants?: number | null;
+            isPublic: boolean;
+            /**
+             * @description Decimal, serialized as a string
+             * @example 12.50
+             */
+            price?: string | null;
+            /** @example EUR */
+            currency?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            recurrenceRuleId?: string | null;
+            parentEventId?: string | null;
+            translations: components["schemas"]["EventTranslationResponseDto"][];
+            tags: components["schemas"]["EventTagResponseDto"][];
+            category?: components["schemas"]["CategoryResponseDto"] | null;
+            recurrenceRule?: components["schemas"]["RecurrenceRuleResponseDto"] | null;
+            _count: components["schemas"]["ParticipantCountDto"];
+            /** @description First 100 recurring children by startTime */
+            childEvents: components["schemas"]["ChildEventResponseDto"][];
+        };
+        EventStatsDto: {
+            totalParticipants: number;
+            registered: number;
+            confirmed: number;
+            waitlist: number;
+            cancelled: number;
+            attended: number;
+            checkedIn: number;
+            availableSpots?: number | null;
+        };
+        EventStatsResponseDto: {
+            event: components["schemas"]["EventResponseDto"];
+            stats: components["schemas"]["EventStatsDto"];
+        };
+        ParticipantResponseDto: {
+            id: string;
+            eventId: string;
+            /** @enum {string} */
+            type: "INLINE" | "EXTERNAL";
+            userName: string;
+            email?: string | null;
+            externalId?: string | null;
+            externalSource?: string | null;
+            /** @enum {string} */
+            status: "REGISTERED" | "WAITLIST" | "CONFIRMED" | "CANCELLED" | "ATTENDED";
+            /** @enum {string} */
+            role: "ATTENDEE" | "SPEAKER" | "ORGANIZER" | "HOST";
+            notes?: string | null;
+            checkedIn: boolean;
+            /** Format: date-time */
+            checkedInAt?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            metadata?: {
+                [key: string]: unknown;
+            } | null;
+        };
         UpdateEventDto: {
             translations?: components["schemas"]["EventTranslationDto"][];
             tagSlugs?: string[];
@@ -920,6 +1163,16 @@ export interface components {
             /** @description Domain-specific data e.g. {team: "RedTeam", rank: 3} */
             metadata?: Record<string, unknown>;
         };
+        BulkAddErrorDto: {
+            index: number;
+            reason: string;
+        };
+        BulkAddResultDto: {
+            added: number;
+            waitlisted: number;
+            skipped: number;
+            errors: components["schemas"]["BulkAddErrorDto"][];
+        };
         BulkAddParticipantsDto: {
             participants: components["schemas"]["AddParticipantDto"][];
             /** @default false */
@@ -956,14 +1209,116 @@ export interface components {
              */
             label?: Record<string, unknown>;
         };
+        TaggedEventDto: {
+            id: string;
+            clientId: string;
+            /** @example it */
+            defaultLocale: string;
+            authorId: string;
+            authorName: string;
+            authorEmail?: string | null;
+            /** Format: date-time */
+            startTime: string;
+            /** Format: date-time */
+            endTime?: string | null;
+            /** @example Europe/Rome */
+            timezone: string;
+            /** @enum {string} */
+            status: "DRAFT" | "PUBLISHED" | "CANCELLED" | "COMPLETED";
+            type?: string | null;
+            coverImageUrl?: string | null;
+            categoryId?: string | null;
+            locationName?: string | null;
+            locationAddress?: string | null;
+            locationUrl?: string | null;
+            isOnline: boolean;
+            maxParticipants?: number | null;
+            isPublic: boolean;
+            /**
+             * @description Decimal, serialized as a string
+             * @example 12.50
+             */
+            price?: string | null;
+            /** @example EUR */
+            currency?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            recurrenceRuleId?: string | null;
+            parentEventId?: string | null;
+            translations: components["schemas"]["EventTranslationResponseDto"][];
+        };
+        TagEventResponseDto: {
+            eventId: string;
+            tagId: string;
+            event: components["schemas"]["TaggedEventDto"];
+        };
         UpdateTagDto: {
             label?: Record<string, unknown>;
+        };
+        WebhookDeliveryResponseDto: {
+            id: string;
+            clientId: string;
+            /** @example event.created */
+            eventType: string;
+            payload: {
+                [key: string]: unknown;
+            };
+            /** @description URL at enqueue time, audit only */
+            webhookUrl: string;
+            attempts: number;
+            maxAttempts: number;
+            /** Format: date-time */
+            nextRetryAt: string;
+            lastError?: string | null;
+            /** @enum {string} */
+            status: "PENDING" | "DELIVERED" | "FAILED";
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ClientResponseDto: {
+            id: string;
+            name: string;
+            tenantId?: string | null;
+            isActive: boolean;
+            /** @example it */
+            defaultLocale: string;
+            emailActive: boolean;
+            webhookUrl?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            revokedAt?: string | null;
         };
         UpdateSettingsDto: {
             webhookUrl?: string;
             /** @example en */
             defaultLocale?: string;
             emailActive?: boolean;
+        };
+        WebhookSecretResponseDto: {
+            id: string;
+            /** @description HMAC secret for the webhook-signature header */
+            webhookSecret: string;
+        };
+        ClientCreatedResponseDto: {
+            id: string;
+            name: string;
+            tenantId?: string | null;
+            isActive: boolean;
+            /** @example it */
+            defaultLocale: string;
+            emailActive: boolean;
+            webhookUrl?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            revokedAt?: string | null;
+            /** @description Shown once, on creation */
+            token: string;
         };
         CreateClientDto: {
             name: string;
@@ -987,6 +1342,149 @@ export interface components {
             emailActive?: boolean;
             webhookUrl?: string;
         };
+        ClientTokenResponseDto: {
+            id: string;
+            name: string;
+            token: string;
+        };
+        StatsEventsDto: {
+            draft: number;
+            published: number;
+            cancelled: number;
+            completed: number;
+            upcoming: number;
+        };
+        StatsParticipantsDto: {
+            total: number;
+            active: number;
+            checkedIn: number;
+        };
+        StatsRatesDto: {
+            avgFillRate: number;
+            checkInRate: number;
+            noShowRate: number;
+        };
+        StatsAlertsDto: {
+            soldOutWithWaitlist: number;
+            staleDrafts: number;
+            pastNotCompleted: number;
+        };
+        DailyPointDto: {
+            /** @description Day, YYYY-MM-DD */
+            bucket: string;
+            value: number;
+        };
+        StatsTrendsDto: {
+            upcoming: components["schemas"]["DailyPointDto"][];
+        };
+        TenantStatsResponseDto: {
+            events: components["schemas"]["StatsEventsDto"];
+            participants: components["schemas"]["StatsParticipantsDto"];
+            rates: components["schemas"]["StatsRatesDto"];
+            alerts: components["schemas"]["StatsAlertsDto"];
+            trends: components["schemas"]["StatsTrendsDto"];
+            version: string;
+        };
+        TimeseriesPointDto: {
+            /** Format: date-time */
+            bucket: string;
+            value: number;
+        };
+        TimeseriesResponseDto: {
+            /** @enum {string} */
+            metric: "events" | "participants";
+            /** @enum {string} */
+            interval: "day" | "week" | "month";
+            data: components["schemas"]["TimeseriesPointDto"][];
+        };
+        BreakdownRowDto: {
+            /** @description status: label; category/tag: id */
+            id?: string | null;
+            /** @description status only */
+            label?: string;
+            /** @description category only */
+            name?: string | null;
+            /** @description tag only */
+            slug?: string;
+            count: number;
+        };
+        BreakdownResponseDto: {
+            /** @enum {string} */
+            by: "status" | "category" | "tag";
+            data: components["schemas"]["BreakdownRowDto"][];
+        };
+        RetentionCohortDto: {
+            /**
+             * @description YYYY-MM
+             * @example 2026-03
+             */
+            cohort: string;
+            size: number;
+            /** @description Share of the cohort active in each following period, 0..1 */
+            retention: number[];
+        };
+        RetentionResponseDto: {
+            /** @enum {string} */
+            granularity: "week" | "month";
+            cohorts: components["schemas"]["RetentionCohortDto"][];
+        };
+        PersonExternalDto: {
+            source?: string | null;
+            id: string;
+        };
+        PersonSummaryDto: {
+            /** @example p_0123456789abcdef0123456789abcdef */
+            key: string;
+            displayName: string;
+            email?: string | null;
+            external?: components["schemas"]["PersonExternalDto"] | null;
+            eventsCount: number;
+            /** Format: date-time */
+            firstSeen: string;
+            /** Format: date-time */
+            lastSeen: string;
+            checkedInCount: number;
+            noShowCount: number;
+            /** @enum {string} */
+            segment: "vip" | "at_risk" | "returning" | "new";
+        };
+        PersonHistoryDto: {
+            eventId: string;
+            title?: string | null;
+            /** Format: date-time */
+            startTime: string;
+            status: string;
+            checkedIn: boolean;
+        };
+        PersonTopCategoryDto: {
+            id?: string | null;
+            name?: string | null;
+            frequency: number;
+        };
+        PersonTopTagDto: {
+            id: string;
+            slug: string;
+            frequency: number;
+        };
+        PersonProfileResponseDto: {
+            /** @example p_0123456789abcdef0123456789abcdef */
+            key: string;
+            displayName: string;
+            email?: string | null;
+            external?: components["schemas"]["PersonExternalDto"] | null;
+            eventsCount: number;
+            /** Format: date-time */
+            firstSeen: string;
+            /** Format: date-time */
+            lastSeen: string;
+            checkedInCount: number;
+            noShowCount: number;
+            /** @enum {string} */
+            segment: "vip" | "at_risk" | "returning" | "new";
+            history: components["schemas"]["PersonHistoryDto"][];
+            topCategories: components["schemas"]["PersonTopCategoryDto"][];
+            topTags: components["schemas"]["PersonTopTagDto"][];
+        };
     };
     responses: never;
     parameters: never;
@@ -994,21 +1492,63 @@ export interface components {
     headers: never;
     pathItems: never;
 }
+export type EventTranslationResponseDto = components['schemas']['EventTranslationResponseDto'];
+export type TagResponseDto = components['schemas']['TagResponseDto'];
+export type EventTagResponseDto = components['schemas']['EventTagResponseDto'];
+export type CategoryTranslationResponseDto = components['schemas']['CategoryTranslationResponseDto'];
+export type CategoryResponseDto = components['schemas']['CategoryResponseDto'];
+export type RecurrenceRuleResponseDto = components['schemas']['RecurrenceRuleResponseDto'];
+export type EventResponseDto = components['schemas']['EventResponseDto'];
 export type EventTranslationDto = components['schemas']['EventTranslationDto'];
 export type CreateEventDto = components['schemas']['CreateEventDto'];
 export type PageMetaDto = components['schemas']['PageMetaDto'];
+export type ParticipantCountDto = components['schemas']['ParticipantCountDto'];
+export type EventWithCountResponseDto = components['schemas']['EventWithCountResponseDto'];
+export type ChildEventResponseDto = components['schemas']['ChildEventResponseDto'];
+export type EventDetailResponseDto = components['schemas']['EventDetailResponseDto'];
+export type EventStatsDto = components['schemas']['EventStatsDto'];
+export type EventStatsResponseDto = components['schemas']['EventStatsResponseDto'];
+export type ParticipantResponseDto = components['schemas']['ParticipantResponseDto'];
 export type UpdateEventDto = components['schemas']['UpdateEventDto'];
 export type AddParticipantDto = components['schemas']['AddParticipantDto'];
+export type BulkAddErrorDto = components['schemas']['BulkAddErrorDto'];
+export type BulkAddResultDto = components['schemas']['BulkAddResultDto'];
 export type BulkAddParticipantsDto = components['schemas']['BulkAddParticipantsDto'];
 export type UpdateParticipantStatusDto = components['schemas']['UpdateParticipantStatusDto'];
 export type CategoryTranslationDto = components['schemas']['CategoryTranslationDto'];
 export type CreateCategoryDto = components['schemas']['CreateCategoryDto'];
 export type UpdateCategoryDto = components['schemas']['UpdateCategoryDto'];
 export type CreateTagDto = components['schemas']['CreateTagDto'];
+export type TaggedEventDto = components['schemas']['TaggedEventDto'];
+export type TagEventResponseDto = components['schemas']['TagEventResponseDto'];
 export type UpdateTagDto = components['schemas']['UpdateTagDto'];
+export type WebhookDeliveryResponseDto = components['schemas']['WebhookDeliveryResponseDto'];
+export type ClientResponseDto = components['schemas']['ClientResponseDto'];
 export type UpdateSettingsDto = components['schemas']['UpdateSettingsDto'];
+export type WebhookSecretResponseDto = components['schemas']['WebhookSecretResponseDto'];
+export type ClientCreatedResponseDto = components['schemas']['ClientCreatedResponseDto'];
 export type CreateClientDto = components['schemas']['CreateClientDto'];
 export type UpdateClientDto = components['schemas']['UpdateClientDto'];
+export type ClientTokenResponseDto = components['schemas']['ClientTokenResponseDto'];
+export type StatsEventsDto = components['schemas']['StatsEventsDto'];
+export type StatsParticipantsDto = components['schemas']['StatsParticipantsDto'];
+export type StatsRatesDto = components['schemas']['StatsRatesDto'];
+export type StatsAlertsDto = components['schemas']['StatsAlertsDto'];
+export type DailyPointDto = components['schemas']['DailyPointDto'];
+export type StatsTrendsDto = components['schemas']['StatsTrendsDto'];
+export type TenantStatsResponseDto = components['schemas']['TenantStatsResponseDto'];
+export type TimeseriesPointDto = components['schemas']['TimeseriesPointDto'];
+export type TimeseriesResponseDto = components['schemas']['TimeseriesResponseDto'];
+export type BreakdownRowDto = components['schemas']['BreakdownRowDto'];
+export type BreakdownResponseDto = components['schemas']['BreakdownResponseDto'];
+export type RetentionCohortDto = components['schemas']['RetentionCohortDto'];
+export type RetentionResponseDto = components['schemas']['RetentionResponseDto'];
+export type PersonExternalDto = components['schemas']['PersonExternalDto'];
+export type PersonSummaryDto = components['schemas']['PersonSummaryDto'];
+export type PersonHistoryDto = components['schemas']['PersonHistoryDto'];
+export type PersonTopCategoryDto = components['schemas']['PersonTopCategoryDto'];
+export type PersonTopTagDto = components['schemas']['PersonTopTagDto'];
+export type PersonProfileResponseDto = components['schemas']['PersonProfileResponseDto'];
 export type $defs = Record<string, never>;
 export interface operations {
     HealthController_live: {
@@ -1182,7 +1722,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: Record<string, unknown>[];
+                        data: components["schemas"]["EventWithCountResponseDto"][];
                         meta: components["schemas"]["PageMetaDto"];
                     };
                 };
@@ -1209,7 +1749,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["EventResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1228,7 +1772,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["EventDetailResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1251,7 +1799,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["EventResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1270,7 +1822,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["EventStatsResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1300,7 +1856,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: Record<string, unknown>[];
+                        data: components["schemas"]["ParticipantResponseDto"][];
                         meta: components["schemas"]["PageMetaDto"];
                     };
                 };
@@ -1329,7 +1885,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ParticipantResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1348,7 +1908,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["EventResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1367,7 +1931,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["EventResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1386,7 +1954,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["EventResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1412,7 +1984,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["BulkAddResultDto"];
+                    };
+                };
             };
         };
     };
@@ -1436,7 +2012,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ParticipantResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1456,7 +2036,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ParticipantResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1493,7 +2077,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CategoryResponseDto"][];
+                    };
+                };
             };
         };
     };
@@ -1514,7 +2102,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CategoryResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1533,7 +2125,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CategoryResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1575,7 +2171,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CategoryResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1592,7 +2192,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["TagResponseDto"][];
+                    };
+                };
             };
         };
     };
@@ -1613,7 +2217,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["TagResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1632,7 +2240,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["TagResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1674,7 +2286,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["TagResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1693,7 +2309,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["TagEventResponseDto"][];
+                    };
+                };
             };
         };
     };
@@ -1727,7 +2347,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: Record<string, unknown>[];
+                        data: components["schemas"]["EventWithCountResponseDto"][];
                         meta: components["schemas"]["PageMetaDto"];
                     };
                 };
@@ -1751,7 +2371,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["EventResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1770,7 +2394,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["EventDetailResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1812,7 +2440,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["EventResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1831,7 +2463,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["EventStatsResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1850,7 +2486,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["EventResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1869,7 +2509,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["EventResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1888,7 +2532,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["EventResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1918,7 +2566,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: Record<string, unknown>[];
+                        data: components["schemas"]["ParticipantResponseDto"][];
                         meta: components["schemas"]["PageMetaDto"];
                     };
                 };
@@ -1944,7 +2592,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ParticipantResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -1967,7 +2619,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["BulkAddResultDto"];
+                    };
+                };
             };
         };
     };
@@ -1991,7 +2647,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ParticipantResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -2011,7 +2671,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ParticipantResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -2051,7 +2715,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CategoryResponseDto"][];
+                    };
+                };
             };
         };
     };
@@ -2072,7 +2740,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CategoryResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -2091,7 +2763,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CategoryResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -2133,7 +2809,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CategoryResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -2153,7 +2833,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["TagResponseDto"][];
+                    };
+                };
             };
         };
     };
@@ -2174,7 +2858,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["TagResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -2193,7 +2881,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["TagResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -2235,7 +2927,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["TagResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -2254,7 +2950,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebhookDeliveryResponseDto"][];
+                    };
+                };
             };
         };
     };
@@ -2290,7 +2990,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ClientResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -2311,7 +3015,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ClientResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -2328,7 +3036,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebhookSecretResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -2345,7 +3057,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ClientResponseDto"][];
+                    };
+                };
             };
         };
     };
@@ -2366,7 +3082,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ClientCreatedResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -2389,7 +3109,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ClientResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -2408,7 +3132,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ClientResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -2427,7 +3155,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ClientResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -2446,7 +3178,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ClientTokenResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -2465,7 +3201,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebhookSecretResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -2486,7 +3226,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebhookDeliveryResponseDto"][];
+                    };
+                };
             };
         };
     };
@@ -2506,7 +3250,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["TenantStatsResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -2528,7 +3276,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["TimeseriesResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -2547,7 +3299,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["BreakdownResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -2567,7 +3323,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["RetentionResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -2593,7 +3353,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: Record<string, unknown>[];
+                        data: components["schemas"]["PersonSummaryDto"][];
                         meta: components["schemas"]["PageMetaDto"];
                     };
                 };
@@ -2615,7 +3375,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["PersonProfileResponseDto"];
+                    };
+                };
             };
         };
     };

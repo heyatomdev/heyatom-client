@@ -62,8 +62,9 @@ Non in fase 1: Herald, migrazione dei consumer (arriva dopo, repo per repo).
 - **Auth anonima esplicita.** Beacon `/public` non ha credenziali: `anonymousAuth()`, accettata solo da un
   client costruito con `HeyAtomHttp(..., { allowAnonymous: true })` (oggi solo `BeaconClient`). Gli altri
   lanciano in costruzione; un `auth` che rende `{}` resta rifiutato ovunque. Non allentare il controllo nel core.
-- Gatherly non documenta le risposte (nessun `@ApiOkResponse`): i metodi hanno `<T = ResponseOf<...>>`,
-  il consumer passa il suo tipo finché il fix non arriva nel servizio. Non scrivere tipi di risposta qui.
+- Envelope: i servizi con `TransformInterceptor` (Beacon, Gatherly) rispondono `{ data }` e devono
+  documentarlo (`ApiOkData`/`ApiCreatedData`), non il DTO nudo. Articuno e FileHarbor non hanno
+  l'interceptor: DTO nudo corretto. Spec che mente sull'envelope → fix nel servizio, mai tipi a mano qui.
 - `pnpm check:api` dopo ogni release di un servizio: confronta le operazioni usate dai client tra spec
   committata e dump fresco, esce 1 se cambiano.
 

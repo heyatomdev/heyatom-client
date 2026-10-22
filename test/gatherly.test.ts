@@ -25,7 +25,7 @@ describe('GatherlyClient', () => {
     const { fetchImpl, calls } = fakeFetch(() => json(201, { data: { status: 'REGISTERED' } }));
     const gatherly = new GatherlyClient({ baseUrl: 'http://gatherly', auth, fetch: fetchImpl });
 
-    const res = await gatherly.addParticipant<{ data: { status: string } }>(
+    const res = await gatherly.addParticipant(
       'e1',
       { type: 'INLINE', role: 'ATTENDEE', userName: 'Ada', email: 'ada@example.com' },
       { idempotencyKey: 'k-1', headers: { 'X-Trace': 't' } },

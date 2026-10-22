@@ -222,7 +222,22 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/EventResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Create event with translations and optional tags",
@@ -368,7 +383,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "type": "object"
+                        "$ref": "#/components/schemas/EventWithCountResponseDto"
                       }
                     },
                     "meta": {
@@ -401,7 +416,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/EventDetailResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -432,7 +462,22 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/EventResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Update event — pass translations to upsert, tagSlugs to replace all tags",
@@ -456,7 +501,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/EventStatsResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -565,7 +625,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "type": "object"
+                        "$ref": "#/components/schemas/ParticipantResponseDto"
                       }
                     },
                     "meta": {
@@ -615,7 +675,22 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ParticipantResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Add participant — INLINE (direct data) or EXTERNAL (externalId + externalSource)",
@@ -639,7 +714,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/EventResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Publish event — validates required fields, transitions DRAFT → PUBLISHED",
@@ -663,7 +753,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/EventResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -686,7 +791,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/EventResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Cancel event — blocks further status changes. Cancels future recurring children.",
@@ -729,7 +849,22 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/BulkAddResultDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Add multiple participants in one request. Returns counts of added/waitlisted/skipped/errors.",
@@ -771,7 +906,22 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ParticipantResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -802,7 +952,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ParticipantResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -858,7 +1023,22 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CategoryResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -870,7 +1050,25 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CategoryResponseDto"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -893,7 +1091,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CategoryResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -924,7 +1137,22 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CategoryResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -969,7 +1197,22 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/TagResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Create tag for client",
@@ -982,7 +1225,25 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TagResponseDto"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "List all tags for client",
@@ -1006,7 +1267,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/TagResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1037,7 +1313,22 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/TagResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Update tag label (localized)",
@@ -1083,7 +1374,25 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TagEventResponseDto"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "List events associated with tag",
@@ -1231,7 +1540,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "type": "object"
+                        "$ref": "#/components/schemas/EventWithCountResponseDto"
                       }
                     },
                     "meta": {
@@ -1267,7 +1576,22 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/EventResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1295,7 +1619,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/EventDetailResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1331,7 +1670,22 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/EventResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1385,7 +1739,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/EventStatsResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1413,7 +1782,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/EventResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1441,7 +1825,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/EventResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1469,7 +1868,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/EventResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1583,7 +1997,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "type": "object"
+                        "$ref": "#/components/schemas/ParticipantResponseDto"
                       }
                     },
                     "meta": {
@@ -1628,7 +2042,22 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ParticipantResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1666,7 +2095,22 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/BulkAddResultDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1712,7 +2156,22 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ParticipantResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1748,7 +2207,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ParticipantResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1813,7 +2287,25 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CategoryResponseDto"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1840,7 +2332,22 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CategoryResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1868,7 +2375,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CategoryResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1904,7 +2426,22 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CategoryResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1959,7 +2496,25 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TagResponseDto"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1986,7 +2541,22 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/TagResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2014,7 +2584,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/TagResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2050,7 +2635,22 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/TagResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2104,7 +2704,25 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/WebhookDeliveryResponseDto"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2151,7 +2769,22 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ClientResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2178,7 +2811,22 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ClientResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2197,7 +2845,22 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebhookSecretResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2216,7 +2879,25 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ClientResponseDto"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2244,7 +2925,22 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ClientCreatedResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2283,7 +2979,22 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ClientResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2312,7 +3023,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ClientResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2341,7 +3067,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ClientResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2370,7 +3111,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ClientTokenResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2399,7 +3155,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebhookSecretResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2441,7 +3212,25 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/WebhookDeliveryResponseDto"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2478,7 +3267,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/TenantStatsResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2539,7 +3343,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/TimeseriesResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2572,7 +3391,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/BreakdownResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2614,7 +3448,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/RetentionResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2699,7 +3548,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "type": "object"
+                        "$ref": "#/components/schemas/PersonSummaryDto"
                       }
                     },
                     "meta": {
@@ -2736,7 +3585,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PersonProfileResponseDto"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2767,6 +3631,322 @@
       }
     },
     "schemas": {
+      "EventTranslationResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string",
+            "example": "it"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "eventId",
+          "locale",
+          "title"
+        ]
+      },
+      "TagResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "label": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": {
+              "type": "string"
+            },
+            "example": {
+              "it": "Competitivo",
+              "en": "Competitive"
+            }
+          },
+          "_count": {
+            "type": "object",
+            "description": "Present on admin list with withUsage=true",
+            "example": {
+              "events": 3
+            }
+          }
+        },
+        "required": [
+          "id",
+          "clientId",
+          "slug"
+        ]
+      },
+      "EventTagResponseDto": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string"
+          },
+          "tagId": {
+            "type": "string"
+          },
+          "tag": {
+            "$ref": "#/components/schemas/TagResponseDto"
+          }
+        },
+        "required": [
+          "eventId",
+          "tagId",
+          "tag"
+        ]
+      },
+      "CategoryTranslationResponseDto": {
+        "type": "object",
+        "properties": {
+          "locale": {
+            "type": "string",
+            "example": "it"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "locale",
+          "name"
+        ]
+      },
+      "CategoryResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string",
+            "nullable": true
+          },
+          "icon": {
+            "type": "string",
+            "nullable": true
+          },
+          "translations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryTranslationResponseDto"
+            }
+          },
+          "_count": {
+            "type": "object",
+            "description": "Present on list/detail only",
+            "example": {
+              "events": 3
+            }
+          }
+        },
+        "required": [
+          "id",
+          "clientId",
+          "translations"
+        ]
+      },
+      "RecurrenceRuleResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "rule": {
+            "type": "string",
+            "example": "FREQ=WEEKLY;BYDAY=MO"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "count": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "rule"
+        ]
+      },
+      "EventResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "defaultLocale": {
+            "type": "string",
+            "example": "it"
+          },
+          "authorId": {
+            "type": "string"
+          },
+          "authorName": {
+            "type": "string"
+          },
+          "authorEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "timezone": {
+            "type": "string",
+            "example": "Europe/Rome"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "PUBLISHED",
+              "CANCELLED",
+              "COMPLETED"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "coverImageUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "categoryId": {
+            "type": "string",
+            "nullable": true
+          },
+          "locationName": {
+            "type": "string",
+            "nullable": true
+          },
+          "locationAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "locationUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "isOnline": {
+            "type": "boolean"
+          },
+          "maxParticipants": {
+            "type": "number",
+            "nullable": true
+          },
+          "isPublic": {
+            "type": "boolean"
+          },
+          "price": {
+            "type": "string",
+            "nullable": true,
+            "example": "12.50",
+            "description": "Decimal, serialized as a string"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true,
+            "example": "EUR"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "recurrenceRuleId": {
+            "type": "string",
+            "nullable": true
+          },
+          "parentEventId": {
+            "type": "string",
+            "nullable": true
+          },
+          "translations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventTranslationResponseDto"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventTagResponseDto"
+            }
+          },
+          "category": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CategoryResponseDto"
+              }
+            ]
+          },
+          "recurrenceRule": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecurrenceRuleResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "clientId",
+          "defaultLocale",
+          "authorId",
+          "authorName",
+          "startTime",
+          "timezone",
+          "status",
+          "isOnline",
+          "isPublic",
+          "createdAt",
+          "updatedAt",
+          "translations",
+          "tags"
+        ]
+      },
       "EventTranslationDto": {
         "type": "object",
         "properties": {
@@ -2901,6 +4081,509 @@
           "totalPages"
         ]
       },
+      "ParticipantCountDto": {
+        "type": "object",
+        "properties": {
+          "participants": {
+            "type": "number",
+            "description": "Seats taken: REGISTERED + CONFIRMED + ATTENDED"
+          }
+        },
+        "required": [
+          "participants"
+        ]
+      },
+      "EventWithCountResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "defaultLocale": {
+            "type": "string",
+            "example": "it"
+          },
+          "authorId": {
+            "type": "string"
+          },
+          "authorName": {
+            "type": "string"
+          },
+          "authorEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "timezone": {
+            "type": "string",
+            "example": "Europe/Rome"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "PUBLISHED",
+              "CANCELLED",
+              "COMPLETED"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "coverImageUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "categoryId": {
+            "type": "string",
+            "nullable": true
+          },
+          "locationName": {
+            "type": "string",
+            "nullable": true
+          },
+          "locationAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "locationUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "isOnline": {
+            "type": "boolean"
+          },
+          "maxParticipants": {
+            "type": "number",
+            "nullable": true
+          },
+          "isPublic": {
+            "type": "boolean"
+          },
+          "price": {
+            "type": "string",
+            "nullable": true,
+            "example": "12.50",
+            "description": "Decimal, serialized as a string"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true,
+            "example": "EUR"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "recurrenceRuleId": {
+            "type": "string",
+            "nullable": true
+          },
+          "parentEventId": {
+            "type": "string",
+            "nullable": true
+          },
+          "translations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventTranslationResponseDto"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventTagResponseDto"
+            }
+          },
+          "category": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CategoryResponseDto"
+              }
+            ]
+          },
+          "recurrenceRule": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecurrenceRuleResponseDto"
+              }
+            ]
+          },
+          "_count": {
+            "$ref": "#/components/schemas/ParticipantCountDto"
+          }
+        },
+        "required": [
+          "id",
+          "clientId",
+          "defaultLocale",
+          "authorId",
+          "authorName",
+          "startTime",
+          "timezone",
+          "status",
+          "isOnline",
+          "isPublic",
+          "createdAt",
+          "updatedAt",
+          "translations",
+          "tags",
+          "_count"
+        ]
+      },
+      "ChildEventResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "PUBLISHED",
+              "CANCELLED",
+              "COMPLETED"
+            ]
+          },
+          "_count": {
+            "$ref": "#/components/schemas/ParticipantCountDto"
+          }
+        },
+        "required": [
+          "id",
+          "startTime",
+          "status",
+          "_count"
+        ]
+      },
+      "EventDetailResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "defaultLocale": {
+            "type": "string",
+            "example": "it"
+          },
+          "authorId": {
+            "type": "string"
+          },
+          "authorName": {
+            "type": "string"
+          },
+          "authorEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "timezone": {
+            "type": "string",
+            "example": "Europe/Rome"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "PUBLISHED",
+              "CANCELLED",
+              "COMPLETED"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "coverImageUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "categoryId": {
+            "type": "string",
+            "nullable": true
+          },
+          "locationName": {
+            "type": "string",
+            "nullable": true
+          },
+          "locationAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "locationUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "isOnline": {
+            "type": "boolean"
+          },
+          "maxParticipants": {
+            "type": "number",
+            "nullable": true
+          },
+          "isPublic": {
+            "type": "boolean"
+          },
+          "price": {
+            "type": "string",
+            "nullable": true,
+            "example": "12.50",
+            "description": "Decimal, serialized as a string"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true,
+            "example": "EUR"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "recurrenceRuleId": {
+            "type": "string",
+            "nullable": true
+          },
+          "parentEventId": {
+            "type": "string",
+            "nullable": true
+          },
+          "translations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventTranslationResponseDto"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventTagResponseDto"
+            }
+          },
+          "category": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CategoryResponseDto"
+              }
+            ]
+          },
+          "recurrenceRule": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecurrenceRuleResponseDto"
+              }
+            ]
+          },
+          "_count": {
+            "$ref": "#/components/schemas/ParticipantCountDto"
+          },
+          "childEvents": {
+            "description": "First 100 recurring children by startTime",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChildEventResponseDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "clientId",
+          "defaultLocale",
+          "authorId",
+          "authorName",
+          "startTime",
+          "timezone",
+          "status",
+          "isOnline",
+          "isPublic",
+          "createdAt",
+          "updatedAt",
+          "translations",
+          "tags",
+          "_count",
+          "childEvents"
+        ]
+      },
+      "EventStatsDto": {
+        "type": "object",
+        "properties": {
+          "totalParticipants": {
+            "type": "number"
+          },
+          "registered": {
+            "type": "number"
+          },
+          "confirmed": {
+            "type": "number"
+          },
+          "waitlist": {
+            "type": "number"
+          },
+          "cancelled": {
+            "type": "number"
+          },
+          "attended": {
+            "type": "number"
+          },
+          "checkedIn": {
+            "type": "number"
+          },
+          "availableSpots": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "totalParticipants",
+          "registered",
+          "confirmed",
+          "waitlist",
+          "cancelled",
+          "attended",
+          "checkedIn"
+        ]
+      },
+      "EventStatsResponseDto": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/EventResponseDto"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/EventStatsDto"
+          }
+        },
+        "required": [
+          "event",
+          "stats"
+        ]
+      },
+      "ParticipantResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "INLINE",
+              "EXTERNAL"
+            ]
+          },
+          "userName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "externalId": {
+            "type": "string",
+            "nullable": true
+          },
+          "externalSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "REGISTERED",
+              "WAITLIST",
+              "CONFIRMED",
+              "CANCELLED",
+              "ATTENDED"
+            ]
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ATTENDEE",
+              "SPEAKER",
+              "ORGANIZER",
+              "HOST"
+            ]
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "checkedIn": {
+            "type": "boolean"
+          },
+          "checkedInAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "metadata": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "id",
+          "eventId",
+          "type",
+          "userName",
+          "status",
+          "role",
+          "checkedIn",
+          "createdAt"
+        ]
+      },
       "UpdateEventDto": {
         "type": "object",
         "properties": {
@@ -3008,6 +4691,47 @@
         },
         "required": [
           "userName"
+        ]
+      },
+      "BulkAddErrorDto": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "number"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "reason"
+        ]
+      },
+      "BulkAddResultDto": {
+        "type": "object",
+        "properties": {
+          "added": {
+            "type": "number"
+          },
+          "waitlisted": {
+            "type": "number"
+          },
+          "skipped": {
+            "type": "number"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BulkAddErrorDto"
+            }
+          }
+        },
+        "required": [
+          "added",
+          "waitlisted",
+          "skipped",
+          "errors"
         ]
       },
       "BulkAddParticipantsDto": {
@@ -3119,6 +4843,154 @@
           "slug"
         ]
       },
+      "TaggedEventDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "defaultLocale": {
+            "type": "string",
+            "example": "it"
+          },
+          "authorId": {
+            "type": "string"
+          },
+          "authorName": {
+            "type": "string"
+          },
+          "authorEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "timezone": {
+            "type": "string",
+            "example": "Europe/Rome"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "PUBLISHED",
+              "CANCELLED",
+              "COMPLETED"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "coverImageUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "categoryId": {
+            "type": "string",
+            "nullable": true
+          },
+          "locationName": {
+            "type": "string",
+            "nullable": true
+          },
+          "locationAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "locationUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "isOnline": {
+            "type": "boolean"
+          },
+          "maxParticipants": {
+            "type": "number",
+            "nullable": true
+          },
+          "isPublic": {
+            "type": "boolean"
+          },
+          "price": {
+            "type": "string",
+            "nullable": true,
+            "example": "12.50",
+            "description": "Decimal, serialized as a string"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true,
+            "example": "EUR"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "recurrenceRuleId": {
+            "type": "string",
+            "nullable": true
+          },
+          "parentEventId": {
+            "type": "string",
+            "nullable": true
+          },
+          "translations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventTranslationResponseDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "clientId",
+          "defaultLocale",
+          "authorId",
+          "authorName",
+          "startTime",
+          "timezone",
+          "status",
+          "isOnline",
+          "isPublic",
+          "createdAt",
+          "updatedAt",
+          "translations"
+        ]
+      },
+      "TagEventResponseDto": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string"
+          },
+          "tagId": {
+            "type": "string"
+          },
+          "event": {
+            "$ref": "#/components/schemas/TaggedEventDto"
+          }
+        },
+        "required": [
+          "eventId",
+          "tagId",
+          "event"
+        ]
+      },
       "UpdateTagDto": {
         "type": "object",
         "properties": {
@@ -3126,6 +4998,118 @@
             "type": "object"
           }
         }
+      },
+      "WebhookDeliveryResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string",
+            "example": "event.created"
+          },
+          "payload": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "webhookUrl": {
+            "type": "string",
+            "description": "URL at enqueue time, audit only"
+          },
+          "attempts": {
+            "type": "number"
+          },
+          "maxAttempts": {
+            "type": "number"
+          },
+          "nextRetryAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastError": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "DELIVERED",
+              "FAILED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "clientId",
+          "eventType",
+          "payload",
+          "webhookUrl",
+          "attempts",
+          "maxAttempts",
+          "nextRetryAt",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "ClientResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "tenantId": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "defaultLocale": {
+            "type": "string",
+            "example": "it"
+          },
+          "emailActive": {
+            "type": "boolean"
+          },
+          "webhookUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revokedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "isActive",
+          "defaultLocale",
+          "emailActive",
+          "createdAt"
+        ]
       },
       "UpdateSettingsDto": {
         "type": "object",
@@ -3141,6 +5125,73 @@
             "type": "boolean"
           }
         }
+      },
+      "WebhookSecretResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "webhookSecret": {
+            "type": "string",
+            "description": "HMAC secret for the webhook-signature header"
+          }
+        },
+        "required": [
+          "id",
+          "webhookSecret"
+        ]
+      },
+      "ClientCreatedResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "tenantId": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "defaultLocale": {
+            "type": "string",
+            "example": "it"
+          },
+          "emailActive": {
+            "type": "boolean"
+          },
+          "webhookUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revokedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "token": {
+            "type": "string",
+            "description": "Shown once, on creation"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "isActive",
+          "defaultLocale",
+          "emailActive",
+          "createdAt",
+          "token"
+        ]
       },
       "CreateClientDto": {
         "type": "object",
@@ -3190,6 +5241,540 @@
             "type": "string"
           }
         }
+      },
+      "ClientTokenResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "token"
+        ]
+      },
+      "StatsEventsDto": {
+        "type": "object",
+        "properties": {
+          "draft": {
+            "type": "number"
+          },
+          "published": {
+            "type": "number"
+          },
+          "cancelled": {
+            "type": "number"
+          },
+          "completed": {
+            "type": "number"
+          },
+          "upcoming": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "draft",
+          "published",
+          "cancelled",
+          "completed",
+          "upcoming"
+        ]
+      },
+      "StatsParticipantsDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number"
+          },
+          "active": {
+            "type": "number"
+          },
+          "checkedIn": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "total",
+          "active",
+          "checkedIn"
+        ]
+      },
+      "StatsRatesDto": {
+        "type": "object",
+        "properties": {
+          "avgFillRate": {
+            "type": "number"
+          },
+          "checkInRate": {
+            "type": "number"
+          },
+          "noShowRate": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "avgFillRate",
+          "checkInRate",
+          "noShowRate"
+        ]
+      },
+      "StatsAlertsDto": {
+        "type": "object",
+        "properties": {
+          "soldOutWithWaitlist": {
+            "type": "number"
+          },
+          "staleDrafts": {
+            "type": "number"
+          },
+          "pastNotCompleted": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "soldOutWithWaitlist",
+          "staleDrafts",
+          "pastNotCompleted"
+        ]
+      },
+      "DailyPointDto": {
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "description": "Day, YYYY-MM-DD"
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "bucket",
+          "value"
+        ]
+      },
+      "StatsTrendsDto": {
+        "type": "object",
+        "properties": {
+          "upcoming": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DailyPointDto"
+            }
+          }
+        },
+        "required": [
+          "upcoming"
+        ]
+      },
+      "TenantStatsResponseDto": {
+        "type": "object",
+        "properties": {
+          "events": {
+            "$ref": "#/components/schemas/StatsEventsDto"
+          },
+          "participants": {
+            "$ref": "#/components/schemas/StatsParticipantsDto"
+          },
+          "rates": {
+            "$ref": "#/components/schemas/StatsRatesDto"
+          },
+          "alerts": {
+            "$ref": "#/components/schemas/StatsAlertsDto"
+          },
+          "trends": {
+            "$ref": "#/components/schemas/StatsTrendsDto"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "events",
+          "participants",
+          "rates",
+          "alerts",
+          "trends",
+          "version"
+        ]
+      },
+      "TimeseriesPointDto": {
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "bucket",
+          "value"
+        ]
+      },
+      "TimeseriesResponseDto": {
+        "type": "object",
+        "properties": {
+          "metric": {
+            "type": "string",
+            "enum": [
+              "events",
+              "participants"
+            ]
+          },
+          "interval": {
+            "type": "string",
+            "enum": [
+              "day",
+              "week",
+              "month"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimeseriesPointDto"
+            }
+          }
+        },
+        "required": [
+          "metric",
+          "interval",
+          "data"
+        ]
+      },
+      "BreakdownRowDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true,
+            "description": "status: label; category/tag: id"
+          },
+          "label": {
+            "type": "string",
+            "description": "status only"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "description": "category only"
+          },
+          "slug": {
+            "type": "string",
+            "description": "tag only"
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "count"
+        ]
+      },
+      "BreakdownResponseDto": {
+        "type": "object",
+        "properties": {
+          "by": {
+            "type": "string",
+            "enum": [
+              "status",
+              "category",
+              "tag"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BreakdownRowDto"
+            }
+          }
+        },
+        "required": [
+          "by",
+          "data"
+        ]
+      },
+      "RetentionCohortDto": {
+        "type": "object",
+        "properties": {
+          "cohort": {
+            "type": "string",
+            "example": "2026-03",
+            "description": "YYYY-MM"
+          },
+          "size": {
+            "type": "number"
+          },
+          "retention": {
+            "description": "Share of the cohort active in each following period, 0..1",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "cohort",
+          "size",
+          "retention"
+        ]
+      },
+      "RetentionResponseDto": {
+        "type": "object",
+        "properties": {
+          "granularity": {
+            "type": "string",
+            "enum": [
+              "week",
+              "month"
+            ]
+          },
+          "cohorts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RetentionCohortDto"
+            }
+          }
+        },
+        "required": [
+          "granularity",
+          "cohorts"
+        ]
+      },
+      "PersonExternalDto": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "PersonSummaryDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "example": "p_0123456789abcdef0123456789abcdef"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "external": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PersonExternalDto"
+              }
+            ]
+          },
+          "eventsCount": {
+            "type": "number"
+          },
+          "firstSeen": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastSeen": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "checkedInCount": {
+            "type": "number"
+          },
+          "noShowCount": {
+            "type": "number"
+          },
+          "segment": {
+            "type": "string",
+            "enum": [
+              "vip",
+              "at_risk",
+              "returning",
+              "new"
+            ]
+          }
+        },
+        "required": [
+          "key",
+          "displayName",
+          "eventsCount",
+          "firstSeen",
+          "lastSeen",
+          "checkedInCount",
+          "noShowCount",
+          "segment"
+        ]
+      },
+      "PersonHistoryDto": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string"
+          },
+          "checkedIn": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "eventId",
+          "startTime",
+          "status",
+          "checkedIn"
+        ]
+      },
+      "PersonTopCategoryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "frequency": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "frequency"
+        ]
+      },
+      "PersonTopTagDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "frequency": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "frequency"
+        ]
+      },
+      "PersonProfileResponseDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "example": "p_0123456789abcdef0123456789abcdef"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "external": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PersonExternalDto"
+              }
+            ]
+          },
+          "eventsCount": {
+            "type": "number"
+          },
+          "firstSeen": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastSeen": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "checkedInCount": {
+            "type": "number"
+          },
+          "noShowCount": {
+            "type": "number"
+          },
+          "segment": {
+            "type": "string",
+            "enum": [
+              "vip",
+              "at_risk",
+              "returning",
+              "new"
+            ]
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonHistoryDto"
+            }
+          },
+          "topCategories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonTopCategoryDto"
+            }
+          },
+          "topTags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonTopTagDto"
+            }
+          }
+        },
+        "required": [
+          "key",
+          "displayName",
+          "eventsCount",
+          "firstSeen",
+          "lastSeen",
+          "checkedInCount",
+          "noShowCount",
+          "segment",
+          "history",
+          "topCategories",
+          "topTags"
+        ]
       }
     }
   }

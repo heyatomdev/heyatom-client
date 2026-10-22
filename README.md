@@ -143,7 +143,7 @@ The signed content is `<webhook-id>.<webhook-timestamp>.<raw body>`, HMAC-SHA256
 
 **`BeaconClient`** (`anonymousAuth()`; `baseUrl` includes any prefix before `/public`, e.g. `/api`): `getCreator(name)`, `getTeam(slug)`, `getOrg(slug)`. Answers keep Beacon's `{ data }` envelope.
 
-**`GatherlyClient`** (service-client JWT for `gatherly`; its tenant selects the Gatherly client): `listEvents`, `getEvent`, `getEventStats`, `addParticipant(eventId, body, { idempotencyKey })`. `idempotencyKey` is sent as `Idempotency-Key`: Gatherly answers a retry with the cached response.
+**`GatherlyClient`** (service-client JWT for `gatherly`; its tenant selects the Gatherly client): `listEvents`, `getEvent`, `getEventStats`, `addParticipant(eventId, body, { idempotencyKey })`. Answers keep Gatherly's `{ data }` envelope (`{ data, meta }` for lists). `idempotencyKey` is sent as `Idempotency-Key`: Gatherly answers a retry with the cached response.
 
 **`ArticunoClient`** (tenant key or service-client JWT):
 - Articles and translations: `listArticles`, `getArticle(slug)`, `listTranslations`, `getTranslation`
@@ -155,9 +155,9 @@ The signed content is `<webhook-id>.<webhook-timestamp>.<raw body>`, HMAC-SHA256
 
 ## Types
 
-Types are generated, never written by hand, from the services' full specs (console routes included, though no client method calls them). Each service's OpenAPI document is committed as `openapi/<service>.json`, and `openapi-typescript` turns it into `src/<service>/types.gen.ts`. Every subpath re-exports the result: `paths`, `components`, `operations`, and one alias per schema (`ImageResponseDto`, `PublicCreateArticleDto`, and so on). Method inputs and outputs derive from `operations`. Every client method has a typed JSON body and, where the service documents one, a typed response. If a route ships without a response schema, its method returns `unknown`. The fix belongs in the service (`@ApiOkResponse({ type })`), followed by a regeneration. It does not belong here.
+Types are generated, never written by hand, from the services' full specs (console routes included, though no client method calls them). Each service's OpenAPI document is committed as `openapi/<service>.json`, and `openapi-typescript` turns it into `src/<service>/types.gen.ts`. Every subpath re-exports the result: `paths`, `components`, `operations`, and one alias per schema (`ImageResponseDto`, `PublicCreateArticleDto`, and so on). Method inputs and outputs derive from `operations`. Every client method has a typed JSON response and body. If a route ships without a response schema, its method returns `unknown`. The fix belongs in the service (`@ApiOkResponse({ type })`), followed by a regeneration. It does not belong here.
 
-Gatherly documents no response schema yet, so `GatherlyClient` methods take the response type as a parameter (`listEvents<Paginated<Event>>()`), defaulting to the generated one. The default becomes typed on its own when Gatherly documents its responses.
+A service whose `TransformInterceptor` wraps bodies in `{ data }` must document the envelope, not the bare DTO (Beacon's and Gatherly's `ApiOkData`), or the generated types lie about the shape on the wire.
 
 ```bash
 pnpm openapi:dump   # runs `pnpm openapi:dump` in ../fileharbor, ../articuno, ../beacon and ../gatherly
@@ -189,6 +189,6 @@ Each service's `openapi:dump` (`scripts/openapi-dump.ts`) boots the Nest app wit
 
 **dbdbuilds-api `modules/beacon`**: drop `BeaconClientService` and import `HeyAtomBeaconModule` with `auth: anonymousAuth()` and `baseUrl: BEACON_URL`. `beacon.get('/teams/x')` becomes `getTeam('x')`, likewise `getOrg` and `getCreator`. The old service unwrapped `{ data }`; the client keeps it, so read `.data`. `beacon.types.ts` goes away in favour of the generated types (`PublicTeamDetailDto`, …).
 
-**sgweb `server/utils/gatherly.ts`**: keep the module-level `ServiceTokenProvider` and build `new GatherlyClient({ baseUrl: gatherlyUrl, auth: serviceTokenAuth(tokens, 'gatherly') })`. `gatherlyFetch` becomes `listEvents`, `getEvent`, `getEventStats` and `addParticipant(id, body, { idempotencyKey })`. The caching, the error sanitizing for the browser and the `gatherly.types.ts` response types stay in the app until Gatherly documents its responses.
+**sgweb `server/utils/gatherly.ts`**: keep the module-level `ServiceTokenProvider` and build `new GatherlyClient({ baseUrl: gatherlyUrl, auth: serviceTokenAuth(tokens, 'gatherly') })`. `gatherlyFetch` becomes `listEvents`, `getEvent`, `getEventStats` and `addParticipant(id, body, { idempotencyKey })`. The caching and the error sanitizing for the browser stay in the app; `gatherly.types.ts` goes away in favour of the generated types (`EventDetailResponseDto`, …).
 
 Herald clients are out of scope for this release.
