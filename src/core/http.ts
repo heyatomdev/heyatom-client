@@ -1,4 +1,4 @@
-import type { AuthProvider } from './auth.js';
+import { isAnonymousAuth, type AuthProvider } from './auth.js';
 
 export interface HeyAtomLogger {
   warn(message: string): void;
@@ -15,7 +15,7 @@ export const silentLogger: HeyAtomLogger = {
 export interface HeyAtomClientOptions {
   /** Service base URL, including any prefix a reverse proxy adds (e.g. `http://fileharbor:3000/v2`). */
   baseUrl: string;
-  /** Called before every request; returns the credential headers. See `apiKeyAuth`, `serviceTokenAuth`. */
+  /** Called before every request; returns the credential headers. See `apiKeyAuth`, `serviceTokenAuth`, `anonymousAuth`. */
   auth: AuthProvider;
   /** Per-request timeout, default 10 000 ms. Uploads default to 60 000 ms. */
   timeoutMs?: number;
@@ -80,14 +80,19 @@ export class HeyAtomHttp {
   private readonly timeoutMs: number;
   private readonly fetchImpl: typeof fetch;
   private readonly auth: AuthProvider;
+  private readonly anonymous: boolean;
   readonly logger: HeyAtomLogger;
 
+  /** `allowAnonymous`: only for a client whose whole surface is anonymous (Beacon `/public`). */
   constructor(
     private readonly service: string,
     options: HeyAtomClientOptions,
+    { allowAnonymous = false }: { allowAnonymous?: boolean } = {},
   ) {
     if (!options.baseUrl) throw new Error(`${service}: baseUrl is required`);
     if (typeof options.auth !== 'function') throw new Error(`${service}: auth is required`);
+    this.anonymous = isAnonymousAuth(options.auth);
+    if (this.anonymous && !allowAnonymous) throw new Error(`${service}: anonymousAuth is not accepted, this service requires a credential`);
     this.baseUrl = options.baseUrl.replace(/\/+$/, '');
     this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     // Late-bound on purpose: a consumer (or its tests) may replace global fetch after construction.
@@ -122,7 +127,7 @@ export class HeyAtomHttp {
   ): Promise<Response> {
     const credentials = await this.auth();
     const lower = Object.fromEntries(Object.entries(credentials).map(([k, v]) => [k.toLowerCase(), v]));
-    if (!lower['x-api-key'] && !/^Bearer \S/.test(lower['authorization'] ?? '')) {
+    if (!this.anonymous && !lower['x-api-key'] && !/^Bearer \S/.test(lower['authorization'] ?? '')) {
       // Every surface of every service authenticates, and on Articuno the credential is
       // what selects the tenant: a call without one must never leave the process.
       throw new Error(`${this.service}: auth returned no X-API-Key or Bearer credential`);

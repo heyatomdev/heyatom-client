@@ -10,7 +10,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
 
-const SERVICES = ['fileharbor', 'articuno'];
+const SERVICES = ['fileharbor', 'articuno', 'beacon', 'gatherly'];
 const root = resolve(import.meta.dirname, '..');
 const tmp = mkdtempSync(join(tmpdir(), 'check-api-'));
 const readJson = (file) => JSON.parse(readFileSync(file, 'utf8'));

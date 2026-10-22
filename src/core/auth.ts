@@ -29,3 +29,18 @@ export function serviceTokenAuth(tokens: ServiceTokenSource, serviceSlug: string
     return { Authorization: `Bearer ${token}` };
   };
 }
+
+const anonymous: AuthProvider = () => ({});
+
+/**
+ * No credential, for anonymous surfaces (Beacon's `/public`). Only clients built for
+ * such a surface accept it: any other client throws at construction, so an
+ * authenticated service can never be called without a credential by mistake.
+ */
+export function anonymousAuth(): AuthProvider {
+  return anonymous;
+}
+
+export function isAnonymousAuth(auth: AuthProvider): boolean {
+  return auth === anonymous;
+}

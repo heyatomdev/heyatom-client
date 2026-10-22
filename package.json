@@ -1,7 +1,7 @@
 {
   "name": "@heyatom/client",
   "version": "0.2.2",
-  "description": "Consumer SDK for the HeyAtom platform services: FileHarbor and Articuno clients on native fetch, with optional NestJS modules",
+  "description": "Consumer SDK for the HeyAtom platform services: FileHarbor, Articuno, Beacon and Gatherly clients on native fetch, with optional NestJS modules",
   "license": "MIT",
   "author": "Andrea Tombolato <hey@heyatom.dev> (https://heyatom.dev)",
   "repository": {
@@ -53,6 +53,46 @@
         "default": "./dist/cjs/articuno/nest/index.js"
       }
     },
+    "./beacon": {
+      "import": {
+        "types": "./dist/esm/beacon/index.d.ts",
+        "default": "./dist/esm/beacon/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/beacon/index.d.ts",
+        "default": "./dist/cjs/beacon/index.js"
+      }
+    },
+    "./beacon/nest": {
+      "import": {
+        "types": "./dist/esm/beacon/nest/index.d.ts",
+        "default": "./dist/esm/beacon/nest/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/beacon/nest/index.d.ts",
+        "default": "./dist/cjs/beacon/nest/index.js"
+      }
+    },
+    "./gatherly": {
+      "import": {
+        "types": "./dist/esm/gatherly/index.d.ts",
+        "default": "./dist/esm/gatherly/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/gatherly/index.d.ts",
+        "default": "./dist/cjs/gatherly/index.js"
+      }
+    },
+    "./gatherly/nest": {
+      "import": {
+        "types": "./dist/esm/gatherly/nest/index.d.ts",
+        "default": "./dist/esm/gatherly/nest/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/gatherly/nest/index.d.ts",
+        "default": "./dist/cjs/gatherly/nest/index.js"
+      }
+    },
     "./webhooks": {
       "import": {
         "types": "./dist/esm/webhooks/index.d.ts",
@@ -78,6 +118,18 @@
       "articuno/nest": [
         "./dist/cjs/articuno/nest/index.d.ts"
       ],
+      "beacon": [
+        "./dist/cjs/beacon/index.d.ts"
+      ],
+      "beacon/nest": [
+        "./dist/cjs/beacon/nest/index.d.ts"
+      ],
+      "gatherly": [
+        "./dist/cjs/gatherly/index.d.ts"
+      ],
+      "gatherly/nest": [
+        "./dist/cjs/gatherly/nest/index.d.ts"
+      ],
       "webhooks": [
         "./dist/cjs/webhooks/index.d.ts"
       ]
@@ -89,8 +141,8 @@
     "lint": "tsc -p tsconfig.json --noEmit",
     "test:di": "node scripts/di-smoke.cjs",
     "check:api": "node scripts/check-api.mjs",
-    "openapi:dump": "pnpm --dir ../fileharbor openapi:dump \"$PWD/openapi/fileharbor.json\" && pnpm --dir ../articuno openapi:dump \"$PWD/openapi/articuno.json\"",
-    "gen:types": "openapi-typescript openapi/fileharbor.json -o src/fileharbor/types.gen.ts --root-types --root-types-no-schema-prefix --empty-objects-unknown && openapi-typescript openapi/articuno.json -o src/articuno/types.gen.ts --root-types --root-types-no-schema-prefix --empty-objects-unknown",
+    "openapi:dump": "pnpm --dir ../fileharbor openapi:dump \"$PWD/openapi/fileharbor.json\" && pnpm --dir ../articuno openapi:dump \"$PWD/openapi/articuno.json\" && pnpm --dir ../beacon openapi:dump \"$PWD/openapi/beacon.json\" && pnpm --dir ../gatherly openapi:dump \"$PWD/openapi/gatherly.json\"",
+    "gen:types": "openapi-typescript openapi/fileharbor.json -o src/fileharbor/types.gen.ts --root-types --root-types-no-schema-prefix --empty-objects-unknown && openapi-typescript openapi/articuno.json -o src/articuno/types.gen.ts --root-types --root-types-no-schema-prefix --empty-objects-unknown && openapi-typescript openapi/beacon.json -o src/beacon/types.gen.ts --root-types --root-types-no-schema-prefix --empty-objects-unknown && openapi-typescript openapi/gatherly.json -o src/gatherly/types.gen.ts --root-types --root-types-no-schema-prefix --empty-objects-unknown",
     "prepublishOnly": "pnpm lint && pnpm test && pnpm build && pnpm test:di"
   },
   "engines": {

@@ -1,4 +1,4 @@
-# @heyatom/client — consumer SDK per FileHarbor, Articuno, Beacon
+# @heyatom/client — consumer SDK per FileHarbor, Articuno, Beacon, Gatherly
 
 Package npm unico con subpath export per servizio. Sostituisce i moduli client copiati a mano in
 dbdbuilds-api, shelfie-api, website4 (e sgweb). Gemello di `../bastion-client`
@@ -12,7 +12,10 @@ dbdbuilds-api, shelfie-api, website4 (e sgweb). Gemello di `../bastion-client`
   @heyatom/client/fileharbor/nest   HeyAtomFileHarborModule.forRoot / forRootAsync
   @heyatom/client/articuno          core: ArticunoClient + tipi
   @heyatom/client/articuno/nest
-  @heyatom/client/beacon            (fase 2, non ora)
+  @heyatom/client/beacon            core: BeaconClient (`/public` anonimo) + tipi
+  @heyatom/client/beacon/nest
+  @heyatom/client/gatherly          core: GatherlyClient (service-client JWT) + tipi
+  @heyatom/client/gatherly/nest
   ```
   Nessun export root che trascina tutto. Nest è peer dep opzionale, usata solo dai subpath `/nest`.
 - **Core su `fetch` nativo.** Niente axios, `@nestjs/axios`, `form-data`. Multipart con `FormData`/`Blob` nativi
@@ -49,7 +52,20 @@ dbdbuilds-api, shelfie-api, website4 (e sgweb). Gemello di `../bastion-client`
    (`../bastion-client/scripts/di-smoke.cjs`).
 6. `README.md`: install, uso core (Nuxt) e Nest, migrazione da modulo copiato.
 
-Non in fase 1: Beacon, Herald, Gatherly, migrazione dei consumer (arriva dopo, repo per repo).
+Non in fase 1: Herald, migrazione dei consumer (arriva dopo, repo per repo).
+
+## Fase 2: Beacon e Gatherly
+
+- Perimetro = route che i consumer usano oggi. Beacon: `getCreator`, `getTeam`, `getOrg` (dbdbuilds-api
+  `modules/beacon`). Gatherly: `listEvents`, `getEvent`, `getEventStats`, `addParticipant` (sgweb
+  `server/utils/gatherly.ts`; dbd lo userà dopo, si aggiunge quando serve).
+- **Auth anonima esplicita.** Beacon `/public` non ha credenziali: `anonymousAuth()`, accettata solo da un
+  client costruito con `HeyAtomHttp(..., { allowAnonymous: true })` (oggi solo `BeaconClient`). Gli altri
+  lanciano in costruzione; un `auth` che rende `{}` resta rifiutato ovunque. Non allentare il controllo nel core.
+- Gatherly non documenta le risposte (nessun `@ApiOkResponse`): i metodi hanno `<T = ResponseOf<...>>`,
+  il consumer passa il suo tipo finché il fix non arriva nel servizio. Non scrivere tipi di risposta qui.
+- `pnpm check:api` dopo ogni release di un servizio: confronta le operazioni usate dai client tra spec
+  committata e dump fresco, esce 1 se cambiano.
 
 ## Convenzioni
 

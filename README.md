@@ -1,6 +1,6 @@
 # @heyatom/client
 
-Consumer SDK for the HeyAtom platform services. It replaces the `src/modules/fileharbor/` and `src/modules/articuno/` clients each app used to copy by hand. Twin of [`@heyatom/bastion-client`](https://github.com/heyatomdev/bastion-client).
+Consumer SDK for the HeyAtom platform services. It replaces the FileHarbor, Articuno, Beacon and Gatherly clients each app used to copy by hand. Twin of [`@heyatom/bastion-client`](https://github.com/heyatomdev/bastion-client).
 
 | Import | What |
 |---|---|
@@ -8,6 +8,10 @@ Consumer SDK for the HeyAtom platform services. It replaces the `src/modules/fil
 | `@heyatom/client/fileharbor/nest` | the above plus `HeyAtomFileHarborModule.forRoot / forRootAsync` |
 | `@heyatom/client/articuno` | `ArticunoClient` (public, tenant-scoped surface), auth helpers, generated types |
 | `@heyatom/client/articuno/nest` | the above plus `HeyAtomArticunoModule.forRoot / forRootAsync` |
+| `@heyatom/client/beacon` | `BeaconClient` (anonymous `/public` surface), `anonymousAuth`, generated types |
+| `@heyatom/client/beacon/nest` | the above plus `HeyAtomBeaconModule.forRoot / forRootAsync` |
+| `@heyatom/client/gatherly` | `GatherlyClient` (service-client surface), `serviceTokenAuth`, generated types |
+| `@heyatom/client/gatherly/nest` | the above plus `HeyAtomGatherlyModule.forRoot / forRootAsync` |
 | `@heyatom/client/webhooks` | `verifyStandardWebhook`: receiving side of the platform's Standard Webhooks (Articuno, Gatherly) |
 
 There is no root export, so import a subpath. The core subpaths depend on nothing: they use native `fetch`, `FormData` and `Blob`, need Node ≥ 20.19, and run the same in Nuxt/Nitro. `@nestjs/common` is an optional peer, used only by `/nest`. `@heyatom/bastion-client` is an optional peer, needed only if you pass its `ServiceTokenProvider` to `serviceTokenAuth`. Ships CJS and ESM.
@@ -20,10 +24,13 @@ Each client takes `auth`, a function that returns the credential headers and run
 
 ```ts
 apiKeyAuth(key)                        // X-API-Key: FileHarbor client key, or Articuno tenant key
-serviceTokenAuth(provider, 'articuno') // Bearer service-client JWT from bastion-client's ServiceTokenProvider
+serviceTokenAuth(provider, 'articuno') // Bearer service-client JWT from bastion-client's ServiceTokenProvider ('gatherly' for Gatherly)
+anonymousAuth()                        // no credential: Beacon's /public only
 ```
 
 A request never leaves the process without a credential. If `auth` yields neither a non-empty `X-API-Key` nor a `Bearer` token, the call throws before `fetch` runs. On Articuno the credential **is** the tenant scope: the tenant key, or the `tenantId` in the token. So an unscoped Articuno call is impossible by construction. Credential headers always override `opts.headers`.
+
+`anonymousAuth()` is the one explicit exception, for a surface that takes no credential. Only `BeaconClient` accepts it: every other client throws at construction when given it. An `auth` that just returns `{}` is still refused, on Beacon too.
 
 The per-call options are `{ userId?, requestId?, headers?, timeoutMs?, signal? }`. `userId` is sent as `X-User-Id`, `requestId` as `X-Request-Id` (pass your own request id, api standard §7).
 
@@ -134,6 +141,10 @@ The signed content is `<webhook-id>.<webhook-timestamp>.<raw body>`, HMAC-SHA256
 
 **`FileHarborClient`** (API key; `baseUrl` includes any proxy prefix, e.g. `/v2`): `uploadImage`, `updateImage`, `deleteImage`, `uploadAvatar`, `deleteAvatar`, `getClientStats`.
 
+**`BeaconClient`** (`anonymousAuth()`; `baseUrl` includes any prefix before `/public`, e.g. `/api`): `getCreator(name)`, `getTeam(slug)`, `getOrg(slug)`. Answers keep Beacon's `{ data }` envelope.
+
+**`GatherlyClient`** (service-client JWT for `gatherly`; its tenant selects the Gatherly client): `listEvents`, `getEvent`, `getEventStats`, `addParticipant(eventId, body, { idempotencyKey })`. `idempotencyKey` is sent as `Idempotency-Key`: Gatherly answers a retry with the cached response.
+
 **`ArticunoClient`** (tenant key or service-client JWT):
 - Articles and translations: `listArticles`, `getArticle(slug)`, `listTranslations`, `getTranslation`
 - Categories and tags: `listCategories`, `getCategory(slug)`, `listTags`, `getTag(slug)`
@@ -144,12 +155,17 @@ The signed content is `<webhook-id>.<webhook-timestamp>.<raw body>`, HMAC-SHA256
 
 ## Types
 
-Types are generated, never written by hand, from the services' full specs (console routes included, though no client method calls them). Each service's OpenAPI document is committed as `openapi/<service>.json`, and `openapi-typescript` turns it into `src/<service>/types.gen.ts`. Every subpath re-exports the result: `paths`, `components`, `operations`, and one alias per schema (`ImageResponseDto`, `PublicCreateArticleDto`, and so on). Method inputs and outputs derive from `operations`. Every client method has a typed JSON response and body. If a service route ever ships without a response schema, its method returns `unknown`. The fix belongs in the service (`@ApiOkResponse({ type })`), followed by a regeneration. It does not belong here.
+Types are generated, never written by hand, from the services' full specs (console routes included, though no client method calls them). Each service's OpenAPI document is committed as `openapi/<service>.json`, and `openapi-typescript` turns it into `src/<service>/types.gen.ts`. Every subpath re-exports the result: `paths`, `components`, `operations`, and one alias per schema (`ImageResponseDto`, `PublicCreateArticleDto`, and so on). Method inputs and outputs derive from `operations`. Every client method has a typed JSON body and, where the service documents one, a typed response. If a route ships without a response schema, its method returns `unknown`. The fix belongs in the service (`@ApiOkResponse({ type })`), followed by a regeneration. It does not belong here.
+
+Gatherly documents no response schema yet, so `GatherlyClient` methods take the response type as a parameter (`listEvents<Paginated<Event>>()`), defaulting to the generated one. The default becomes typed on its own when Gatherly documents its responses.
 
 ```bash
-pnpm openapi:dump   # runs `pnpm openapi:dump` in ../fileharbor and ../articuno
+pnpm openapi:dump   # runs `pnpm openapi:dump` in ../fileharbor, ../articuno, ../beacon and ../gatherly
 pnpm gen:types      # openapi/*.json → src/*/types.gen.ts
+pnpm check:api      # after a service release: fails if an operation a client calls changed
 ```
+
+`check:api` dumps each service's spec from the sibling repo and compares, for every operation a client calls, its path, method, definition and every schema it reaches against the committed spec. Routes the clients don't call are only counted. `info.version` is not a signal: services add routes without bumping it.
 
 Each service's `openapi:dump` (`scripts/openapi-dump.ts`) boots the Nest app without `listen()` and without `init()`, so `onModuleInit` never runs and Prisma never connects. Dummy values fill the required env vars. It then writes `SwaggerModule.createDocument` to a file. It needs no database and no running instance, and the output is deterministic.
 
@@ -171,4 +187,8 @@ Each service's `openapi:dump` (`scripts/openapi-dump.ts`) boots the Nest app wit
 - `findAll` becomes `listArticles`, `findBySlug` becomes `getArticle`, `toggle` becomes `toggleBookmark`, `findMine` becomes `listMyBookmarks`, `sync` becomes `syncUser`, and so on.
 - `ArticunoTagsService.findBySlug` called `/tags/slug/:slug`, which Articuno does not serve (always 404). `findOne(id)` hit `/tags/:slug` with an id. Both become `getTag(slug)`. `ArticunoCategoriesService.findOne(id)` has the same problem and becomes `getCategory(slug)`.
 
-Beacon, Herald and Gatherly clients are out of scope for this release.
+**dbdbuilds-api `modules/beacon`**: drop `BeaconClientService` and import `HeyAtomBeaconModule` with `auth: anonymousAuth()` and `baseUrl: BEACON_URL`. `beacon.get('/teams/x')` becomes `getTeam('x')`, likewise `getOrg` and `getCreator`. The old service unwrapped `{ data }`; the client keeps it, so read `.data`. `beacon.types.ts` goes away in favour of the generated types (`PublicTeamDetailDto`, …).
+
+**sgweb `server/utils/gatherly.ts`**: keep the module-level `ServiceTokenProvider` and build `new GatherlyClient({ baseUrl: gatherlyUrl, auth: serviceTokenAuth(tokens, 'gatherly') })`. `gatherlyFetch` becomes `listEvents`, `getEvent`, `getEventStats` and `addParticipant(id, body, { idempotencyKey })`. The caching, the error sanitizing for the browser and the `gatherly.types.ts` response types stay in the app until Gatherly documents its responses.
+
+Herald clients are out of scope for this release.

@@ -1,0 +1,4603 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/health/live": {
+      "get": {
+        "description": "Always returns 200. Used by container orchestrators to check if the process is alive.",
+        "operationId": "HealthController_live",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "status": "ok"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Liveness probe",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "description": "Checks database connectivity. Returns 200 when the service is ready to accept traffic, 503 otherwise.",
+        "operationId": "HealthController_ready",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Service is ready — all health indicators passed\n\nThe Health Check is successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {},
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The Health Check is not successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        },
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Readiness probe",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/extension/team": {
+      "get": {
+        "description": "Bearer token = JWT from Twitch.ext.onAuthorized. `team` is null when the channel is in no team.",
+        "operationId": "ExtensionController_team",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Team of the channel the panel is installed on, live members first",
+        "tags": [
+          "Twitch extension"
+        ]
+      },
+      "post": {
+        "description": "One per channel. Errors carry a `code`: `invalid_team_name` 400, `slug_taken` / `channel_team_exists` 409, `twitch_unavailable` 503.",
+        "operationId": "ExtensionController_createTeam",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateChannelTeamDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Broadcaster: create a team holding only this channel and show it in the panel",
+        "tags": [
+          "Twitch extension"
+        ]
+      }
+    },
+    "/extension/config": {
+      "get": {
+        "operationId": "ExtensionController_getConfig",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Broadcaster: team options, current choice, own blocks",
+        "tags": [
+          "Twitch extension"
+        ]
+      },
+      "put": {
+        "operationId": "ExtensionController_setConfig",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPanelTeamDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Broadcaster: pick the panel team (a Twitch team is imported or synced first)",
+        "tags": [
+          "Twitch extension"
+        ]
+      }
+    },
+    "/extension/leave": {
+      "post": {
+        "operationId": "ExtensionController_leave",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeaveTeamDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Broadcaster: leave (and optionally report) a team; blocks re-adding",
+        "tags": [
+          "Twitch extension"
+        ]
+      }
+    },
+    "/extension/blocks/{teamSlug}": {
+      "delete": {
+        "operationId": "ExtensionController_unblock",
+        "parameters": [
+          {
+            "name": "teamSlug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Broadcaster: remove own block on a team",
+        "tags": [
+          "Twitch extension"
+        ]
+      }
+    },
+    "/public/teams": {
+      "get": {
+        "operationId": "PublicController_listTeams",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Case-insensitive search",
+            "schema": {
+              "minLength": 2,
+              "maxLength": 50,
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "description": "name = by name; live = teams by live member count, creators live first by current viewers, then by name",
+            "schema": {
+              "default": "name",
+              "type": "string",
+              "enum": [
+                "name",
+                "live"
+              ]
+            }
+          },
+          {
+            "name": "slugs",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated team slugs, at most 10: exactly those teams (unlisted included, banned orgs and unknown slugs left out), in the order given, members or not. Overrides the listing: q, sort, page and limit are ignored and meta describes the returned set (page 1).",
+            "schema": {
+              "example": "element,rocket",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicTeamPageDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or unknown query parameter, more than 10 slugs"
+          }
+        },
+        "summary": "Listed teams with at least one member, by name or by live members (sort=live); or exactly ?slugs=",
+        "tags": [
+          "Public"
+        ]
+      }
+    },
+    "/public/orgs/{slug}": {
+      "get": {
+        "operationId": "PublicController_getOrg",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PublicOrgDetailDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No published organization with this slug (personal, banned or unknown)"
+          }
+        },
+        "summary": "Organization page: profile and every non-empty team of the org",
+        "tags": [
+          "Public"
+        ]
+      }
+    },
+    "/public/teams/{slug}": {
+      "get": {
+        "operationId": "PublicController_getTeam",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PublicTeamDetailDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Team not found or org banned"
+          }
+        },
+        "summary": "Team and its members (unlisted teams included)",
+        "tags": [
+          "Public"
+        ]
+      }
+    },
+    "/public/teams/{slug}/stats": {
+      "get": {
+        "operationId": "PublicController_teamStats",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "days",
+            "required": false,
+            "in": "query",
+            "description": "Window in days",
+            "schema": {
+              "default": 30,
+              "type": "number",
+              "enum": [
+                30,
+                90
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PublicStatsDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "days not 30 or 90"
+          },
+          "404": {
+            "description": "Team not found or org banned"
+          }
+        },
+        "summary": "Stream statistics of the current members over 30 or 90 days",
+        "tags": [
+          "Public"
+        ]
+      }
+    },
+    "/public/creators": {
+      "get": {
+        "operationId": "PublicController_listCreators",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Case-insensitive search",
+            "schema": {
+              "minLength": 2,
+              "maxLength": 50,
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "description": "name = by name; live = teams by live member count, creators live first by current viewers, then by name",
+            "schema": {
+              "default": "name",
+              "type": "string",
+              "enum": [
+                "name",
+                "live"
+              ]
+            }
+          },
+          {
+            "name": "platform",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "TWITCH",
+                "KICK"
+              ]
+            }
+          },
+          {
+            "name": "live",
+            "required": false,
+            "in": "query",
+            "description": "true = only creators with a live account (on `platform`, if given); false = no filter",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicCreatorPageDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or unknown query parameter"
+          }
+        },
+        "summary": "Creators of listed teams, by name or live first by viewers (sort=live)",
+        "tags": [
+          "Public"
+        ]
+      }
+    },
+    "/public/creators/{name}": {
+      "get": {
+        "operationId": "PublicController_getCreator",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PublicCreatorDetailDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Creator not found"
+          }
+        },
+        "summary": "Creator profile, accounts, games, last game and listed teams",
+        "tags": [
+          "Public"
+        ]
+      }
+    },
+    "/public/creators/{name}/stats": {
+      "get": {
+        "operationId": "PublicController_creatorStats",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "days",
+            "required": false,
+            "in": "query",
+            "description": "Window in days",
+            "schema": {
+              "default": 30,
+              "type": "number",
+              "enum": [
+                30,
+                90
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PublicStatsDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "days not 30 or 90"
+          },
+          "404": {
+            "description": "Creator not found"
+          }
+        },
+        "summary": "Stream statistics of the creator over 30 or 90 days",
+        "tags": [
+          "Public"
+        ]
+      }
+    },
+    "/public/games/{slug}": {
+      "get": {
+        "operationId": "PublicController_getGame",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PublicGameDetailDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Game not found or hidden"
+          }
+        },
+        "summary": "Game page: name, cover, how many listed creators play it and how many are live",
+        "tags": [
+          "Public"
+        ]
+      }
+    },
+    "/public/games/{slug}/creators": {
+      "get": {
+        "operationId": "PublicController_gameCreators",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicGameCreatorPageDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or unknown query parameter"
+          },
+          "404": {
+            "description": "Game not found or hidden"
+          }
+        },
+        "summary": "Creators of a game (listed teams only): live first, pinned, then minutes in 90 days",
+        "tags": [
+          "Public"
+        ]
+      }
+    },
+    "/me/orgs": {
+      "post": {
+        "operationId": "MeOrgsController_ensurePersonal",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Already existed"
+          },
+          "201": {
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get or create your personal organization (idempotent)",
+        "tags": [
+          "Me — organizations"
+        ]
+      },
+      "get": {
+        "operationId": "MeOrgsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Organizations you own or manage, with your role",
+        "tags": [
+          "Me — organizations"
+        ]
+      }
+    },
+    "/me/orgs/{orgId}": {
+      "get": {
+        "operationId": "MeOrgsController_get",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not found or not yours"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "One of your organizations, with its members",
+        "tags": [
+          "Me — organizations"
+        ]
+      },
+      "patch": {
+        "operationId": "MeOrgsController_update",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeUpdateOrgDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "403": {
+            "description": "Personal organization, or banned"
+          },
+          "409": {
+            "description": "Slug taken"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Public profile of an ORGANIZATION (slug, name, logo, description, socials)",
+        "tags": [
+          "Me — organizations"
+        ]
+      }
+    },
+    "/me/orgs/{orgId}/images/{kind}": {
+      "put": {
+        "operationId": "MeOrgsController_setImage",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "kind",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "403": {
+            "description": "Personal organization, or banned"
+          },
+          "503": {
+            "description": "FileHarbor unavailable"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Upload the ORGANIZATION logo or banner (FileHarbor, max 5 MB)",
+        "tags": [
+          "Me — organizations"
+        ]
+      }
+    },
+    "/me/orgs/{orgId}/leave": {
+      "post": {
+        "operationId": "MeOrgsController_leave",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "409": {
+            "description": "You are its last owner"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Leave an organization",
+        "tags": [
+          "Me — organizations"
+        ]
+      }
+    },
+    "/me/orgs/{orgId}/members/{userId}": {
+      "delete": {
+        "operationId": "MeOrgsController_removeMember",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "409": {
+            "description": "Last owner"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a member (OWNER), or yourself",
+        "tags": [
+          "Me — organizations"
+        ]
+      },
+      "patch": {
+        "operationId": "MeOrgsController_setMemberRole",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeOrgRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "409": {
+            "description": "Would demote the last owner"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change a member role (OWNER)",
+        "tags": [
+          "Me — organizations"
+        ]
+      }
+    },
+    "/me/orgs/{orgId}/invites": {
+      "post": {
+        "operationId": "MeOrgsController_createInvite",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeOrgRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "403": {
+            "description": "Personal organization, or banned"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "One-time invite link, 7 days (OWNER of an ORGANIZATION). The token is shown once",
+        "tags": [
+          "Me — organizations"
+        ]
+      }
+    },
+    "/me/invites/{token}/accept": {
+      "post": {
+        "operationId": "MeOrgsController_acceptInvite",
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Unknown or already used"
+          },
+          "410": {
+            "description": "Expired"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Accept an invite: you join the organization with its role",
+        "tags": [
+          "Me — organizations"
+        ]
+      }
+    },
+    "/me/orgs/{orgId}/teams": {
+      "get": {
+        "operationId": "MeTeamsController_list",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Teams of the organization",
+        "tags": [
+          "Me — teams"
+        ]
+      },
+      "post": {
+        "operationId": "MeTeamsController_create",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeCreateTeamDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "403": {
+            "description": "maxTeams reached, or banned"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a team (slug from the name, immutable)",
+        "tags": [
+          "Me — teams"
+        ]
+      }
+    },
+    "/me/orgs/{orgId}/teams/{teamId}": {
+      "get": {
+        "operationId": "MeTeamsController_get",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not found or not yours"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A team with its members",
+        "tags": [
+          "Me — teams"
+        ]
+      },
+      "patch": {
+        "operationId": "MeTeamsController_update",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeUpdateTeamDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit a team (the slug never changes)",
+        "tags": [
+          "Me — teams"
+        ]
+      },
+      "delete": {
+        "operationId": "MeTeamsController_remove",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a team",
+        "tags": [
+          "Me — teams"
+        ]
+      }
+    },
+    "/me/orgs/{orgId}/teams/{teamId}/images/{kind}": {
+      "put": {
+        "operationId": "MeTeamsController_setImage",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "kind",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "409": {
+            "description": "Twitch-synced team"
+          },
+          "503": {
+            "description": "FileHarbor unavailable"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Upload the team logo or banner (FileHarbor, max 5 MB)",
+        "tags": [
+          "Me — teams"
+        ]
+      }
+    },
+    "/me/orgs/{orgId}/teams/{teamId}/stats": {
+      "get": {
+        "operationId": "MeTeamsController_stats",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "days",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 30,
+              "type": "number",
+              "enum": [
+                30,
+                90
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Aggregate of the current members over 30/90 days",
+        "tags": [
+          "Me — teams"
+        ]
+      }
+    },
+    "/me/orgs/{orgId}/teams/{teamId}/members": {
+      "post": {
+        "operationId": "MeTeamsController_addMember",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeAddMemberDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "404": {
+            "description": "Team or channel not found"
+          },
+          "409": {
+            "description": "Already a member, creator left this team, or Twitch-synced team"
+          },
+          "422": {
+            "description": "maxMembersPerTeam reached"
+          },
+          "503": {
+            "description": "Kick not configured or unreachable"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a Twitch or Kick channel by login",
+        "tags": [
+          "Me — teams"
+        ]
+      }
+    },
+    "/me/orgs/{orgId}/teams/{teamId}/members/{creatorId}": {
+      "patch": {
+        "operationId": "MeTeamsController_updateMember",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creatorId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeUpdateMemberDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Public badge (role) and display priority (sortOrder) of a member",
+        "tags": [
+          "Me — teams"
+        ]
+      },
+      "delete": {
+        "operationId": "MeTeamsController_removeMember",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "creatorId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a member",
+        "tags": [
+          "Me — teams"
+        ]
+      }
+    },
+    "/me/orgs/{orgId}/teams/{teamId}/discord": {
+      "put": {
+        "operationId": "MeTeamsController_setDiscord",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeDiscordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Not a Discord webhook URL"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Discord webhook of the team (URL masked in the response)",
+        "tags": [
+          "Me — teams"
+        ]
+      },
+      "delete": {
+        "operationId": "MeTeamsController_deleteDiscord",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove the Discord webhook",
+        "tags": [
+          "Me — teams"
+        ]
+      }
+    },
+    "/me/orgs/{orgId}/teams/{teamId}/discord/test": {
+      "post": {
+        "operationId": "MeTeamsController_testDiscord",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "No webhook saved"
+          },
+          "422": {
+            "description": "Discord rejected the webhook"
+          },
+          "503": {
+            "description": "Discord did not answer"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Post a test message to the saved webhook",
+        "tags": [
+          "Me — teams"
+        ]
+      }
+    },
+    "/me/creator": {
+      "post": {
+        "operationId": "MeCreatorController_claim",
+        "parameters": [
+          {
+            "name": "authorization",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Claimed creator"
+          },
+          "204": {
+            "description": "No Twitch account linked: nothing to claim"
+          },
+          "409": {
+            "description": "Claimed by another user, or you claimed another creator"
+          },
+          "503": {
+            "description": "Bastion without providerId, or Twitch unreachable"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Claim the creator behind your Twitch account linked in Bastion (idempotent)",
+        "tags": [
+          "Me — creator"
+        ]
+      },
+      "get": {
+        "operationId": "MeCreatorController_get",
+        "parameters": [],
+        "responses": {
+          "404": {
+            "description": "No claimed creator"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Your claimed creator",
+        "tags": [
+          "Me — creator"
+        ]
+      },
+      "patch": {
+        "operationId": "MeCreatorController_update",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeUpdateCreatorDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Description and socials (name and display name come from the platform)",
+        "tags": [
+          "Me — creator"
+        ]
+      },
+      "delete": {
+        "operationId": "MeCreatorController_remove",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeDeleteCreatorDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "confirm does not match the creator name"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete your creator with every stream and statistic (irreversible)",
+        "tags": [
+          "Me — creator"
+        ]
+      }
+    },
+    "/me/creator/claim": {
+      "delete": {
+        "operationId": "MeCreatorController_unclaim",
+        "parameters": [],
+        "responses": {
+          "404": {
+            "description": "No claimed creator"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Give your creator back (before unlinking Twitch); its data stays",
+        "tags": [
+          "Me — creator"
+        ]
+      }
+    },
+    "/me/creator/discord": {
+      "get": {
+        "operationId": "MeCreatorController_getDiscord",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Discord webhook of your channel (URL masked)",
+        "tags": [
+          "Me — creator"
+        ]
+      },
+      "put": {
+        "operationId": "MeCreatorController_setDiscord",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeDiscordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Not a Discord webhook URL"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Discord webhook of your channel: live start / game change / live end (URL masked in the response)",
+        "tags": [
+          "Me — creator"
+        ]
+      },
+      "delete": {
+        "operationId": "MeCreatorController_deleteDiscord",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove the Discord webhook of your channel",
+        "tags": [
+          "Me — creator"
+        ]
+      }
+    },
+    "/me/creator/discord/test": {
+      "post": {
+        "operationId": "MeCreatorController_testDiscord",
+        "parameters": [],
+        "responses": {
+          "404": {
+            "description": "No webhook saved"
+          },
+          "422": {
+            "description": "Discord rejected the webhook"
+          },
+          "503": {
+            "description": "Discord did not answer"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Post a test message to your saved webhook",
+        "tags": [
+          "Me — creator"
+        ]
+      }
+    },
+    "/me/creator/games": {
+      "get": {
+        "operationId": "MeCreatorController_listGames",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Your games: shown (automatic + pinned), then the ones you hid",
+        "tags": [
+          "Me — creator"
+        ]
+      }
+    },
+    "/me/creator/games/{gameSlug}": {
+      "put": {
+        "operationId": "MeCreatorController_setGame",
+        "parameters": [
+          {
+            "name": "gameSlug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeGameOverrideDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Pin (always shown) or hide a game",
+        "tags": [
+          "Me — creator"
+        ]
+      },
+      "delete": {
+        "operationId": "MeCreatorController_deleteGame",
+        "parameters": [
+          {
+            "name": "gameSlug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Drop the override: back to the automatic rule",
+        "tags": [
+          "Me — creator"
+        ]
+      }
+    },
+    "/me/creator/teams": {
+      "get": {
+        "operationId": "MeCreatorController_teams",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Teams you are a member of, and teams you left (blocks)",
+        "tags": [
+          "Me — creator"
+        ]
+      }
+    },
+    "/me/creator/teams/{slug}/leave": {
+      "post": {
+        "operationId": "MeCreatorController_leave",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeLeaveTeamDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Leave a team (it cannot add you back), optionally reporting it",
+        "tags": [
+          "Me — creator"
+        ]
+      }
+    },
+    "/me/creator/blocks/{slug}": {
+      "delete": {
+        "operationId": "MeCreatorController_unblock",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove your block: the team can add you again",
+        "tags": [
+          "Me — creator"
+        ]
+      }
+    },
+    "/me/creator/streams": {
+      "get": {
+        "operationId": "MeCreatorController_streams",
+        "parameters": [
+          {
+            "name": "days",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 30,
+              "type": "number",
+              "enum": [
+                30,
+                90
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Your last streams (max 50) in the window",
+        "tags": [
+          "Me — creator"
+        ]
+      }
+    },
+    "/me/creator/streams/{streamId}": {
+      "get": {
+        "operationId": "MeCreatorController_streamCurve",
+        "parameters": [
+          {
+            "name": "streamId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Viewer curve of one of your streams",
+        "tags": [
+          "Me — creator"
+        ]
+      }
+    },
+    "/me/terms": {
+      "get": {
+        "operationId": "MeTermsController_get",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Published terms version and your acceptance (needsTerms: every other /me route answers 403 terms_required)",
+        "tags": [
+          "Me — terms"
+        ]
+      },
+      "post": {
+        "operationId": "MeTermsController_accept",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Accept the published terms version (idempotent)",
+        "tags": [
+          "Me — terms"
+        ]
+      }
+    },
+    "/admin/orgs": {
+      "get": {
+        "operationId": "AdminOrgsController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Case-insensitive search",
+            "schema": {
+              "minLength": 2,
+              "maxLength": 50,
+              "type": "string"
+            }
+          },
+          {
+            "name": "kind",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PERSONAL",
+                "ORGANIZATION"
+              ]
+            }
+          },
+          {
+            "name": "banned",
+            "required": false,
+            "in": "query",
+            "description": "true = banned only, false = not banned only",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ownerless",
+            "required": false,
+            "in": "query",
+            "description": "true = organizations without any OWNER (after an erasure), false = with one",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Organizations (filters: kind, banned, ownerless, q = name/slug or exact Bastion user id)",
+        "tags": [
+          "Admin — organizations"
+        ]
+      }
+    },
+    "/admin/orgs/{id}": {
+      "get": {
+        "operationId": "AdminOrgsController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Organization with members (role), teams, limits",
+        "tags": [
+          "Admin — organizations"
+        ]
+      },
+      "patch": {
+        "operationId": "AdminOrgsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUpdateOrgDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "409": {
+            "description": "Downgrade would break a personal organization"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Kind (upgrade), limits, and for organizations slug/name",
+        "tags": [
+          "Admin — organizations"
+        ]
+      }
+    },
+    "/admin/orgs/{id}/ban": {
+      "post": {
+        "operationId": "AdminOrgsController_ban",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Ban: teams leave /public and the panel, management is read-only",
+        "tags": [
+          "Admin — organizations"
+        ]
+      }
+    },
+    "/admin/orgs/{id}/unban": {
+      "post": {
+        "operationId": "AdminOrgsController_unban",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Lift a ban",
+        "tags": [
+          "Admin — organizations"
+        ]
+      }
+    },
+    "/admin/orgs/{id}/invites": {
+      "post": {
+        "operationId": "AdminOrgsController_invite",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "403": {
+            "description": "Personal or banned organization"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "One-time OWNER invite (ORGANIZATION only); the token is returned once",
+        "tags": [
+          "Admin — organizations"
+        ]
+      }
+    },
+    "/admin/teams": {
+      "get": {
+        "operationId": "AdminTeamsController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Case-insensitive search",
+            "schema": {
+              "minLength": 2,
+              "maxLength": 50,
+              "type": "string"
+            }
+          },
+          {
+            "name": "visibility",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "UNLISTED",
+                "LISTED",
+                "FEATURED"
+              ]
+            }
+          },
+          {
+            "name": "system",
+            "required": false,
+            "in": "query",
+            "description": "true = system teams only (no organization), false = teams of an organization only",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "twitch",
+            "required": false,
+            "in": "query",
+            "description": "true = Twitch-synced teams only, false = manual teams only",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "panelCreated",
+            "required": false,
+            "in": "query",
+            "description": "true = teams created from the Twitch panel only (moderation queue: newest first in the UI), false = the others",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "orgId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Teams (filters: visibility, system, twitch, orgId, q)",
+        "tags": [
+          "Admin — teams"
+        ]
+      }
+    },
+    "/admin/teams/{id}": {
+      "get": {
+        "operationId": "AdminTeamsController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Team with members and blocks",
+        "tags": [
+          "Admin — teams"
+        ]
+      },
+      "patch": {
+        "operationId": "AdminTeamsController_setVisibility",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminTeamVisibilityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Visibility",
+        "tags": [
+          "Admin — teams"
+        ]
+      },
+      "delete": {
+        "operationId": "AdminTeamsController_deleteChannelTeam",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "409": {
+            "description": "Not a panel-created system team"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a team created from the Twitch panel, still a system team (frees its slug)",
+        "tags": [
+          "Admin — teams"
+        ]
+      }
+    },
+    "/admin/teams/{id}/sort-order": {
+      "patch": {
+        "operationId": "AdminTeamsController_setSortOrder",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminTeamSortOrderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Order on the org page (higher first, null = last)",
+        "tags": [
+          "Admin — teams"
+        ]
+      }
+    },
+    "/admin/teams/twitch": {
+      "post": {
+        "operationId": "AdminTeamsController_linkTwitch",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminLinkTwitchTeamDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "409": {
+            "description": "Personal org, org at maxTeams, or team in another org"
+          },
+          "422": {
+            "description": "More than 200 members"
+          },
+          "503": {
+            "description": "Twitch unavailable (or unknown team id)"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Link an official Twitch team to an ORGANIZATION, then sync it",
+        "tags": [
+          "Admin — teams"
+        ]
+      }
+    },
+    "/admin/teams/reserved-slugs/{slug}": {
+      "delete": {
+        "operationId": "AdminTeamsController_releaseSlug",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Slug not reserved"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Give a slug reserved by a panel team delete back to user creation",
+        "tags": [
+          "Admin — teams"
+        ]
+      }
+    },
+    "/admin/teams/{id}/org": {
+      "patch": {
+        "operationId": "AdminTeamsController_assignOrg",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminTeamOrgDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "409": {
+            "description": "Not a system team, Twitch team to a personal org, or org at maxTeams"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Assign a system team to an organization",
+        "tags": [
+          "Admin — teams"
+        ]
+      }
+    },
+    "/admin/reports": {
+      "get": {
+        "operationId": "AdminReportsController_reports",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Report queue (reported blocks), grouped by team",
+        "tags": [
+          "Admin — reports and blocks"
+        ]
+      }
+    },
+    "/admin/blocks/{id}/archive": {
+      "post": {
+        "operationId": "AdminReportsController_archive",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Archive a report: the block stays",
+        "tags": [
+          "Admin — reports and blocks"
+        ]
+      }
+    },
+    "/admin/blocks/{id}": {
+      "delete": {
+        "operationId": "AdminReportsController_removeBlock",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a block: the creator can be added again",
+        "tags": [
+          "Admin — reports and blocks"
+        ]
+      }
+    },
+    "/admin/creators": {
+      "get": {
+        "operationId": "AdminCreatorsController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Case-insensitive search",
+            "schema": {
+              "minLength": 2,
+              "maxLength": 50,
+              "type": "string"
+            }
+          },
+          {
+            "name": "claimed",
+            "required": false,
+            "in": "query",
+            "description": "true = claimed by a user only, false = unclaimed only",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Creators lookup (q: name, display name or account login; claimed)",
+        "tags": [
+          "Admin — creators"
+        ]
+      }
+    },
+    "/admin/creators/{name}": {
+      "get": {
+        "operationId": "AdminCreatorsController_get",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Creator with accounts, teams, blocks, claimed flag, recent streams",
+        "tags": [
+          "Admin — creators"
+        ]
+      }
+    },
+    "/admin/creators/{name}/kick": {
+      "post": {
+        "operationId": "AdminCreatorsController_linkKick",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminLinkKickDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "409": {
+            "description": "Already has Kick, Kick creator claimed or with other accounts"
+          },
+          "503": {
+            "description": "Kick not configured or unreachable"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Link a Kick channel; merges its creator if it has one",
+        "tags": [
+          "Admin — creators"
+        ]
+      }
+    },
+    "/admin/creators/{name}/accounts/kick": {
+      "delete": {
+        "operationId": "AdminCreatorsController_unlinkKick",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "409": {
+            "description": "Kick is the only account"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Unlink the Kick account: it becomes a separate unclaimed creator",
+        "tags": [
+          "Admin — creators"
+        ]
+      }
+    },
+    "/admin/creators/{name}/team-creation-block": {
+      "delete": {
+        "operationId": "AdminCreatorsController_unblockTeamCreation",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Creator not found or not blocked"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Let the channel create a team from the Twitch panel again (set by a panel team delete)",
+        "tags": [
+          "Admin — creators"
+        ]
+      }
+    },
+    "/admin/streams/{id}": {
+      "get": {
+        "operationId": "AdminCreatorsController_stream",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Stream with its sections and games",
+        "tags": [
+          "Admin — creators"
+        ]
+      }
+    },
+    "/admin/games": {
+      "get": {
+        "operationId": "AdminGamesController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Case-insensitive search",
+            "schema": {
+              "minLength": 2,
+              "maxLength": 50,
+              "type": "string"
+            }
+          },
+          {
+            "name": "hidden",
+            "required": false,
+            "in": "query",
+            "description": "true = hidden only, false = published only",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Games (filters: q, hidden)",
+        "tags": [
+          "Admin — games"
+        ]
+      }
+    },
+    "/admin/games/{slug}": {
+      "patch": {
+        "operationId": "AdminGamesController_setHidden",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminGameHiddenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Hide / publish a game",
+        "tags": [
+          "Admin — games"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Beacon API",
+    "description": "API documentation for Beacon",
+    "version": "3.2.0",
+    "contact": {
+      "name": "Andrea Tombolato",
+      "url": "https://heyatom.dev",
+      "email": "hey@heyatom.dev"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/heyatomdev/beacon/blob/main/README.md"
+    }
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "SetPanelTeamDto": {
+        "type": "object",
+        "properties": {
+          "teamSlug": {
+            "type": "string",
+            "description": "Beacon team the channel is a member of"
+          },
+          "twitchTeamId": {
+            "type": "string",
+            "description": "One of the channel's Twitch teams: imported if unknown, synced otherwise"
+          }
+        }
+      },
+      "CreateChannelTeamDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Team Rocket",
+            "minLength": 3,
+            "maxLength": 50
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "LeaveTeamDto": {
+        "type": "object",
+        "properties": {
+          "teamSlug": {
+            "type": "string"
+          },
+          "reported": {
+            "type": "boolean",
+            "description": "Also report the team to the moderators"
+          }
+        },
+        "required": [
+          "teamSlug",
+          "reported"
+        ]
+      },
+      "PublicSocialsDto": {
+        "type": "object",
+        "properties": {
+          "website": {
+            "type": "string",
+            "nullable": true
+          },
+          "discord": {
+            "type": "string",
+            "nullable": true
+          },
+          "youtube": {
+            "type": "string",
+            "nullable": true
+          },
+          "instagram": {
+            "type": "string",
+            "nullable": true
+          },
+          "telegram": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "website",
+          "discord",
+          "youtube",
+          "instagram",
+          "telegram"
+        ]
+      },
+      "PublicOrgDto": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "logo": {
+            "type": "string",
+            "nullable": true
+          },
+          "socials": {
+            "$ref": "#/components/schemas/PublicSocialsDto"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "logo",
+          "socials"
+        ]
+      },
+      "PublicTeamDto": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "logo": {
+            "type": "string",
+            "nullable": true
+          },
+          "org": {
+            "nullable": true,
+            "description": "Only for an organization with a slug",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PublicOrgDto"
+              }
+            ]
+          },
+          "memberCount": {
+            "type": "number"
+          },
+          "liveCount": {
+            "type": "number",
+            "description": "Members with at least one live account"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "description",
+          "logo",
+          "org",
+          "memberCount",
+          "liveCount"
+        ]
+      },
+      "PageMetaDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "totalPages": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "total",
+          "page",
+          "limit",
+          "totalPages"
+        ]
+      },
+      "PublicTeamPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicTeamDto"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetaDto"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "PublicOrgDetailDto": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "logo": {
+            "type": "string",
+            "nullable": true
+          },
+          "banner": {
+            "type": "string",
+            "nullable": true
+          },
+          "socials": {
+            "$ref": "#/components/schemas/PublicSocialsDto"
+          },
+          "teams": {
+            "description": "Every team of the organization with at least one member, whatever its directory visibility: featured, then listed, then the others; by name. At most 100",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicTeamDto"
+            }
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "description",
+          "logo",
+          "banner",
+          "socials",
+          "teams"
+        ]
+      },
+      "PublicGameDto": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "example": "dead-by-daylight"
+          },
+          "name": {
+            "type": "string"
+          },
+          "cover": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "cover"
+        ]
+      },
+      "PublicAccountDto": {
+        "type": "object",
+        "properties": {
+          "platform": {
+            "type": "string",
+            "enum": [
+              "TWITCH",
+              "KICK"
+            ]
+          },
+          "slug": {
+            "type": "string",
+            "description": "Channel login, for the link to the channel"
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "logo": {
+            "type": "string",
+            "nullable": true
+          },
+          "bannerUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "offlinePlaceholderUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "live": {
+            "type": "boolean"
+          },
+          "viewers": {
+            "type": "number",
+            "nullable": true,
+            "description": "null while offline"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true,
+            "description": "Stream title; null while offline"
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "Live preview, ready to use (Twitch size placeholders filled); null while offline"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "description": "null while offline"
+          },
+          "game": {
+            "nullable": true,
+            "description": "Current game; null while offline or hidden",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PublicGameDto"
+              }
+            ]
+          },
+          "checkedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "description": "When Beacon last polled the account; null = never"
+          },
+          "lastLiveAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "description": "End of the latest stream; null while live or never seen live"
+          }
+        },
+        "required": [
+          "platform",
+          "slug",
+          "displayName",
+          "logo",
+          "bannerUrl",
+          "offlinePlaceholderUrl",
+          "live",
+          "viewers",
+          "title",
+          "thumbnailUrl",
+          "startedAt",
+          "game",
+          "checkedAt",
+          "lastLiveAt"
+        ]
+      },
+      "PublicMemberDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Public key: Twitch login (Kick for Kick-only creators)"
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "socials": {
+            "$ref": "#/components/schemas/PublicSocialsDto"
+          },
+          "live": {
+            "type": "boolean",
+            "description": "At least one account live"
+          },
+          "accounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicAccountDto"
+            }
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "OWNER",
+              "MEMBER"
+            ],
+            "nullable": true
+          }
+        },
+        "required": [
+          "name",
+          "displayName",
+          "description",
+          "socials",
+          "live",
+          "accounts",
+          "role"
+        ]
+      },
+      "PublicTeamDetailDto": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "logo": {
+            "type": "string",
+            "nullable": true
+          },
+          "org": {
+            "nullable": true,
+            "description": "Only for an organization with a slug",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PublicOrgDto"
+              }
+            ]
+          },
+          "memberCount": {
+            "type": "number"
+          },
+          "liveCount": {
+            "type": "number",
+            "description": "Members with at least one live account"
+          },
+          "banner": {
+            "type": "string",
+            "nullable": true
+          },
+          "background": {
+            "type": "string",
+            "nullable": true
+          },
+          "members": {
+            "description": "Live first, then roster order; at most 100",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicMemberDto"
+            }
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "description",
+          "logo",
+          "org",
+          "memberCount",
+          "liveCount",
+          "banner",
+          "background",
+          "members"
+        ]
+      },
+      "PublicGameMinutesDto": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "example": "dead-by-daylight"
+          },
+          "name": {
+            "type": "string"
+          },
+          "cover": {
+            "type": "string",
+            "nullable": true
+          },
+          "minutes": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "cover",
+          "minutes"
+        ]
+      },
+      "PublicStreamDto": {
+        "type": "object",
+        "properties": {
+          "creator": {
+            "type": "string",
+            "description": "Creator name"
+          },
+          "platform": {
+            "type": "string",
+            "enum": [
+              "TWITCH",
+              "KICK"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "durationMinutes": {
+            "type": "number",
+            "nullable": true
+          },
+          "avgViewers": {
+            "type": "number",
+            "nullable": true
+          },
+          "peakViewers": {
+            "type": "number",
+            "nullable": true
+          },
+          "games": {
+            "description": "Hidden games omitted",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicGameMinutesDto"
+            }
+          }
+        },
+        "required": [
+          "creator",
+          "platform",
+          "title",
+          "startedAt",
+          "endedAt",
+          "durationMinutes",
+          "avgViewers",
+          "peakViewers",
+          "games"
+        ]
+      },
+      "PublicStatsDto": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "type": "number",
+            "enum": [
+              30,
+              90
+            ]
+          },
+          "hours": {
+            "type": "number",
+            "description": "Hours live, one decimal"
+          },
+          "streams": {
+            "type": "number",
+            "description": "Number of streams"
+          },
+          "avgViewers": {
+            "type": "number",
+            "description": "Mean of the per-stream average viewers, rounded"
+          },
+          "peakViewers": {
+            "type": "number",
+            "description": "Highest per-stream peak"
+          },
+          "topGames": {
+            "description": "Top games by minutes, hidden games omitted",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicGameMinutesDto"
+            }
+          },
+          "recentStreams": {
+            "description": "Latest streams, newest first",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicStreamDto"
+            }
+          }
+        },
+        "required": [
+          "days",
+          "hours",
+          "streams",
+          "avgViewers",
+          "peakViewers",
+          "topGames",
+          "recentStreams"
+        ]
+      },
+      "PublicCreatorDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Public key: Twitch login (Kick for Kick-only creators)"
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "socials": {
+            "$ref": "#/components/schemas/PublicSocialsDto"
+          },
+          "live": {
+            "type": "boolean",
+            "description": "At least one account live"
+          },
+          "accounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicAccountDto"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "displayName",
+          "description",
+          "socials",
+          "live",
+          "accounts"
+        ]
+      },
+      "PublicCreatorPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicCreatorDto"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetaDto"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "PublicCreatorGameDto": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "example": "dead-by-daylight"
+          },
+          "name": {
+            "type": "string"
+          },
+          "cover": {
+            "type": "string",
+            "nullable": true
+          },
+          "pinned": {
+            "type": "boolean"
+          },
+          "minutes": {
+            "type": "number",
+            "description": "Minutes in the last 90 days"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "cover",
+          "pinned",
+          "minutes"
+        ]
+      },
+      "PublicCreatorTeamDto": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "logo": {
+            "type": "string",
+            "nullable": true
+          },
+          "org": {
+            "nullable": true,
+            "description": "Only an ORGANIZATION with a slug",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PublicOrgDto"
+              }
+            ]
+          },
+          "memberCount": {
+            "type": "number"
+          },
+          "liveCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "logo",
+          "org",
+          "memberCount",
+          "liveCount"
+        ]
+      },
+      "PublicCreatorDetailDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Public key: Twitch login (Kick for Kick-only creators)"
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "socials": {
+            "$ref": "#/components/schemas/PublicSocialsDto"
+          },
+          "live": {
+            "type": "boolean",
+            "description": "At least one account live"
+          },
+          "accounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicAccountDto"
+            }
+          },
+          "lastGame": {
+            "nullable": true,
+            "description": "Game of the latest stream (its last section); null if none or hidden",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PublicGameDto"
+              }
+            ]
+          },
+          "games": {
+            "description": "Pinned first, then minutes",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicCreatorGameDto"
+            }
+          },
+          "teams": {
+            "description": "Listed/featured teams only",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicCreatorTeamDto"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "displayName",
+          "description",
+          "socials",
+          "live",
+          "accounts",
+          "lastGame",
+          "games",
+          "teams"
+        ]
+      },
+      "PublicGameDetailDto": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "example": "dead-by-daylight"
+          },
+          "name": {
+            "type": "string"
+          },
+          "cover": {
+            "type": "string",
+            "nullable": true
+          },
+          "creatorCount": {
+            "type": "number",
+            "description": "Creators of the game listed on /public/games/:slug/creators"
+          },
+          "liveCount": {
+            "type": "number",
+            "description": "Of those, live now (on any game)"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "cover",
+          "creatorCount",
+          "liveCount"
+        ]
+      },
+      "PublicGameCreatorDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Public key: Twitch login (Kick for Kick-only creators)"
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "socials": {
+            "$ref": "#/components/schemas/PublicSocialsDto"
+          },
+          "live": {
+            "type": "boolean",
+            "description": "At least one account live"
+          },
+          "accounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicAccountDto"
+            }
+          },
+          "pinned": {
+            "type": "boolean",
+            "description": "The creator marked the game as one of theirs"
+          },
+          "minutes": {
+            "type": "number",
+            "description": "Minutes on the game in the last 90 days"
+          }
+        },
+        "required": [
+          "name",
+          "displayName",
+          "description",
+          "socials",
+          "live",
+          "accounts",
+          "pinned",
+          "minutes"
+        ]
+      },
+      "PublicGameCreatorPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicGameCreatorDto"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetaDto"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "MeUpdateOrgDto": {
+        "type": "object",
+        "properties": {
+          "website": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri"
+          },
+          "discord": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri"
+          },
+          "youtube": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri"
+          },
+          "instagram": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri"
+          },
+          "telegram": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri"
+          },
+          "slug": {
+            "type": "string",
+            "example": "element",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+            "minLength": 3,
+            "maxLength": 40
+          },
+          "name": {
+            "type": "string",
+            "example": "Element",
+            "minLength": 2,
+            "maxLength": 60
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 1000
+          },
+          "logo": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri"
+          },
+          "banner": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri"
+          }
+        }
+      },
+      "MeOrgRoleDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "OWNER",
+              "MANAGER"
+            ],
+            "example": "MANAGER"
+          }
+        },
+        "required": [
+          "role"
+        ]
+      },
+      "MeCreateTeamDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Team Rocket",
+            "minLength": 3,
+            "maxLength": 50
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 500
+          },
+          "logo": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri"
+          },
+          "banner": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "MeUpdateTeamDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Team Rocket",
+            "minLength": 3,
+            "maxLength": 50
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 500
+          },
+          "logo": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri"
+          },
+          "banner": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri"
+          },
+          "sortOrder": {
+            "type": "number",
+            "nullable": true,
+            "minimum": -1000,
+            "maximum": 1000,
+            "description": "Order on the org page, higher first; null = last"
+          }
+        }
+      },
+      "MeAddMemberDto": {
+        "type": "object",
+        "properties": {
+          "platform": {
+            "type": "string",
+            "enum": [
+              "TWITCH",
+              "KICK"
+            ],
+            "example": "TWITCH"
+          },
+          "login": {
+            "type": "string",
+            "example": "some_streamer",
+            "pattern": "^[a-zA-Z0-9_]{3,25}$"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "OWNER",
+              "MEMBER"
+            ],
+            "example": "MEMBER"
+          },
+          "sortOrder": {
+            "type": "number",
+            "example": 10,
+            "minimum": -1000,
+            "maximum": 1000
+          }
+        },
+        "required": [
+          "platform",
+          "login"
+        ]
+      },
+      "MeUpdateMemberDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "OWNER",
+              "MEMBER"
+            ],
+            "nullable": true,
+            "description": "Public badge; null removes it"
+          },
+          "sortOrder": {
+            "type": "number",
+            "nullable": true,
+            "minimum": -1000,
+            "maximum": 1000,
+            "description": "Higher first; null = last"
+          }
+        }
+      },
+      "MeDiscordDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "example": "https://discord.com/api/webhooks/123/abc",
+            "description": "Discord webhook URL; the masked value from a read keeps the saved one"
+          },
+          "notifyLiveStart": {
+            "type": "boolean",
+            "default": true
+          },
+          "notifyGameChange": {
+            "type": "boolean",
+            "default": false
+          },
+          "notifyLiveEnd": {
+            "type": "boolean",
+            "default": false
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "en",
+              "it"
+            ],
+            "default": "en",
+            "description": "Language of the alerts; omitted = unchanged"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "MeUpdateCreatorDto": {
+        "type": "object",
+        "properties": {
+          "website": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri"
+          },
+          "discord": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri"
+          },
+          "youtube": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri"
+          },
+          "instagram": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri"
+          },
+          "telegram": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 1000
+          }
+        }
+      },
+      "MeDeleteCreatorDto": {
+        "type": "object",
+        "properties": {
+          "confirm": {
+            "type": "string",
+            "description": "Repeat your creator name to confirm: every stream and statistic is deleted"
+          }
+        },
+        "required": [
+          "confirm"
+        ]
+      },
+      "MeGameOverrideDto": {
+        "type": "object",
+        "properties": {
+          "pinned": {
+            "type": "boolean",
+            "description": "true = always shown (habitual), false = never shown"
+          }
+        },
+        "required": [
+          "pinned"
+        ]
+      },
+      "MeLeaveTeamDto": {
+        "type": "object",
+        "properties": {
+          "reported": {
+            "type": "boolean",
+            "default": false,
+            "description": "Also report the team to the moderators"
+          }
+        }
+      },
+      "AdminUpdateOrgDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "PERSONAL",
+              "ORGANIZATION"
+            ],
+            "description": "PERSONAL → ORGANIZATION = upgrade"
+          },
+          "maxTeams": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "maxMembersPerTeam": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "slug": {
+            "type": "string",
+            "description": "ORGANIZATION only: prepare the public profile before handing the org over (the owner can change it via /me)",
+            "example": "dbd-builds",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+            "minLength": 3,
+            "maxLength": 40
+          },
+          "name": {
+            "type": "string",
+            "example": "DBD Builds",
+            "minLength": 2,
+            "maxLength": 60
+          }
+        }
+      },
+      "AdminTeamVisibilityDto": {
+        "type": "object",
+        "properties": {
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "UNLISTED",
+              "LISTED",
+              "FEATURED"
+            ]
+          }
+        },
+        "required": [
+          "visibility"
+        ]
+      },
+      "AdminTeamSortOrderDto": {
+        "type": "object",
+        "properties": {
+          "sortOrder": {
+            "type": "number",
+            "nullable": true,
+            "minimum": -1000,
+            "maximum": 1000,
+            "description": "Order on the org page, higher first; null = last"
+          }
+        },
+        "required": [
+          "sortOrder"
+        ]
+      },
+      "AdminLinkTwitchTeamDto": {
+        "type": "object",
+        "properties": {
+          "orgId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Target organization"
+          },
+          "twitchTeamId": {
+            "type": "string",
+            "example": "6358",
+            "description": "Twitch team id (Helix `GET /teams`)"
+          }
+        },
+        "required": [
+          "orgId",
+          "twitchTeamId"
+        ]
+      },
+      "AdminTeamOrgDto": {
+        "type": "object",
+        "properties": {
+          "orgId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Target organization"
+          }
+        },
+        "required": [
+          "orgId"
+        ]
+      },
+      "AdminLinkKickDto": {
+        "type": "object",
+        "properties": {
+          "login": {
+            "type": "string",
+            "example": "xqc",
+            "description": "Kick channel slug"
+          }
+        },
+        "required": [
+          "login"
+        ]
+      },
+      "AdminGameHiddenDto": {
+        "type": "object",
+        "properties": {
+          "hidden": {
+            "type": "boolean",
+            "description": "Hidden games are never published (`game: null`)"
+          }
+        },
+        "required": [
+          "hidden"
+        ]
+      }
+    }
+  }
+}
