@@ -153,4 +153,5 @@ publishing (OIDC, nessun token, provenance). Prima del rilascio: `pnpm check:api
 ## Banner del README
 
 `docs/brand/banner.html` → `banner.png` con `docs/brand/render.sh` (stessa pipeline di
-`heyatom-portfolio/og`; mano ed esagoni copiati da lì). `docs/` è fuori da `files`.
+`heyatom-portfolio/og`; mano ed esagoni copiati da lì). `docs/` è fuori da `files`: il README lo carica da
+`raw.githubusercontent.com` (URL assoluto, così npm lo mostra).

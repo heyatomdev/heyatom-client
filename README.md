@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/brand/banner.png" width="500" alt="HeyAtom @heyatom/client" />
+  <img src="https://raw.githubusercontent.com/heyatomdev/heyatom-client/main/docs/brand/banner.png" width="500" alt="HeyAtom @heyatom/client" />
 </p>
 
 <p align="center">
