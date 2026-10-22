@@ -149,3 +149,8 @@ Cache e sanificazione degli errori per il browser restano nell'app; `gatherly.ty
 Alzare `version`, aggiornare `CHANGELOG.md`, commit, tag `vX.Y.Z`, push del tag. Il workflow
 (`.github/workflows/publish.yml`) esegue lint/test/build/DI smoke e pubblica con npm trusted
 publishing (OIDC, nessun token, provenance). Prima del rilascio: `pnpm check:api` pulito.
+
+## Banner del README
+
+`docs/brand/banner.html` → `banner.png` con `docs/brand/render.sh` (stessa pipeline di
+`heyatom-portfolio/og`; mano ed esagoni copiati da lì). `docs/` è fuori da `files`.

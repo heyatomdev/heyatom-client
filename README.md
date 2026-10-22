@@ -1,3 +1,14 @@
+<p align="center">
+  <img src="docs/brand/banner.png" width="500" alt="HeyAtom @heyatom/client" />
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@heyatom/client"><img src="https://img.shields.io/npm/v/@heyatom/client" alt="npm version" /></a>
+  <a href="https://github.com/heyatomdev/heyatom-client/actions/workflows/test.yml"><img src="https://github.com/heyatomdev/heyatom-client/actions/workflows/test.yml/badge.svg?branch=main" alt="Test" /></a>
+  <img src="https://img.shields.io/node/v/@heyatom/client" alt="Node version" />
+  <img src="https://img.shields.io/npm/l/@heyatom/client" alt="License" />
+</p>
+
 # @heyatom/client
 
 Client SDK for the HeyAtom platform services: FileHarbor (media), Articuno (content), Beacon
