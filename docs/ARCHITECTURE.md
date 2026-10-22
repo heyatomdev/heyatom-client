@@ -26,8 +26,7 @@ moduli Nest da `dist/cjs` e verifica che l'auth arrivi a `fetch`.
 ## Perimetro
 
 - **Solo le route che i consumer chiamano.** Le route di console (`/admin/*`, `/me/*`) sono di
-  Meridian e restano fuori (`cec8c92` ha tolto i client admin). I tipi però si generano dalle spec
-  complete.
+  Meridian e restano fuori (`cec8c92` ha tolto i client admin), anche dai tipi pubblicati (sotto).
 - **Solo trasporto**: endpoint, header di auth, tipi, mapping errori. La policy (allowlist MIME,
   limiti di dimensione, replace-and-cleanup, "404 su delete = già cancellato") resta nell'app.
   Riferimento: shelfie-api `modules/fileharbor` (wrapper puro) contro dbdbuilds-api
@@ -77,12 +76,12 @@ Generati, mai scritti a mano.
 
 ```
 servizio: pnpm openapi:dump  →  openapi/<service>.json (committato qui)
-qui:      pnpm gen:types     →  src/<service>/types.gen.ts (committato)
+qui:      pnpm gen:types     →  src/<service>/types.gen.ts (committato, senza route di console)
 ```
 
 ```bash
 pnpm openapi:dump   # pnpm openapi:dump in ../fileharbor, ../articuno, ../beacon, ../gatherly
-pnpm gen:types      # openapi/*.json → src/*/types.gen.ts
+pnpm gen:types      # openapi/*.json → src/*/types.gen.ts, filtrati da scripts/gen-types.mjs
 pnpm check:api      # dopo un rilascio di un servizio
 ```
 
@@ -90,6 +89,13 @@ pnpm check:api      # dopo un rilascio di un servizio
   `init()`: niente `onModuleInit`, Prisma non si connette, valori finti per le env obbligatorie.
   Nessun DB, nessuna istanza, output deterministico. Herald fa eccezione: sorgenti nodenext con
   import `.js` che ts-node non risolve, quindi `nest build` + `scripts/openapi-dump.cjs` su `dist/`.
+- **Filtro dei tipi** (`scripts/gen-types.mjs`): `openapi/*.json` resta completo (lo legge
+  `check:api`, e non è pubblicato: `files` = `dist`, README, CHANGELOG). Prima di
+  `openapi-typescript` si tolgono i path con primo segmento in `admin`, `me`, `extension` (console di
+  Meridian, self-service dell'utente, estensione Twitch di Beacon) e gli schema raggiunti solo da
+  loro. Le route pubbliche restano anche se nessun metodo le usa: un sito può tipizzare una chiamata
+  propria senza aspettare un rilascio. Restano descrizioni che nominano `/admin` dentro DTO
+  condivisi: testo della spec, si correggono nel servizio se serve.
 - **`check:api`** (`scripts/check-api.mjs`): per ogni servizio fa il dump dal repo accanto e
   confronta, per ogni `operationId` citato in `src/<service>/client.ts`, path, metodo, definizione
   e ogni schema raggiunto via `$ref` con la spec committata. Esce 1 su qualsiasi cambio. Le route

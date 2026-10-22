@@ -13,6 +13,8 @@
 
 ### Changed
 
+- The generated types cover the public routes only: console routes (`/admin`, `/me`, `/extension`)
+  and the schemas only they use are no longer exported. No client method used them.
 - FileHarbor and Articuno types regenerated (FileHarbor 3.5.0, Articuno 1.4.0). Additive: the
   only change on a route the clients call is an optional `article` on `CommentListItemDto`.
 

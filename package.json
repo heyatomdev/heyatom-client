@@ -143,7 +143,7 @@
     "test:di": "node scripts/di-smoke.cjs",
     "check:api": "node scripts/check-api.mjs",
     "openapi:dump": "pnpm --dir ../fileharbor openapi:dump \"$PWD/openapi/fileharbor.json\" && pnpm --dir ../articuno openapi:dump \"$PWD/openapi/articuno.json\" && pnpm --dir ../beacon openapi:dump \"$PWD/openapi/beacon.json\" && pnpm --dir ../gatherly openapi:dump \"$PWD/openapi/gatherly.json\"",
-    "gen:types": "openapi-typescript openapi/fileharbor.json -o src/fileharbor/types.gen.ts --root-types --root-types-no-schema-prefix --empty-objects-unknown && openapi-typescript openapi/articuno.json -o src/articuno/types.gen.ts --root-types --root-types-no-schema-prefix --empty-objects-unknown && openapi-typescript openapi/beacon.json -o src/beacon/types.gen.ts --root-types --root-types-no-schema-prefix --empty-objects-unknown && openapi-typescript openapi/gatherly.json -o src/gatherly/types.gen.ts --root-types --root-types-no-schema-prefix --empty-objects-unknown",
+    "gen:types": "node scripts/gen-types.mjs",
     "prepublishOnly": "pnpm lint && pnpm test && pnpm build && pnpm test:di"
   },
   "engines": {

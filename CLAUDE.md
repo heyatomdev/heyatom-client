@@ -28,8 +28,10 @@ dbdbuilds-api, shelfie-api, website4 (e sgweb). Gemello di `../bastion-client`
   `@heyatom/bastion-client` è peer dep opzionale, importata solo dall'helper bastion.
 - Admin routes (`/admin/*`, `/me/*`) are Meridian-only and stay out of the package.
 - **Tipi generati da OpenAPI, mai scritti a mano.** Tutti i servizi espongono Swagger su `/docs`
-  (`/docs-json`). Pipeline: `openapi/<service>.json` committato → `openapi-typescript` → `src/<service>/types.gen.ts`
-  committato. Script `pnpm gen:types`. Preferire uno script di dump nel servizio (boot Nest senza `listen`,
+  (`/docs-json`). Pipeline: `openapi/<service>.json` committato (spec completa) → `scripts/gen-types.mjs`
+  (toglie le route di console `/admin`, `/me`, `/extension` e gli schema raggiunti solo da loro) →
+  `openapi-typescript` → `src/<service>/types.gen.ts` committato. Su npm finisce solo la superficie pubblica,
+  anche le route pubbliche non ancora usate da un metodo (tipizzabili dai siti senza rilascio). Script `pnpm gen:types`. Preferire uno script di dump nel servizio (boot Nest senza `listen`,
   `SwaggerModule.createDocument`, scrivi file) al fetch da istanza in esecuzione; se serve toccare il
   servizio, aggiungere solo lo script `openapi:dump` in `package.json` + un file `scripts/`.
 - **Nel package va solo ciò che è identico in tutti i consumer:** endpoint, auth header, tipi, mapping

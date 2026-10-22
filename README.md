@@ -161,7 +161,8 @@ original answer.
 
 ## Types
 
-Types are generated from each service's OpenAPI document, never written by hand. Every subpath
+Types are generated from each service's OpenAPI document (public routes only), never written by
+hand. Every subpath
 re-exports `paths`, `components`, `operations` and one alias per schema (`ImageResponseDto`,
 `EventDetailResponseDto`, …), plus type helpers such as `ResponseOf` (the response of an
 operation). Method inputs and outputs derive from them.
