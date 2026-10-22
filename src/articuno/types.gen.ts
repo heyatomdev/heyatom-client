@@ -569,7 +569,7 @@ export interface paths {
         };
         /**
          * List articles
-         * @description Returns a paginated list of articles for the session tenant. Supports filtering by status, category, tag, and featured flag.
+         * @description Returns a paginated list of articles for the session tenant. Supports filtering by status, category, tag, language and featured flag, title search (`search`) and sorting (`sortBy`, `sortOrder`).
          */
         get: operations["AdminArticlesController_findAll"];
         put?: never;
@@ -1573,6 +1573,16 @@ export interface components {
             username: string | null;
             avatarUrl: string | null;
         };
+        CommentArticleTranslationSummaryDto: {
+            title: string;
+            slug: string;
+            languageCode: string;
+        };
+        CommentArticleSummaryDto: {
+            id: string;
+            /** @description At most one: the first translation by languageCode. */
+            translations: components["schemas"]["CommentArticleTranslationSummaryDto"][];
+        };
         CommentListItemDto: {
             id: string;
             /** @description Null on the public API while the comment is not VISIBLE */
@@ -1589,6 +1599,8 @@ export interface components {
             updatedAt: string;
             tenant: components["schemas"]["CommentTenantSummaryDto"];
             author: components["schemas"]["CommentAuthorSummaryDto"];
+            /** @description Admin list only (`GET /admin/comments`). */
+            article?: components["schemas"]["CommentArticleSummaryDto"];
         };
         PublicUpdateCommentDto: {
             /** @description Updated comment content, plain text (tags are stripped) */
@@ -1934,6 +1946,8 @@ export interface components {
             tenantId: string;
             /** @description External ID of the actor */
             actorUserId: string;
+            /** @description Username of the actor, null when unknown */
+            actorUsername: string | null;
             /** @description Role of the actor at the time of the action */
             actorRole: string;
             action: components["schemas"]["AuditAction"];
@@ -2041,8 +2055,13 @@ export interface components {
             sentAt: string | null;
             attempts: number;
             lastError: string | null;
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Next scheduled attempt; null when delivered, due now, or dead-lettered
+             */
             nextRetryAt: string | null;
+            /** @description Max attempts reached: never retried again until a manual resend */
+            deadLettered: boolean;
             /** Format: date-time */
             createdAt: string;
         };
@@ -2098,6 +2117,12 @@ export interface components {
             tags: number;
             bannedWords: number;
         };
+        DashboardWebhooksDto: {
+            /** @description Outbox events not delivered yet (any state) */
+            undelivered: number;
+            /** @description Undelivered events past max attempts: need a manual resend */
+            deadLettered: number;
+        };
         DashboardLanguageDto: {
             /** @example en */
             code: string;
@@ -2139,6 +2164,7 @@ export interface components {
             reports: components["schemas"]["DashboardReportsDto"];
             users: components["schemas"]["DashboardUsersDto"];
             taxonomy: components["schemas"]["DashboardTaxonomyDto"];
+            webhooks: components["schemas"]["DashboardWebhooksDto"];
             languages: components["schemas"]["DashboardLanguageDto"][];
             topArticles: components["schemas"]["DashboardTopArticleDto"][];
             /** @description One row per day within `days` */
@@ -2181,6 +2207,8 @@ export type UserDto = components['schemas']['UserDto'];
 export type CommentDto = components['schemas']['CommentDto'];
 export type CommentTenantSummaryDto = components['schemas']['CommentTenantSummaryDto'];
 export type CommentAuthorSummaryDto = components['schemas']['CommentAuthorSummaryDto'];
+export type CommentArticleTranslationSummaryDto = components['schemas']['CommentArticleTranslationSummaryDto'];
+export type CommentArticleSummaryDto = components['schemas']['CommentArticleSummaryDto'];
 export type CommentListItemDto = components['schemas']['CommentListItemDto'];
 export type PublicUpdateCommentDto = components['schemas']['PublicUpdateCommentDto'];
 export type LikeToggleResultDto = components['schemas']['LikeToggleResultDto'];
@@ -2217,6 +2245,7 @@ export type DashboardCommentsDto = components['schemas']['DashboardCommentsDto']
 export type DashboardReportsDto = components['schemas']['DashboardReportsDto'];
 export type DashboardUsersDto = components['schemas']['DashboardUsersDto'];
 export type DashboardTaxonomyDto = components['schemas']['DashboardTaxonomyDto'];
+export type DashboardWebhooksDto = components['schemas']['DashboardWebhooksDto'];
 export type DashboardLanguageDto = components['schemas']['DashboardLanguageDto'];
 export type DashboardTopArticleDto = components['schemas']['DashboardTopArticleDto'];
 export type DailyStatsDto = components['schemas']['DailyStatsDto'];
@@ -3926,6 +3955,12 @@ export interface operations {
                 featured?: boolean;
                 /** @description Filter articles by moderation status. */
                 status?: "DRAFT" | "PUBLISHED" | "UNDER_REVIEW" | "HIDDEN" | "BANNED";
+                /** @description Case-insensitive substring of a translation title. With `languageCode`, the title must match in that language. */
+                search?: string;
+                /** @description Sort field. `publishedAt` puts never-published articles last. Default `createdAt`. */
+                sortBy?: "createdAt" | "updatedAt" | "publishedAt" | "views";
+                /** @description Sort direction. Default `desc`. */
+                sortOrder?: "asc" | "desc";
             };
             header?: never;
             path?: never;
@@ -3957,7 +3992,9 @@ export interface operations {
     AdminArticlesController_create: {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                "content-type": string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -4091,7 +4128,9 @@ export interface operations {
     AdminArticlesController_update: {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                "content-type": string;
+            };
             path: {
                 /** @description UUID of the article to update */
                 id: string;
@@ -4980,6 +5019,8 @@ export interface operations {
                 limit?: number;
                 /** @description Filter by username (case-insensitive partial match) */
                 username?: string;
+                /** @description Exact external id (Bastion `sub`): resolves an id from the audit log, e.g. `actorUserId`, to its user. */
+                externalId?: string;
                 /** @description Filter by user status */
                 status?: "ACTIVE" | "BANNED" | "SHADOW_BANNED";
                 /** @description Filter by user role */
@@ -5436,8 +5477,9 @@ export interface operations {
     };
     AdminStatsController_getDashboard: {
         parameters: {
-            query: {
-                days: string;
+            query?: {
+                /** @description Length of the `history` window in days, ending today. Totals are all-time. */
+                days?: number;
             };
             header?: never;
             path?: never;

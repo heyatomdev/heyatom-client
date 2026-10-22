@@ -527,6 +527,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/images/duplicates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Groups of images with the same dHash (scoped to accessible clients)
+         * @description Key (clientId, dHash); dHash alone with crossClient=true, fullAccess only. Flat images (dHash 0) and unhashed ones are left out.
+         */
+        get: operations["ImagesAdminController_listDuplicates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/images/{id}": {
         parameters: {
             query?: never;
@@ -763,10 +783,14 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List image share links (scoped to accessible clients) */
+        /**
+         * List image share links (scoped to accessible clients)
+         * @description An unknown image and an image outside the caller scope both give an empty list.
+         */
         get: operations["ImageShareLinksAdminController_listShareLinks"];
         put?: never;
-        post?: never;
+        /** Create a share link on a private image (admin) */
+        post: operations["ImageShareLinksAdminController_createShareLink"];
         delete?: never;
         options?: never;
         head?: never;
@@ -958,6 +982,43 @@ export interface paths {
         };
         /** Get statistics (scoped to accessible clients) */
         get: operations["StatisticsController_getGlobalStats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/stats/storage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Storage per day and kind (snapshots) and per client (live)
+         * @description Bytes of the originals: thumbnails and cached variants are not counted.
+         */
+        get: operations["StatisticsController_getStorageReport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/stats/storage/creators": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Live storage per creator, biggest first */
+        get: operations["StatisticsController_getCreatorStorage"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1183,7 +1244,8 @@ export interface components {
         };
         CreateShareLinkDto: {
             /**
-             * @description Expiration date for the share link
+             * Format: date-time
+             * @description Expiration date for the share link (future)
              * @example 2025-11-05T12:00:00.000Z
              */
             expiresAt?: string;
@@ -1806,6 +1868,8 @@ export interface components {
             updatedAt: string;
             /** Format: date-time */
             optimizedAt?: string;
+            /** @description Perceptual hash (16 hex chars), null until computed */
+            dHash: string | null;
             fullPath?: string;
             /** @description Whether the requesting admin has bookmarked this image */
             isBookmarked: boolean;
@@ -1823,6 +1887,36 @@ export interface components {
             data: components["schemas"]["AdminImageListItemDto"][];
             pagination: components["schemas"]["AdminPaginationResponseDto"];
         };
+        PageMetaDto: {
+            total: number;
+            page: number;
+            limit: number;
+            totalPages: number;
+        };
+        AdminDuplicateImageDto: {
+            id: string;
+            clientId: string;
+            originalName: string;
+            width: number;
+            height: number;
+            size: number;
+            /** Format: date-time */
+            createdAt: string;
+            isPrivate: boolean;
+            creatorExternalId: string;
+        };
+        AdminDuplicateGroupDto: {
+            /** @example 3c3e1e0f0f1e3c3c */
+            dHash: string;
+            /** @description null only with crossClient=true */
+            clientId: string | null;
+            count: number;
+            /** @description Sum of size over the whole group */
+            totalBytes: number;
+            /** @description Up to 6, oldest first */
+            images: components["schemas"]["AdminDuplicateImageDto"][];
+        };
+        Object: Record<string, unknown>;
         AdminClientCreatorClientDto: {
             id: string;
             name: string;
@@ -1863,6 +1957,8 @@ export interface components {
             updatedAt: string;
             /** Format: date-time */
             optimizedAt?: string;
+            /** @description Perceptual hash (16 hex chars), null until computed */
+            dHash: string | null;
             fullPath?: string;
             client?: components["schemas"]["AdminClientCreatorClientDto"];
             creator?: components["schemas"]["AdminImageCreatorDto"];
@@ -1870,6 +1966,8 @@ export interface components {
             albums?: components["schemas"]["AdminImageAlbumDto"][];
             /** @description Number of active (non-expired) share links for this image */
             activeShareLinks?: number;
+            /** @description Other images with the same dHash in the caller scope (0 if unhashed or flat). Detail only. */
+            duplicates?: number;
             /** @description Whether the requesting admin has bookmarked this image */
             isBookmarked: boolean;
         };
@@ -2146,21 +2244,40 @@ export interface components {
             /** @description Updated biography */
             bio?: string;
         };
+        AdminShareLinkImageDto: {
+            id: string;
+            originalName: string;
+            isPrivate: boolean;
+        };
+        AdminShareLinkClientDto: {
+            id: string;
+            name: string;
+        };
         AdminImageShareLinkResponseDto: {
             id: string;
             imageId: string;
             clientId: string;
             readToken: string;
+            /** @description Absolute URL: BASE_URL + /images/:id?token= */
+            shareUrl: string;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
             expiresAt?: string;
             /** @description True if the link is expired at response time */
             isExpired: boolean;
+            image: components["schemas"]["AdminShareLinkImageDto"];
+            client: components["schemas"]["AdminShareLinkClientDto"];
         };
-        AdminImageShareLinksListResponseDto: {
-            data: components["schemas"]["AdminImageShareLinkResponseDto"][];
-            pagination: components["schemas"]["AdminPaginationResponseDto"];
+        AdminCreateShareLinkDto: {
+            /** @description Image ID (must be private) */
+            imageId: string;
+            /**
+             * Format: date-time
+             * @description Expiry, in the future and at most 365 days out
+             * @example 2026-11-05T12:00:00.000Z
+             */
+            expiresAt: string;
         };
         AdminBookmarkResponseDto: {
             id: string;
@@ -2246,6 +2363,14 @@ export interface components {
             data: components["schemas"]["AdminVideoResponseDto"][];
             pagination: components["schemas"]["AdminPaginationResponseDto"];
         };
+        StorageByKindDto: {
+            /** @description Bytes */
+            images: number;
+            /** @description Bytes */
+            videos: number;
+            /** @description Bytes */
+            avatars: number;
+        };
         StatsTrendDto: {
             /** @description New items in the last 7 days */
             newImages: number;
@@ -2267,6 +2392,8 @@ export interface components {
             avatars: number;
             albums: number;
             videos: number;
+            /** @description Bytes in scope from that day's storage snapshot (00:30 UTC); null when there is none */
+            storage: number | null;
         };
         AdminStatsResponseDto: {
             /**
@@ -2281,10 +2408,55 @@ export interface components {
             totalVideos: number;
             totalStorage: number;
             totalCreators: number;
+            /** @description totalStorage split by kind (bytes) */
+            storageByKind: components["schemas"]["StorageByKindDto"];
             /** @description New counts in the last 7 days */
             last7Days: components["schemas"]["StatsTrendDto"];
             /** @description Daily breakdown for the last 7 days (for charts) */
             dailyChart: components["schemas"]["DailyDataPointDto"][];
+        };
+        StorageSeriesPointDto: {
+            /** @example 2026-10-22 */
+            date: string;
+            images: number | null;
+            videos: number | null;
+            avatars: number | null;
+        };
+        KindUsageDto: {
+            count: number;
+            /** @description Bytes */
+            bytes: number;
+        };
+        ClientStorageDto: {
+            clientId: string;
+            name: string;
+            images: components["schemas"]["KindUsageDto"];
+            videos: components["schemas"]["KindUsageDto"];
+            avatars: components["schemas"]["KindUsageDto"];
+        };
+        StorageReportDto: {
+            from: string;
+            to: string;
+            /** @description First snapshot in scope: the series is real from this day */
+            firstSnapshot: string | null;
+            /** @description One point per day, bytes; null on days with no snapshot */
+            series: components["schemas"]["StorageSeriesPointDto"][];
+            /** @description Live, biggest first */
+            byClient: components["schemas"]["ClientStorageDto"][];
+        };
+        CreatorStorageDto: {
+            creatorId: string;
+            externalId: string;
+            username: string | null;
+            clientId: string;
+            /** @description Bytes */
+            images: number;
+            /** @description Bytes */
+            videos: number;
+            /** @description Bytes */
+            avatars: number;
+            totalBytes: number;
+            itemCount: number;
         };
         TagTagClientDto: {
             id: string;
@@ -2382,6 +2554,10 @@ export type AdminListClientDto = components['schemas']['AdminListClientDto'];
 export type AdminImageListItemDto = components['schemas']['AdminImageListItemDto'];
 export type AdminPaginationResponseDto = components['schemas']['AdminPaginationResponseDto'];
 export type AdminImageListResponseDto = components['schemas']['AdminImageListResponseDto'];
+export type PageMetaDto = components['schemas']['PageMetaDto'];
+export type AdminDuplicateImageDto = components['schemas']['AdminDuplicateImageDto'];
+export type AdminDuplicateGroupDto = components['schemas']['AdminDuplicateGroupDto'];
+export type Object = components['schemas']['Object'];
 export type AdminClientCreatorClientDto = components['schemas']['AdminClientCreatorClientDto'];
 export type AdminImageCreatorDto = components['schemas']['AdminImageCreatorDto'];
 export type AdminImageAlbumDto = components['schemas']['AdminImageAlbumDto'];
@@ -2407,8 +2583,10 @@ export type CreateCreatorAdminDto = components['schemas']['CreateCreatorAdminDto
 export type CreatorListResponseDto = components['schemas']['CreatorListResponseDto'];
 export type AdminCreatorListResponseDto = components['schemas']['AdminCreatorListResponseDto'];
 export type UpdateCreatorAdminDto = components['schemas']['UpdateCreatorAdminDto'];
+export type AdminShareLinkImageDto = components['schemas']['AdminShareLinkImageDto'];
+export type AdminShareLinkClientDto = components['schemas']['AdminShareLinkClientDto'];
 export type AdminImageShareLinkResponseDto = components['schemas']['AdminImageShareLinkResponseDto'];
-export type AdminImageShareLinksListResponseDto = components['schemas']['AdminImageShareLinksListResponseDto'];
+export type AdminCreateShareLinkDto = components['schemas']['AdminCreateShareLinkDto'];
 export type AdminBookmarkResponseDto = components['schemas']['AdminBookmarkResponseDto'];
 export type AdminBookmarkListResponseDto = components['schemas']['AdminBookmarkListResponseDto'];
 export type AdminBookmarkedCreatorDto = components['schemas']['AdminBookmarkedCreatorDto'];
@@ -2417,9 +2595,15 @@ export type AdminVideoResponseDto = components['schemas']['AdminVideoResponseDto
 export type AdminVideoBookmarkResponseDto = components['schemas']['AdminVideoBookmarkResponseDto'];
 export type AdminVideoBookmarkListResponseDto = components['schemas']['AdminVideoBookmarkListResponseDto'];
 export type AdminVideoListResponseDto = components['schemas']['AdminVideoListResponseDto'];
+export type StorageByKindDto = components['schemas']['StorageByKindDto'];
 export type StatsTrendDto = components['schemas']['StatsTrendDto'];
 export type DailyDataPointDto = components['schemas']['DailyDataPointDto'];
 export type AdminStatsResponseDto = components['schemas']['AdminStatsResponseDto'];
+export type StorageSeriesPointDto = components['schemas']['StorageSeriesPointDto'];
+export type KindUsageDto = components['schemas']['KindUsageDto'];
+export type ClientStorageDto = components['schemas']['ClientStorageDto'];
+export type StorageReportDto = components['schemas']['StorageReportDto'];
+export type CreatorStorageDto = components['schemas']['CreatorStorageDto'];
 export type TagTagClientDto = components['schemas']['TagTagClientDto'];
 export type TagListItemDto = components['schemas']['TagListItemDto'];
 export type TagMetaDto = components['schemas']['TagMetaDto'];
@@ -3816,6 +4000,8 @@ export interface operations {
                 name?: string;
                 /** @description Only private (true) or only public (false) files */
                 isPrivate?: "true" | "false";
+                /** @description Only images with this dHash (16 hex chars) */
+                dHash?: string;
                 /** @description Sort field */
                 sortBy?: "createdAt" | "size" | "originalName" | "views" | "downloads";
                 /** @description Sort order */
@@ -3887,6 +4073,45 @@ export interface operations {
                 content?: never;
             };
             /** @description Admin has no access to the given client */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ImagesAdminController_listDuplicates: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: components["schemas"]["Object"];
+                /** @description Only this client */
+                clientId?: string;
+                /** @description Only images of this creator (id) */
+                creatorId?: string;
+                /** @description Group across clients (key = dHash alone). fullAccess principals only, 403 otherwise. */
+                crossClient?: components["schemas"]["Object"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated list. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["AdminDuplicateGroupDto"][];
+                        meta: components["schemas"]["PageMetaDto"];
+                    };
+                };
+            };
+            /** @description crossClient without fullAccess */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4519,12 +4744,13 @@ export interface operations {
     ImageShareLinksAdminController_listShareLinks: {
         parameters: {
             query?: {
+                page?: number;
+                limit?: number;
                 /** @description Filter by client ID */
                 clientId?: string;
                 /** @description Filter by image ID */
                 imageId?: string;
-                page?: number;
-                perPage?: number;
+                status?: "active" | "expired" | "all";
             };
             header?: never;
             path?: never;
@@ -4532,13 +4758,61 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Paginated list. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AdminImageShareLinksListResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["AdminImageShareLinkResponseDto"][];
+                        meta: components["schemas"]["PageMetaDto"];
+                    };
                 };
+            };
+        };
+    };
+    ImageShareLinksAdminController_createShareLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminCreateShareLinkDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminImageShareLinkResponseDto"];
+                };
+            };
+            /** @description Invalid expiry, or IMAGE_NOT_PRIVATE */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Image client outside scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Image not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -5003,6 +5277,81 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["AdminStatsResponseDto"];
                 };
+            };
+        };
+    };
+    StatisticsController_getStorageReport: {
+        parameters: {
+            query?: {
+                /** @description First day (UTC), default `to` - 29 days */
+                from?: string;
+                /** @description Last day (UTC, included), default today. Max 366 days from `from`. */
+                to?: string;
+                /** @description Only this client */
+                clientId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StorageReportDto"];
+                };
+            };
+            /** @description Bad range (to < from, > 366 days) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description clientId out of scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StatisticsController_getCreatorStorage: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: components["schemas"]["Object"];
+                /** @description Only this client */
+                clientId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated list. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CreatorStorageDto"][];
+                        meta: components["schemas"]["PageMetaDto"];
+                    };
+                };
+            };
+            /** @description clientId out of scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

@@ -88,6 +88,7 @@
     "test": "vitest run",
     "lint": "tsc -p tsconfig.json --noEmit",
     "test:di": "node scripts/di-smoke.cjs",
+    "check:api": "node scripts/check-api.mjs",
     "openapi:dump": "pnpm --dir ../fileharbor openapi:dump \"$PWD/openapi/fileharbor.json\" && pnpm --dir ../articuno openapi:dump \"$PWD/openapi/articuno.json\"",
     "gen:types": "openapi-typescript openapi/fileharbor.json -o src/fileharbor/types.gen.ts --root-types --root-types-no-schema-prefix --empty-objects-unknown && openapi-typescript openapi/articuno.json -o src/articuno/types.gen.ts --root-types --root-types-no-schema-prefix --empty-objects-unknown",
     "prepublishOnly": "pnpm lint && pnpm test && pnpm build && pnpm test:di"

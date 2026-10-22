@@ -2379,7 +2379,16 @@
       "post": {
         "description": "Creates a new article for the session tenant. Accepts either `application/json` (plain body) or `multipart/form-data` (JSON in the `data` field + optional `coverImage` file). Uploaded images are stored in the tenant's FileHarbor instance (JPEG/PNG/GIF/WebP, max 10 MB).",
         "operationId": "AdminArticlesController_create",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "content-type",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "description": "Article data. When using multipart/form-data, serialize the article JSON in the `data` field and optionally attach a `coverImage` file.",
@@ -2449,7 +2458,7 @@
         ]
       },
       "get": {
-        "description": "Returns a paginated list of articles for the session tenant. Supports filtering by status, category, tag, and featured flag.",
+        "description": "Returns a paginated list of articles for the session tenant. Supports filtering by status, category, tag, language and featured flag, title search (`search`) and sorting (`sortBy`, `sortOrder`).",
         "operationId": "AdminArticlesController_findAll",
         "parameters": [
           {
@@ -2527,6 +2536,47 @@
                 "UNDER_REVIEW",
                 "HIDDEN",
                 "BANNED"
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Case-insensitive substring of a translation title. With `languageCode`, the title must match in that language.",
+            "schema": {
+              "maxLength": 100,
+              "example": "nestjs",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Sort field. `publishedAt` puts never-published articles last. Default `createdAt`.",
+            "schema": {
+              "default": "createdAt",
+              "type": "string",
+              "enum": [
+                "createdAt",
+                "updatedAt",
+                "publishedAt",
+                "views"
+              ]
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "description": "Sort direction. Default `desc`.",
+            "schema": {
+              "default": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
               ]
             }
           }
@@ -2628,6 +2678,14 @@
             "description": "UUID of the article to update",
             "schema": {
               "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "content-type",
+            "required": true,
+            "in": "header",
+            "schema": {
               "type": "string"
             }
           }
@@ -4087,6 +4145,16 @@
             }
           },
           {
+            "name": "externalId",
+            "required": false,
+            "in": "query",
+            "description": "Exact external id (Bastion `sub`): resolves an id from the audit log, e.g. `actorUserId`, to its user.",
+            "schema": {
+              "example": "5f0c2a7e-1b2c-4d3e-8f90-123456789abc",
+              "type": "string"
+            }
+          },
+          {
             "name": "status",
             "required": false,
             "in": "query",
@@ -4745,10 +4813,14 @@
         "parameters": [
           {
             "name": "days",
-            "required": true,
+            "required": false,
             "in": "query",
+            "description": "Length of the `history` window in days, ending today. Totals are all-time.",
             "schema": {
-              "type": "string"
+              "minimum": 1,
+              "maximum": 365,
+              "default": 30,
+              "type": "number"
             }
           }
         ],
@@ -4778,7 +4850,7 @@
   "info": {
     "title": "Articuno",
     "description": "Multi-tenant CMS management system built with NestJS, Prisma ORM, and PostgreSQL.",
-    "version": "1.2.3",
+    "version": "1.4.0",
     "contact": {
       "name": "Andrea Tombolato",
       "url": "https://heyatom.dev",
@@ -5916,6 +5988,44 @@
           "avatarUrl"
         ]
       },
+      "CommentArticleTranslationSummaryDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "languageCode": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "slug",
+          "languageCode"
+        ]
+      },
+      "CommentArticleSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "translations": {
+            "description": "At most one: the first translation by languageCode.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CommentArticleTranslationSummaryDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "translations"
+        ]
+      },
       "CommentListItemDto": {
         "type": "object",
         "properties": {
@@ -5960,6 +6070,14 @@
           },
           "author": {
             "$ref": "#/components/schemas/CommentAuthorSummaryDto"
+          },
+          "article": {
+            "description": "Admin list only (`GET /admin/comments`).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CommentArticleSummaryDto"
+              }
+            ]
           }
         },
         "required": [
@@ -6642,6 +6760,11 @@
             "type": "string",
             "description": "External ID of the actor"
           },
+          "actorUsername": {
+            "type": "string",
+            "nullable": true,
+            "description": "Username of the actor, null when unknown"
+          },
           "actorRole": {
             "type": "string",
             "description": "Role of the actor at the time of the action"
@@ -6687,6 +6810,7 @@
           "timestamp",
           "tenantId",
           "actorUserId",
+          "actorUsername",
           "actorRole",
           "action",
           "resourceType",
@@ -6855,7 +6979,12 @@
           "nextRetryAt": {
             "format": "date-time",
             "type": "string",
-            "nullable": true
+            "nullable": true,
+            "description": "Next scheduled attempt; null when delivered, due now, or dead-lettered"
+          },
+          "deadLettered": {
+            "type": "boolean",
+            "description": "Max attempts reached: never retried again until a manual resend"
           },
           "createdAt": {
             "format": "date-time",
@@ -6871,6 +7000,7 @@
           "attempts",
           "lastError",
           "nextRetryAt",
+          "deadLettered",
           "createdAt"
         ]
       },
@@ -7055,6 +7185,23 @@
           "bannedWords"
         ]
       },
+      "DashboardWebhooksDto": {
+        "type": "object",
+        "properties": {
+          "undelivered": {
+            "type": "number",
+            "description": "Outbox events not delivered yet (any state)"
+          },
+          "deadLettered": {
+            "type": "number",
+            "description": "Undelivered events past max attempts: need a manual resend"
+          }
+        },
+        "required": [
+          "undelivered",
+          "deadLettered"
+        ]
+      },
       "DashboardLanguageDto": {
         "type": "object",
         "properties": {
@@ -7191,6 +7338,9 @@
           "taxonomy": {
             "$ref": "#/components/schemas/DashboardTaxonomyDto"
           },
+          "webhooks": {
+            "$ref": "#/components/schemas/DashboardWebhooksDto"
+          },
           "languages": {
             "type": "array",
             "items": {
@@ -7221,6 +7371,7 @@
           "reports",
           "users",
           "taxonomy",
+          "webhooks",
           "languages",
           "topArticles",
           "history"
