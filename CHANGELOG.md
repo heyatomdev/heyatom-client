@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- FileHarbor types regenerated: `ImageResponseDto` gains an optional `srcset` (absolute URLs,
+  public images only), ready for `<img srcset>`.
+
 ## 0.3.0
 
 ### Added
