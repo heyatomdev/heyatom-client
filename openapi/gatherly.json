@@ -1370,24 +1370,48 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Paginated list.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
                   "required": [
-                    "data"
+                    "data",
+                    "meta"
                   ],
                   "properties": {
                     "data": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/TagEventResponseDto"
+                        "$ref": "#/components/schemas/EventWithCountResponseDto"
                       }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PageMetaDto"
                     }
                   }
                 }
@@ -2694,23 +2718,49 @@
         "operationId": "AdminWebhooksController_deliveries",
         "parameters": [
           {
-            "name": "status",
-            "required": true,
+            "name": "page",
+            "required": false,
             "in": "query",
             "schema": {
-              "type": "string"
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "DELIVERED",
+                "FAILED"
+              ]
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Paginated list.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
                   "required": [
-                    "data"
+                    "data",
+                    "meta"
                   ],
                   "properties": {
                     "data": {
@@ -2718,6 +2768,9 @@
                       "items": {
                         "$ref": "#/components/schemas/WebhookDeliveryResponseDto"
                       }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PageMetaDto"
                     }
                   }
                 }
@@ -3197,28 +3250,49 @@
             }
           },
           {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
             "name": "status",
             "required": false,
             "in": "query",
             "schema": {
+              "type": "string",
               "enum": [
                 "PENDING",
                 "DELIVERED",
                 "FAILED"
-              ],
-              "type": "string"
+              ]
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Paginated list.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
                   "required": [
-                    "data"
+                    "data",
+                    "meta"
                   ],
                   "properties": {
                     "data": {
@@ -3226,6 +3300,9 @@
                       "items": {
                         "$ref": "#/components/schemas/WebhookDeliveryResponseDto"
                       }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PageMetaDto"
                     }
                   }
                 }
@@ -4841,154 +4918,6 @@
         },
         "required": [
           "slug"
-        ]
-      },
-      "TaggedEventDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "clientId": {
-            "type": "string"
-          },
-          "defaultLocale": {
-            "type": "string",
-            "example": "it"
-          },
-          "authorId": {
-            "type": "string"
-          },
-          "authorName": {
-            "type": "string"
-          },
-          "authorEmail": {
-            "type": "string",
-            "nullable": true
-          },
-          "startTime": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "endTime": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "timezone": {
-            "type": "string",
-            "example": "Europe/Rome"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "DRAFT",
-              "PUBLISHED",
-              "CANCELLED",
-              "COMPLETED"
-            ]
-          },
-          "type": {
-            "type": "string",
-            "nullable": true
-          },
-          "coverImageUrl": {
-            "type": "string",
-            "nullable": true
-          },
-          "categoryId": {
-            "type": "string",
-            "nullable": true
-          },
-          "locationName": {
-            "type": "string",
-            "nullable": true
-          },
-          "locationAddress": {
-            "type": "string",
-            "nullable": true
-          },
-          "locationUrl": {
-            "type": "string",
-            "nullable": true
-          },
-          "isOnline": {
-            "type": "boolean"
-          },
-          "maxParticipants": {
-            "type": "number",
-            "nullable": true
-          },
-          "isPublic": {
-            "type": "boolean"
-          },
-          "price": {
-            "type": "string",
-            "nullable": true,
-            "example": "12.50",
-            "description": "Decimal, serialized as a string"
-          },
-          "currency": {
-            "type": "string",
-            "nullable": true,
-            "example": "EUR"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "recurrenceRuleId": {
-            "type": "string",
-            "nullable": true
-          },
-          "parentEventId": {
-            "type": "string",
-            "nullable": true
-          },
-          "translations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/EventTranslationResponseDto"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "clientId",
-          "defaultLocale",
-          "authorId",
-          "authorName",
-          "startTime",
-          "timezone",
-          "status",
-          "isOnline",
-          "isPublic",
-          "createdAt",
-          "updatedAt",
-          "translations"
-        ]
-      },
-      "TagEventResponseDto": {
-        "type": "object",
-        "properties": {
-          "eventId": {
-            "type": "string"
-          },
-          "tagId": {
-            "type": "string"
-          },
-          "event": {
-            "$ref": "#/components/schemas/TaggedEventDto"
-          }
-        },
-        "required": [
-          "eventId",
-          "tagId",
-          "event"
         ]
       },
       "UpdateTagDto": {

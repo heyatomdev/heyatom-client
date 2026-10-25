@@ -24,6 +24,11 @@ export class FileHarborClient {
     return this.http.upload<ResponseOf<Op<'ImageController_uploadImage'>>>('POST', '/images', toFormData('file', [file], fields), opts);
   }
 
+  /** `GET /images/:imageId?info=true` — the image's metadata (tags, owner, URLs), not the file. */
+  getImageInfo(imageId: string, opts?: RequestOptions) {
+    return this.http.json<ResponseOf<Op<'ImageController_getImage'>>>('GET', `/images/${seg(imageId)}`, { query: { info: true } }, opts);
+  }
+
   /** `PATCH /images/:imageId` — tags, description, isPrivate; only the owner (`opts.userId`). */
   updateImage(imageId: string, body: BodyOf<Op<'ImageController_updateImage'>>, opts?: RequestOptions) {
     return this.http.json<ResponseOf<Op<'ImageController_updateImage'>>>('PATCH', `/images/${seg(imageId)}`, { body }, opts);

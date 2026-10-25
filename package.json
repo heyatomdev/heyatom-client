@@ -1,6 +1,6 @@
 {
   "name": "@heyatom/client",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "Consumer SDK for the HeyAtom platform services: FileHarbor, Articuno, Beacon and Gatherly clients on native fetch, with optional NestJS modules",
   "license": "MIT",
   "author": "Andrea Tombolato <hey@heyatom.dev> (https://heyatom.dev)",

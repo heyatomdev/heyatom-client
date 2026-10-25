@@ -8,7 +8,7 @@ const fakeJwt = `${b64({ alg: 'RS256' })}.${b64({ exp: Math.floor(Date.now() / 1
 
 describe('ArticunoClient', () => {
   it('scopes every call with the tenant key and sends X-User-Id where Articuno needs it', async () => {
-    const { fetchImpl, calls } = fakeFetch(() => json(200, { liked: true }));
+    const { fetchImpl, calls } = fakeFetch(() => json(200, { data: { liked: true } }));
     const articuno = new ArticunoClient({ baseUrl: 'http://articuno', auth: apiKeyAuth('tenant-key'), fetch: fetchImpl });
 
     await articuno.toggleLike('art-1', 'user-1');

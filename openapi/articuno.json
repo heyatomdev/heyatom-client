@@ -22,7 +22,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ArticleDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ArticleDto"
+                    }
+                  }
                 }
               }
             }
@@ -219,7 +227,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ArticleDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ArticleDto"
+                    }
+                  }
                 }
               }
             }
@@ -274,7 +290,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ArticleDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ArticleDto"
+                    }
+                  }
                 }
               }
             }
@@ -357,7 +381,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BannedWordDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/BannedWordDto"
+                    }
+                  }
                 }
               }
             }
@@ -528,7 +560,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ArticleTranslationDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ArticleTranslationDto"
+                    }
+                  }
                 }
               }
             }
@@ -587,9 +627,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ArticleTranslationSummaryDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ArticleTranslationSummaryDto"
+                      }
+                    }
                   }
                 }
               }
@@ -655,7 +703,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ArticleTranslationDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ArticleTranslationDto"
+                    }
+                  }
                 }
               }
             }
@@ -718,7 +774,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ArticleTranslationDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ArticleTranslationDto"
+                    }
+                  }
                 }
               }
             }
@@ -829,7 +893,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BookmarkToggleResultDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/BookmarkToggleResultDto"
+                    }
+                  }
                 }
               }
             }
@@ -963,7 +1035,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CategoryDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CategoryDto"
+                    }
+                  }
                 }
               }
             }
@@ -1077,7 +1157,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CategoryDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CategoryDto"
+                    }
+                  }
                 }
               }
             }
@@ -1132,7 +1220,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CategoryDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CategoryDto"
+                    }
+                  }
                 }
               }
             }
@@ -1217,7 +1313,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CommentDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CommentDto"
+                    }
+                  }
                 }
               }
             }
@@ -1346,7 +1450,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CommentDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CommentDto"
+                    }
+                  }
                 }
               }
             }
@@ -1389,7 +1501,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CommentDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CommentDto"
+                    }
+                  }
                 }
               }
             }
@@ -1462,7 +1582,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LikeToggleResultDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/LikeToggleResultDto"
+                    }
+                  }
                 }
               }
             }
@@ -1527,7 +1655,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ArticleInteractionStatusDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ArticleInteractionStatusDto"
+                    }
+                  }
                 }
               }
             }
@@ -1615,7 +1751,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ReportDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ReportDto"
+                    }
+                  }
                 }
               }
             }
@@ -1807,7 +1951,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ReportDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ReportDto"
+                    }
+                  }
                 }
               }
             }
@@ -1854,7 +2006,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TagDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/TagDto"
+                    }
+                  }
                 }
               }
             }
@@ -1978,7 +2138,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TagDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/TagDto"
+                    }
+                  }
                 }
               }
             }
@@ -2033,7 +2201,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TagDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/TagDto"
+                    }
+                  }
                 }
               }
             }
@@ -2119,7 +2295,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/UserDto"
+                    }
+                  }
                 }
               }
             }
@@ -2192,7 +2376,9 @@
               "application/json": {
                 "schema": {
                   "example": {
-                    "status": "ok"
+                    "data": {
+                      "status": "ok"
+                    }
                   }
                 }
               }
@@ -2435,7 +2621,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ArticleDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ArticleDto"
+                    }
+                  }
                 }
               }
             }
@@ -2643,7 +2837,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ArticleDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ArticleDto"
+                    }
+                  }
                 }
               }
             }
@@ -2736,7 +2938,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ArticleDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ArticleDto"
+                    }
+                  }
                 }
               }
             }
@@ -2830,7 +3040,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ArticleTranslationDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ArticleTranslationDto"
+                    }
+                  }
                 }
               }
             }
@@ -2879,9 +3097,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ArticleTranslationSummaryDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ArticleTranslationSummaryDto"
+                      }
+                    }
                   }
                 }
               }
@@ -2937,7 +3163,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ArticleTranslationDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ArticleTranslationDto"
+                    }
+                  }
                 }
               }
             }
@@ -3000,7 +3234,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ArticleTranslationDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ArticleTranslationDto"
+                    }
+                  }
                 }
               }
             }
@@ -3092,7 +3334,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TagDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/TagDto"
+                    }
+                  }
                 }
               }
             }
@@ -3199,7 +3449,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TagDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/TagDto"
+                    }
+                  }
                 }
               }
             }
@@ -3244,7 +3502,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TagDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/TagDto"
+                    }
+                  }
                 }
               }
             }
@@ -3308,7 +3574,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CategoryDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CategoryDto"
+                    }
+                  }
                 }
               }
             }
@@ -3405,7 +3679,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CategoryDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CategoryDto"
+                    }
+                  }
                 }
               }
             }
@@ -3450,7 +3732,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CategoryDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CategoryDto"
+                    }
+                  }
                 }
               }
             }
@@ -3515,7 +3805,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BannedWordDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/BannedWordDto"
+                    }
+                  }
                 }
               }
             }
@@ -3672,7 +3970,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ReportDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ReportDto"
+                    }
+                  }
                 }
               }
             }
@@ -3854,7 +4160,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ReportDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ReportDto"
+                    }
+                  }
                 }
               }
             }
@@ -3909,7 +4223,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ReportDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ReportDto"
+                    }
+                  }
                 }
               }
             }
@@ -4085,7 +4407,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AuditLogDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AuditLogDto"
+                    }
+                  }
                 }
               }
             }
@@ -4249,7 +4579,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserListItemDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/UserListItemDto"
+                    }
+                  }
                 }
               }
             }
@@ -4340,7 +4678,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserListItemDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/UserListItemDto"
+                    }
+                  }
                 }
               }
             }
@@ -4479,7 +4825,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CommentDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CommentDto"
+                    }
+                  }
                 }
               }
             }
@@ -4533,7 +4887,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CommentDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CommentDto"
+                    }
+                  }
                 }
               }
             }
@@ -4703,7 +5065,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/WebhookEventDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebhookEventDto"
+                    }
+                  }
                 }
               }
             }
@@ -4747,7 +5117,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/WebhookEventDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebhookEventDto"
+                    }
+                  }
                 }
               }
             }
@@ -4787,7 +5165,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/WebhookResendAllResultDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebhookResendAllResultDto"
+                    }
+                  }
                 }
               }
             }
@@ -4830,7 +5216,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DashboardStatsDto"
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/DashboardStatsDto"
+                    }
+                  }
                 }
               }
             }
@@ -4877,93 +5271,6 @@
       }
     },
     "schemas": {
-      "CreateArticleTranslationDto": {
-        "type": "object",
-        "properties": {
-          "languageCode": {
-            "type": "string",
-            "description": "BCP 47 language code for this translation (e.g. \"en\", \"it\", \"fr\").",
-            "example": "en"
-          },
-          "title": {
-            "type": "string",
-            "description": "Localized title of the article.",
-            "example": "Getting Started with NestJS"
-          },
-          "content": {
-            "type": "string",
-            "description": "Full HTML/Markdown body of the article.",
-            "example": "<p>NestJS is a progressive Node.js framework...</p>"
-          },
-          "excerpt": {
-            "type": "string",
-            "description": "Short plain-text summary shown in listing pages and previews.",
-            "example": "A step-by-step guide to building your first NestJS application."
-          },
-          "metaTitle": {
-            "type": "string",
-            "description": "SEO meta title. Defaults to the article title when omitted.",
-            "example": "Getting Started with NestJS | My Blog"
-          },
-          "metaDescription": {
-            "type": "string",
-            "description": "SEO meta description shown in search engine result pages.",
-            "example": "Learn how to set up your first NestJS project from scratch."
-          }
-        },
-        "required": [
-          "languageCode",
-          "title",
-          "content",
-          "excerpt"
-        ]
-      },
-      "PublicCreateArticleDto": {
-        "type": "object",
-        "properties": {
-          "coverImage": {
-            "type": "string",
-            "description": "URL of the article cover image. When creating via multipart/form-data, upload the file in the `coverImage` field instead.",
-            "example": "https://cdn.example.com/articles/my-article-cover.jpg"
-          },
-          "featured": {
-            "type": "boolean",
-            "description": "Whether the article should appear in featured/highlighted sections.",
-            "example": false
-          },
-          "authorId": {
-            "type": "string",
-            "description": "UUID of the user (author) to associate with the article. Defaults to the authenticated user when omitted.",
-            "example": "123e4567-e89b-12d3-a456-426614174000"
-          },
-          "categoryId": {
-            "type": "string",
-            "description": "UUID of the category the article belongs to.",
-            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-          },
-          "tagIds": {
-            "description": "List of tag UUIDs to attach to the article.",
-            "example": [
-              "tag-uuid-1",
-              "tag-uuid-2"
-            ],
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "translations": {
-            "description": "One or more translation objects to create alongside the article. At least one translation (with the default language) is recommended.",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CreateArticleTranslationDto"
-            }
-          }
-        },
-        "required": [
-          "categoryId"
-        ]
-      },
       "ContentStatus": {
         "type": "string",
         "enum": [
@@ -5246,6 +5553,93 @@
           "translations"
         ]
       },
+      "CreateArticleTranslationDto": {
+        "type": "object",
+        "properties": {
+          "languageCode": {
+            "type": "string",
+            "description": "BCP 47 language code for this translation (e.g. \"en\", \"it\", \"fr\").",
+            "example": "en"
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized title of the article.",
+            "example": "Getting Started with NestJS"
+          },
+          "content": {
+            "type": "string",
+            "description": "Full HTML/Markdown body of the article.",
+            "example": "<p>NestJS is a progressive Node.js framework...</p>"
+          },
+          "excerpt": {
+            "type": "string",
+            "description": "Short plain-text summary shown in listing pages and previews.",
+            "example": "A step-by-step guide to building your first NestJS application."
+          },
+          "metaTitle": {
+            "type": "string",
+            "description": "SEO meta title. Defaults to the article title when omitted.",
+            "example": "Getting Started with NestJS | My Blog"
+          },
+          "metaDescription": {
+            "type": "string",
+            "description": "SEO meta description shown in search engine result pages.",
+            "example": "Learn how to set up your first NestJS project from scratch."
+          }
+        },
+        "required": [
+          "languageCode",
+          "title",
+          "content",
+          "excerpt"
+        ]
+      },
+      "PublicCreateArticleDto": {
+        "type": "object",
+        "properties": {
+          "coverImage": {
+            "type": "string",
+            "description": "URL of the article cover image. When creating via multipart/form-data, upload the file in the `coverImage` field instead.",
+            "example": "https://cdn.example.com/articles/my-article-cover.jpg"
+          },
+          "featured": {
+            "type": "boolean",
+            "description": "Whether the article should appear in featured/highlighted sections.",
+            "example": false
+          },
+          "authorId": {
+            "type": "string",
+            "description": "UUID of the user (author) to associate with the article. Defaults to the authenticated user when omitted.",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "UUID of the category the article belongs to.",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "tagIds": {
+            "description": "List of tag UUIDs to attach to the article.",
+            "example": [
+              "tag-uuid-1",
+              "tag-uuid-2"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "translations": {
+            "description": "One or more translation objects to create alongside the article. At least one translation (with the default language) is recommended.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateArticleTranslationDto"
+            }
+          }
+        },
+        "required": [
+          "categoryId"
+        ]
+      },
       "PageMetaDto": {
         "type": "object",
         "properties": {
@@ -5442,21 +5836,6 @@
           }
         }
       },
-      "CreateBannedWordDto": {
-        "type": "object",
-        "properties": {
-          "word": {
-            "type": "string",
-            "description": "The word to add to the banned word list (2–50 characters)",
-            "example": "spam",
-            "minLength": 2,
-            "maxLength": 50
-          }
-        },
-        "required": [
-          "word"
-        ]
-      },
       "BannedWordDto": {
         "type": "object",
         "properties": {
@@ -5480,6 +5859,21 @@
           "id",
           "word",
           "tenantId"
+        ]
+      },
+      "CreateBannedWordDto": {
+        "type": "object",
+        "properties": {
+          "word": {
+            "type": "string",
+            "description": "The word to add to the banned word list (2–50 characters)",
+            "example": "spam",
+            "minLength": 2,
+            "maxLength": 50
+          }
+        },
+        "required": [
+          "word"
         ]
       },
       "UpdateArticleTranslationDto": {
@@ -5646,29 +6040,6 @@
           "article"
         ]
       },
-      "CreateCategoryDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Display name of the category. The slug will be auto-generated from this value.",
-            "example": "Science"
-          },
-          "description": {
-            "type": "string",
-            "description": "Optional human-readable description of the category.",
-            "example": "Articles about science and research."
-          },
-          "color": {
-            "type": "string",
-            "description": "Optional hex colour associated with the category for UI display.",
-            "example": "#3B82F6"
-          }
-        },
-        "required": [
-          "name"
-        ]
-      },
       "CategoryDto": {
         "type": "object",
         "properties": {
@@ -5716,6 +6087,29 @@
           "slug",
           "createdAt",
           "updatedAt"
+        ]
+      },
+      "CreateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Display name of the category. The slug will be auto-generated from this value.",
+            "example": "Science"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional human-readable description of the category.",
+            "example": "Articles about science and research."
+          },
+          "color": {
+            "type": "string",
+            "description": "Optional hex colour associated with the category for UI display.",
+            "example": "#3B82F6"
+          }
+        },
+        "required": [
+          "name"
         ]
       },
       "CategoryListItemDto": {
@@ -5792,29 +6186,6 @@
             "example": "#10B981"
           }
         }
-      },
-      "CreateCommentDto": {
-        "type": "object",
-        "properties": {
-          "articleId": {
-            "type": "string",
-            "description": "UUID of the article being commented on"
-          },
-          "content": {
-            "type": "string",
-            "description": "Comment text, plain text (tags are stripped)",
-            "maxLength": 5000
-          },
-          "authorExternalId": {
-            "type": "string",
-            "description": "External ID of the author (from your identity provider)"
-          }
-        },
-        "required": [
-          "articleId",
-          "content",
-          "authorExternalId"
-        ]
       },
       "UserDto": {
         "type": "object",
@@ -5929,6 +6300,29 @@
           "createdAt",
           "updatedAt",
           "author"
+        ]
+      },
+      "CreateCommentDto": {
+        "type": "object",
+        "properties": {
+          "articleId": {
+            "type": "string",
+            "description": "UUID of the article being commented on"
+          },
+          "content": {
+            "type": "string",
+            "description": "Comment text, plain text (tags are stripped)",
+            "maxLength": 5000
+          },
+          "authorExternalId": {
+            "type": "string",
+            "description": "External ID of the author (from your identity provider)"
+          }
+        },
+        "required": [
+          "articleId",
+          "content",
+          "authorExternalId"
         ]
       },
       "CommentTenantSummaryDto": {
@@ -6131,47 +6525,6 @@
           "bookmarked"
         ]
       },
-      "CreateReportDto": {
-        "type": "object",
-        "properties": {
-          "targetType": {
-            "type": "string",
-            "description": "Type of the reported target",
-            "enum": [
-              "ARTICLE",
-              "COMMENT",
-              "USER"
-            ],
-            "example": "COMMENT"
-          },
-          "targetId": {
-            "type": "string",
-            "description": "UUID of the reported target (article, comment or user)",
-            "example": "123e4567-e89b-12d3-a456-426614174000"
-          },
-          "reason": {
-            "type": "string",
-            "description": "Short reason for the report",
-            "example": "Spam"
-          },
-          "description": {
-            "type": "string",
-            "description": "Optional additional details about the report",
-            "example": "This comment contains repeated promotional links."
-          },
-          "reporterId": {
-            "type": "string",
-            "description": "External ID of the user submitting the report",
-            "example": "user_abc123"
-          }
-        },
-        "required": [
-          "targetType",
-          "targetId",
-          "reason",
-          "reporterId"
-        ]
-      },
       "ReportStatus": {
         "type": "string",
         "enum": [
@@ -6350,6 +6703,47 @@
           "target"
         ]
       },
+      "CreateReportDto": {
+        "type": "object",
+        "properties": {
+          "targetType": {
+            "type": "string",
+            "description": "Type of the reported target",
+            "enum": [
+              "ARTICLE",
+              "COMMENT",
+              "USER"
+            ],
+            "example": "COMMENT"
+          },
+          "targetId": {
+            "type": "string",
+            "description": "UUID of the reported target (article, comment or user)",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Short reason for the report",
+            "example": "Spam"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional additional details about the report",
+            "example": "This comment contains repeated promotional links."
+          },
+          "reporterId": {
+            "type": "string",
+            "description": "External ID of the user submitting the report",
+            "example": "user_abc123"
+          }
+        },
+        "required": [
+          "targetType",
+          "targetId",
+          "reason",
+          "reporterId"
+        ]
+      },
       "UpdateReportStatusDto": {
         "type": "object",
         "properties": {
@@ -6378,19 +6772,6 @@
         "required": [
           "status",
           "moderatorId"
-        ]
-      },
-      "CreateTagDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Display name of the tag. The slug will be auto-generated from this value.",
-            "example": "Technology"
-          }
-        },
-        "required": [
-          "name"
         ]
       },
       "TenantDto": {
@@ -6510,6 +6891,19 @@
           "slug",
           "createdAt",
           "updatedAt"
+        ]
+      },
+      "CreateTagDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Display name of the tag. The slug will be auto-generated from this value.",
+            "example": "Technology"
+          }
+        },
+        "required": [
+          "name"
         ]
       },
       "UpdateTagDto": {

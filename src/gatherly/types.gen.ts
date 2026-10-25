@@ -689,51 +689,6 @@ export interface components {
              */
             label?: Record<string, unknown>;
         };
-        TaggedEventDto: {
-            id: string;
-            clientId: string;
-            /** @example it */
-            defaultLocale: string;
-            authorId: string;
-            authorName: string;
-            authorEmail?: string | null;
-            /** Format: date-time */
-            startTime: string;
-            /** Format: date-time */
-            endTime?: string | null;
-            /** @example Europe/Rome */
-            timezone: string;
-            /** @enum {string} */
-            status: "DRAFT" | "PUBLISHED" | "CANCELLED" | "COMPLETED";
-            type?: string | null;
-            coverImageUrl?: string | null;
-            categoryId?: string | null;
-            locationName?: string | null;
-            locationAddress?: string | null;
-            locationUrl?: string | null;
-            isOnline: boolean;
-            maxParticipants?: number | null;
-            isPublic: boolean;
-            /**
-             * @description Decimal, serialized as a string
-             * @example 12.50
-             */
-            price?: string | null;
-            /** @example EUR */
-            currency?: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            recurrenceRuleId?: string | null;
-            parentEventId?: string | null;
-            translations: components["schemas"]["EventTranslationResponseDto"][];
-        };
-        TagEventResponseDto: {
-            eventId: string;
-            tagId: string;
-            event: components["schemas"]["TaggedEventDto"];
-        };
         UpdateTagDto: {
             label?: Record<string, unknown>;
         };
@@ -771,8 +726,6 @@ export type CategoryTranslationDto = components['schemas']['CategoryTranslationD
 export type CreateCategoryDto = components['schemas']['CreateCategoryDto'];
 export type UpdateCategoryDto = components['schemas']['UpdateCategoryDto'];
 export type CreateTagDto = components['schemas']['CreateTagDto'];
-export type TaggedEventDto = components['schemas']['TaggedEventDto'];
-export type TagEventResponseDto = components['schemas']['TagEventResponseDto'];
 export type UpdateTagDto = components['schemas']['UpdateTagDto'];
 export type $defs = Record<string, never>;
 export interface operations {
@@ -1521,7 +1474,10 @@ export interface operations {
     };
     TagController_getTagEvents: {
         parameters: {
-            query?: never;
+            query?: {
+                page?: number;
+                limit?: number;
+            };
             header?: never;
             path: {
                 tagId: string;
@@ -1530,13 +1486,15 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Paginated list. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        data: components["schemas"]["TagEventResponseDto"][];
+                        data: components["schemas"]["EventWithCountResponseDto"][];
+                        meta: components["schemas"]["PageMetaDto"];
                     };
                 };
             };

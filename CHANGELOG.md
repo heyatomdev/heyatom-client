@@ -1,6 +1,37 @@
 # Changelog
 
-## Unreleased
+## 1.0.0
+
+First stable release. FileHarbor, Articuno and Gatherly move to the common response contract:
+every JSON answer is wrapped in `{ data }`, pages are `{ data, meta }` with `page` / `limit` in
+the query. The clients return the body as the service sends it and never unwrap it: read `.data`.
+
+### Breaking
+
+- **FileHarbor** (types from FileHarbor 3.6.1):
+  - `uploadImage`, `updateImage`, `deleteImage`, `uploadAvatar`, `deleteAvatar` and
+    `getClientStats` return `{ data: X }` instead of `X`.
+  - Lists take `limit` instead of `perPage` and answer `{ data, meta }` instead of
+    `{ data, pagination }`.
+  - Exported types removed: `ListImagesResponseDto`, `ListAlbumsResponseDto`,
+    `ListVideosResponseDto`, `AlbumItemListResponseDto`, `PaginationMetaDto`,
+    `AlbumItemPaginationDto`, `VideoPaginationMetaDto`. Use `PageMetaDto` for `meta`.
+- **Articuno**:
+  - `getArticle`, `getTranslation`, `getCategory`, `getTag`, `createComment`, `getComment`,
+    `updateComment`, `toggleLike`, `getInteractionStatus`, `toggleBookmark`, `createReport`,
+    `updateReportStatus` and `syncUser` return `{ data: X }` instead of `X`.
+  - `listTranslations` returns `{ data: X[] }` instead of a bare array.
+  - Lists already answered `{ data, meta }`: unchanged.
+- **Gatherly**:
+  - `GET /tags/:tagId/events` is paginated (`page`, `limit`) and answers `{ data: EventWithCountResponseDto[], meta }`;
+    `TagEventResponseDto` and `TaggedEventDto` are removed from the exported types. No client
+    method calls this route.
+  - The methods of `GatherlyClient` already returned `{ data }`: unchanged.
+
+### Added
+
+- `FileHarborClient.getImageInfo(imageId)`: `GET /images/:imageId?info=true`, the image's
+  metadata (`{ data?: ImageResponseDto }`).
 
 ### Changed
 
