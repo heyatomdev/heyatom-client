@@ -4,7 +4,7 @@ import { fakeFetch, json } from './helpers.js';
 
 describe('FileHarborClient', () => {
   it('uploads an image as multipart: file with name and type, arrays as repeated fields', async () => {
-    const { fetchImpl, calls } = fakeFetch(() => json(201, { id: 'img-1', fullPath: 'http://fh/v2/images/img-1' }));
+    const { fetchImpl, calls } = fakeFetch(() => json(201, { data: { id: 'img-1', fullPath: 'http://fh/v2/images/img-1' } }));
     const fh = new FileHarborClient({ baseUrl: 'http://fh/v2', auth: apiKeyAuth('k'), fetch: fetchImpl });
 
     const res = await fh.uploadImage(
@@ -13,7 +13,7 @@ describe('FileHarborClient', () => {
       { userId: 'user-9' },
     );
 
-    expect(res.id).toBe('img-1');
+    expect(res.data.id).toBe('img-1'); // the envelope is the caller's to unwrap
     const { url, init, headers } = calls[0];
     expect(url).toBe('http://fh/v2/images');
     expect(headers).toEqual({ 'X-API-Key': 'k', 'X-User-Id': 'user-9' }); // no Content-Type: fetch sets the boundary
@@ -26,17 +26,28 @@ describe('FileHarborClient', () => {
   });
 
   it('updates an image as JSON PATCH, as its owner', async () => {
-    const { fetchImpl, calls } = fakeFetch(() => json(200, { id: 'img/1', isPrivate: true }));
+    const { fetchImpl, calls } = fakeFetch(() => json(200, { data: { id: 'img/1', isPrivate: true } }));
     const fh = new FileHarborClient({ baseUrl: 'http://fh/v2', auth: apiKeyAuth('k'), fetch: fetchImpl });
 
     const res = await fh.updateImage('img/1', { isPrivate: true }, { userId: 'user-9' });
 
-    expect(res.isPrivate).toBe(true);
+    expect(res.data.isPrivate).toBe(true);
     const { url, init, headers } = calls[0];
     expect(url).toBe('http://fh/v2/images/img%2F1');
     expect(init.method).toBe('PATCH');
     expect(headers['X-User-Id']).toBe('user-9');
     expect(JSON.parse(init.body as string)).toEqual({ isPrivate: true });
+  });
+
+  it('reads image metadata with ?info=true, still enveloped', async () => {
+    const { fetchImpl, calls } = fakeFetch(() => json(200, { data: { id: 'img-1', tags: ['team:1'] } }));
+    const fh = new FileHarborClient({ baseUrl: 'http://fh/v2', auth: apiKeyAuth('k'), fetch: fetchImpl });
+
+    const res = await fh.getImageInfo('img-1');
+
+    expect(res.data?.tags).toEqual(['team:1']);
+    expect(calls[0].url).toBe('http://fh/v2/images/img-1?info=true');
+    expect(calls[0].init.method).toBe('GET');
   });
 
   it('uploads an avatar with externalUserId in the form, not the header', async () => {

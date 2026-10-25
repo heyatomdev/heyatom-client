@@ -564,70 +564,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        CreateArticleTranslationDto: {
-            /**
-             * @description BCP 47 language code for this translation (e.g. "en", "it", "fr").
-             * @example en
-             */
-            languageCode: string;
-            /**
-             * @description Localized title of the article.
-             * @example Getting Started with NestJS
-             */
-            title: string;
-            /**
-             * @description Full HTML/Markdown body of the article.
-             * @example <p>NestJS is a progressive Node.js framework...</p>
-             */
-            content: string;
-            /**
-             * @description Short plain-text summary shown in listing pages and previews.
-             * @example A step-by-step guide to building your first NestJS application.
-             */
-            excerpt: string;
-            /**
-             * @description SEO meta title. Defaults to the article title when omitted.
-             * @example Getting Started with NestJS | My Blog
-             */
-            metaTitle?: string;
-            /**
-             * @description SEO meta description shown in search engine result pages.
-             * @example Learn how to set up your first NestJS project from scratch.
-             */
-            metaDescription?: string;
-        };
-        PublicCreateArticleDto: {
-            /**
-             * @description URL of the article cover image. When creating via multipart/form-data, upload the file in the `coverImage` field instead.
-             * @example https://cdn.example.com/articles/my-article-cover.jpg
-             */
-            coverImage?: string;
-            /**
-             * @description Whether the article should appear in featured/highlighted sections.
-             * @example false
-             */
-            featured?: boolean;
-            /**
-             * @description UUID of the user (author) to associate with the article. Defaults to the authenticated user when omitted.
-             * @example 123e4567-e89b-12d3-a456-426614174000
-             */
-            authorId?: string;
-            /**
-             * @description UUID of the category the article belongs to.
-             * @example a1b2c3d4-e5f6-7890-abcd-ef1234567890
-             */
-            categoryId: string;
-            /**
-             * @description List of tag UUIDs to attach to the article.
-             * @example [
-             *       "tag-uuid-1",
-             *       "tag-uuid-2"
-             *     ]
-             */
-            tagIds?: string[];
-            /** @description One or more translation objects to create alongside the article. At least one translation (with the default language) is recommended. */
-            translations?: components["schemas"]["CreateArticleTranslationDto"][];
-        };
         /** @enum {string} */
         ContentStatus: "PUBLISHED" | "DRAFT" | "UNDER_REVIEW" | "HIDDEN" | "BANNED" | "VISIBLE";
         ArticleCategorySummaryDto: {
@@ -697,6 +633,70 @@ export interface components {
             tags: components["schemas"]["ArticleTagSummaryDto"][];
             _count: components["schemas"]["ArticleCommentCountDto"];
             translations: components["schemas"]["ArticleTranslationDto"][];
+        };
+        CreateArticleTranslationDto: {
+            /**
+             * @description BCP 47 language code for this translation (e.g. "en", "it", "fr").
+             * @example en
+             */
+            languageCode: string;
+            /**
+             * @description Localized title of the article.
+             * @example Getting Started with NestJS
+             */
+            title: string;
+            /**
+             * @description Full HTML/Markdown body of the article.
+             * @example <p>NestJS is a progressive Node.js framework...</p>
+             */
+            content: string;
+            /**
+             * @description Short plain-text summary shown in listing pages and previews.
+             * @example A step-by-step guide to building your first NestJS application.
+             */
+            excerpt: string;
+            /**
+             * @description SEO meta title. Defaults to the article title when omitted.
+             * @example Getting Started with NestJS | My Blog
+             */
+            metaTitle?: string;
+            /**
+             * @description SEO meta description shown in search engine result pages.
+             * @example Learn how to set up your first NestJS project from scratch.
+             */
+            metaDescription?: string;
+        };
+        PublicCreateArticleDto: {
+            /**
+             * @description URL of the article cover image. When creating via multipart/form-data, upload the file in the `coverImage` field instead.
+             * @example https://cdn.example.com/articles/my-article-cover.jpg
+             */
+            coverImage?: string;
+            /**
+             * @description Whether the article should appear in featured/highlighted sections.
+             * @example false
+             */
+            featured?: boolean;
+            /**
+             * @description UUID of the user (author) to associate with the article. Defaults to the authenticated user when omitted.
+             * @example 123e4567-e89b-12d3-a456-426614174000
+             */
+            authorId?: string;
+            /**
+             * @description UUID of the category the article belongs to.
+             * @example a1b2c3d4-e5f6-7890-abcd-ef1234567890
+             */
+            categoryId: string;
+            /**
+             * @description List of tag UUIDs to attach to the article.
+             * @example [
+             *       "tag-uuid-1",
+             *       "tag-uuid-2"
+             *     ]
+             */
+            tagIds?: string[];
+            /** @description One or more translation objects to create alongside the article. At least one translation (with the default language) is recommended. */
+            translations?: components["schemas"]["CreateArticleTranslationDto"][];
         };
         PageMetaDto: {
             total: number;
@@ -770,13 +770,6 @@ export interface components {
              */
             tagIds?: string[];
         };
-        CreateBannedWordDto: {
-            /**
-             * @description The word to add to the banned word list (2–50 characters)
-             * @example spam
-             */
-            word: string;
-        };
         BannedWordDto: {
             /**
              * @description Unique identifier of the banned word entry
@@ -793,6 +786,13 @@ export interface components {
              * @example 123e4567-e89b-12d3-a456-426614174000
              */
             tenantId: string;
+        };
+        CreateBannedWordDto: {
+            /**
+             * @description The word to add to the banned word list (2–50 characters)
+             * @example spam
+             */
+            word: string;
         };
         UpdateArticleTranslationDto: {
             /**
@@ -860,23 +860,6 @@ export interface components {
             createdAt: string;
             article: components["schemas"]["BookmarkedArticleDto"];
         };
-        CreateCategoryDto: {
-            /**
-             * @description Display name of the category. The slug will be auto-generated from this value.
-             * @example Science
-             */
-            name: string;
-            /**
-             * @description Optional human-readable description of the category.
-             * @example Articles about science and research.
-             */
-            description?: string;
-            /**
-             * @description Optional hex colour associated with the category for UI display.
-             * @example #3B82F6
-             */
-            color?: string;
-        };
         CategoryDto: {
             /**
              * @description Unique identifier of the category
@@ -915,6 +898,23 @@ export interface components {
              * @example 2026-03-22T08:45:00.000Z
              */
             updatedAt: string;
+        };
+        CreateCategoryDto: {
+            /**
+             * @description Display name of the category. The slug will be auto-generated from this value.
+             * @example Science
+             */
+            name: string;
+            /**
+             * @description Optional human-readable description of the category.
+             * @example Articles about science and research.
+             */
+            description?: string;
+            /**
+             * @description Optional hex colour associated with the category for UI display.
+             * @example #3B82F6
+             */
+            color?: string;
         };
         CategoryListItemDto: {
             /**
@@ -977,14 +977,6 @@ export interface components {
              */
             color?: string;
         };
-        CreateCommentDto: {
-            /** @description UUID of the article being commented on */
-            articleId: string;
-            /** @description Comment text, plain text (tags are stripped) */
-            content: string;
-            /** @description External ID of the author (from your identity provider) */
-            authorExternalId: string;
-        };
         UserDto: {
             /** @description Internal UUID of the user */
             id: string;
@@ -1019,6 +1011,14 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
             author: components["schemas"]["UserDto"];
+        };
+        CreateCommentDto: {
+            /** @description UUID of the article being commented on */
+            articleId: string;
+            /** @description Comment text, plain text (tags are stripped) */
+            content: string;
+            /** @description External ID of the author (from your identity provider) */
+            authorExternalId: string;
         };
         CommentTenantSummaryDto: {
             id: string;
@@ -1074,34 +1074,6 @@ export interface components {
             liked: boolean;
             bookmarked: boolean;
         };
-        CreateReportDto: {
-            /**
-             * @description Type of the reported target
-             * @example COMMENT
-             * @enum {string}
-             */
-            targetType: "ARTICLE" | "COMMENT" | "USER";
-            /**
-             * @description UUID of the reported target (article, comment or user)
-             * @example 123e4567-e89b-12d3-a456-426614174000
-             */
-            targetId: string;
-            /**
-             * @description Short reason for the report
-             * @example Spam
-             */
-            reason: string;
-            /**
-             * @description Optional additional details about the report
-             * @example This comment contains repeated promotional links.
-             */
-            description?: string;
-            /**
-             * @description External ID of the user submitting the report
-             * @example user_abc123
-             */
-            reporterId: string;
-        };
         /** @enum {string} */
         ReportStatus: "PENDING" | "REVIEWED" | "RESOLVED" | "DISMISSED";
         /** @enum {string} */
@@ -1147,6 +1119,34 @@ export interface components {
             moderator: components["schemas"]["ReportUserSummaryDto"] | null;
             target: components["schemas"]["ReportTargetDto"];
         };
+        CreateReportDto: {
+            /**
+             * @description Type of the reported target
+             * @example COMMENT
+             * @enum {string}
+             */
+            targetType: "ARTICLE" | "COMMENT" | "USER";
+            /**
+             * @description UUID of the reported target (article, comment or user)
+             * @example 123e4567-e89b-12d3-a456-426614174000
+             */
+            targetId: string;
+            /**
+             * @description Short reason for the report
+             * @example Spam
+             */
+            reason: string;
+            /**
+             * @description Optional additional details about the report
+             * @example This comment contains repeated promotional links.
+             */
+            description?: string;
+            /**
+             * @description External ID of the user submitting the report
+             * @example user_abc123
+             */
+            reporterId: string;
+        };
         UpdateReportStatusDto: {
             /**
              * @description New status to set for the report
@@ -1164,13 +1164,6 @@ export interface components {
              * @example mod_xyz789
              */
             moderatorId: string;
-        };
-        CreateTagDto: {
-            /**
-             * @description Display name of the tag. The slug will be auto-generated from this value.
-             * @example Technology
-             */
-            name: string;
         };
         TenantDto: {
             /**
@@ -1253,6 +1246,13 @@ export interface components {
             /** @description Aggregated counts for related resources */
             _count?: components["schemas"]["TagCountDto"];
         };
+        CreateTagDto: {
+            /**
+             * @description Display name of the tag. The slug will be auto-generated from this value.
+             * @example Technology
+             */
+            name: string;
+        };
         UpdateTagDto: {
             /**
              * @description New display name for the tag. The slug does not change.
@@ -1289,8 +1289,6 @@ export interface components {
     headers: never;
     pathItems: never;
 }
-export type CreateArticleTranslationDto = components['schemas']['CreateArticleTranslationDto'];
-export type PublicCreateArticleDto = components['schemas']['PublicCreateArticleDto'];
 export type ContentStatus = components['schemas']['ContentStatus'];
 export type ArticleCategorySummaryDto = components['schemas']['ArticleCategorySummaryDto'];
 export type UserStatus = components['schemas']['UserStatus'];
@@ -1300,23 +1298,25 @@ export type ArticleTagSummaryDto = components['schemas']['ArticleTagSummaryDto']
 export type ArticleCommentCountDto = components['schemas']['ArticleCommentCountDto'];
 export type ArticleTranslationDto = components['schemas']['ArticleTranslationDto'];
 export type ArticleDto = components['schemas']['ArticleDto'];
+export type CreateArticleTranslationDto = components['schemas']['CreateArticleTranslationDto'];
+export type PublicCreateArticleDto = components['schemas']['PublicCreateArticleDto'];
 export type PageMetaDto = components['schemas']['PageMetaDto'];
 export type ArticleTranslationSummaryDto = components['schemas']['ArticleTranslationSummaryDto'];
 export type ArticleListItemDto = components['schemas']['ArticleListItemDto'];
 export type PublicUpdateArticleDto = components['schemas']['PublicUpdateArticleDto'];
-export type CreateBannedWordDto = components['schemas']['CreateBannedWordDto'];
 export type BannedWordDto = components['schemas']['BannedWordDto'];
+export type CreateBannedWordDto = components['schemas']['CreateBannedWordDto'];
 export type UpdateArticleTranslationDto = components['schemas']['UpdateArticleTranslationDto'];
 export type BookmarkToggleResultDto = components['schemas']['BookmarkToggleResultDto'];
 export type BookmarkedArticleDto = components['schemas']['BookmarkedArticleDto'];
 export type BookmarkListItemDto = components['schemas']['BookmarkListItemDto'];
-export type CreateCategoryDto = components['schemas']['CreateCategoryDto'];
 export type CategoryDto = components['schemas']['CategoryDto'];
+export type CreateCategoryDto = components['schemas']['CreateCategoryDto'];
 export type CategoryListItemDto = components['schemas']['CategoryListItemDto'];
 export type UpdateCategoryDto = components['schemas']['UpdateCategoryDto'];
-export type CreateCommentDto = components['schemas']['CreateCommentDto'];
 export type UserDto = components['schemas']['UserDto'];
 export type CommentDto = components['schemas']['CommentDto'];
+export type CreateCommentDto = components['schemas']['CreateCommentDto'];
 export type CommentTenantSummaryDto = components['schemas']['CommentTenantSummaryDto'];
 export type CommentAuthorSummaryDto = components['schemas']['CommentAuthorSummaryDto'];
 export type CommentArticleTranslationSummaryDto = components['schemas']['CommentArticleTranslationSummaryDto'];
@@ -1325,17 +1325,17 @@ export type CommentListItemDto = components['schemas']['CommentListItemDto'];
 export type PublicUpdateCommentDto = components['schemas']['PublicUpdateCommentDto'];
 export type LikeToggleResultDto = components['schemas']['LikeToggleResultDto'];
 export type ArticleInteractionStatusDto = components['schemas']['ArticleInteractionStatusDto'];
-export type CreateReportDto = components['schemas']['CreateReportDto'];
 export type ReportStatus = components['schemas']['ReportStatus'];
 export type TargetType = components['schemas']['TargetType'];
 export type ReportUserSummaryDto = components['schemas']['ReportUserSummaryDto'];
 export type ReportTargetDto = components['schemas']['ReportTargetDto'];
 export type ReportDto = components['schemas']['ReportDto'];
+export type CreateReportDto = components['schemas']['CreateReportDto'];
 export type UpdateReportStatusDto = components['schemas']['UpdateReportStatusDto'];
-export type CreateTagDto = components['schemas']['CreateTagDto'];
 export type TenantDto = components['schemas']['TenantDto'];
 export type TagCountDto = components['schemas']['TagCountDto'];
 export type TagDto = components['schemas']['TagDto'];
+export type CreateTagDto = components['schemas']['CreateTagDto'];
 export type UpdateTagDto = components['schemas']['UpdateTagDto'];
 export type UpsertUserDto = components['schemas']['UpsertUserDto'];
 export type $defs = Record<string, never>;
@@ -1411,7 +1411,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ArticleDto"];
+                    "application/json": {
+                        data: components["schemas"]["ArticleDto"];
+                    };
                 };
             };
             /** @description Validation error – invalid request body. */
@@ -1453,7 +1455,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ArticleDto"];
+                    "application/json": {
+                        data: components["schemas"]["ArticleDto"];
+                    };
                 };
             };
             /** @description Missing or invalid API key. */
@@ -1529,7 +1533,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ArticleDto"];
+                    "application/json": {
+                        data: components["schemas"]["ArticleDto"];
+                    };
                 };
             };
             /** @description Validation error or invalid status transition. */
@@ -1609,7 +1615,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["BannedWordDto"];
+                    "application/json": {
+                        data: components["schemas"]["BannedWordDto"];
+                    };
                 };
             };
             /** @description Validation error – invalid request body. */
@@ -1691,7 +1699,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ArticleTranslationSummaryDto"][];
+                    "application/json": {
+                        data: components["schemas"]["ArticleTranslationSummaryDto"][];
+                    };
                 };
             };
             /** @description Missing or invalid API key. */
@@ -1732,7 +1742,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ArticleTranslationDto"];
+                    "application/json": {
+                        data: components["schemas"]["ArticleTranslationDto"];
+                    };
                 };
             };
             /** @description Validation error – invalid request body. */
@@ -1788,7 +1800,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ArticleTranslationDto"];
+                    "application/json": {
+                        data: components["schemas"]["ArticleTranslationDto"];
+                    };
                 };
             };
             /** @description Missing or invalid API key. */
@@ -1868,7 +1882,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ArticleTranslationDto"];
+                    "application/json": {
+                        data: components["schemas"]["ArticleTranslationDto"];
+                    };
                 };
             };
             /** @description Validation error – invalid request body. */
@@ -1916,7 +1932,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["BookmarkToggleResultDto"];
+                    "application/json": {
+                        data: components["schemas"]["BookmarkToggleResultDto"];
+                    };
                 };
             };
             /** @description Missing X-User-Id header or invalid articleId. */
@@ -2038,7 +2056,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CategoryDto"];
+                    "application/json": {
+                        data: components["schemas"]["CategoryDto"];
+                    };
                 };
             };
             /** @description Validation error – invalid request body. */
@@ -2082,7 +2102,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CategoryDto"];
+                    "application/json": {
+                        data: components["schemas"]["CategoryDto"];
+                    };
                 };
             };
             /** @description Missing or invalid API key. */
@@ -2158,7 +2180,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CategoryDto"];
+                    "application/json": {
+                        data: components["schemas"]["CategoryDto"];
+                    };
                 };
             };
             /** @description Validation error – invalid request body. */
@@ -2239,7 +2263,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CommentDto"];
+                    "application/json": {
+                        data: components["schemas"]["CommentDto"];
+                    };
                 };
             };
             /** @description Article not found or not PUBLISHED. */
@@ -2273,7 +2299,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CommentDto"];
+                    "application/json": {
+                        data: components["schemas"]["CommentDto"];
+                    };
                 };
             };
             /** @description Comment not found, HIDDEN/BANNED, or its article is not PUBLISHED (unless X-User-Id is the author). */
@@ -2326,7 +2354,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CommentDto"];
+                    "application/json": {
+                        data: components["schemas"]["CommentDto"];
+                    };
                 };
             };
         };
@@ -2353,7 +2383,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["LikeToggleResultDto"];
+                    "application/json": {
+                        data: components["schemas"]["LikeToggleResultDto"];
+                    };
                 };
             };
             /** @description Missing X-User-Id header or invalid articleId. */
@@ -2401,7 +2433,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ArticleInteractionStatusDto"];
+                    "application/json": {
+                        data: components["schemas"]["ArticleInteractionStatusDto"];
+                    };
                 };
             };
             /** @description Missing X-User-Id header or invalid articleId. */
@@ -2533,7 +2567,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ReportDto"];
+                    "application/json": {
+                        data: components["schemas"]["ReportDto"];
+                    };
                 };
             };
             /** @description Validation error – invalid request body. */
@@ -2581,7 +2617,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ReportDto"];
+                    "application/json": {
+                        data: components["schemas"]["ReportDto"];
+                    };
                 };
             };
             /** @description Validation error – invalid request body. */
@@ -2661,7 +2699,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TagDto"];
+                    "application/json": {
+                        data: components["schemas"]["TagDto"];
+                    };
                 };
             };
             /** @description Validation error – invalid request body. */
@@ -2705,7 +2745,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TagDto"];
+                    "application/json": {
+                        data: components["schemas"]["TagDto"];
+                    };
                 };
             };
             /** @description Missing or invalid API key. */
@@ -2781,7 +2823,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TagDto"];
+                    "application/json": {
+                        data: components["schemas"]["TagDto"];
+                    };
                 };
             };
             /** @description Validation error – invalid request body. */
@@ -2833,7 +2877,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserDto"];
+                    "application/json": {
+                        data: components["schemas"]["UserDto"];
+                    };
                 };
             };
             /** @description Validation error – invalid request body. */

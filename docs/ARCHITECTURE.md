@@ -101,11 +101,14 @@ pnpm check:api      # dopo un rilascio di un servizio
   e ogni schema raggiunto via `$ref` con la spec committata. Esce 1 su qualsiasi cambio. Le route
   non usate sono solo contate. `info.version` non è un segnale: i servizi aggiungono route senza
   alzarla.
-- **Envelope.** I servizi con `TransformInterceptor` (Beacon, Gatherly; FileHarbor, Articuno e
-  Bastion dalla fase 3 del piano 01) rispondono `{ data }` e devono documentarlo con
+- **Envelope.** I servizi con `TransformInterceptor` (Beacon, Gatherly; FileHarbor e Articuno dal
+  client 1.0.0; Bastion dalla fase 3 del piano 01) rispondono `{ data }` e devono documentarlo con
   `ApiOkData` / `ApiCreatedData` di `@heyatom/nest-common` ≥ 0.4.0, non con
   `@ApiOkResponse({ type })`. Altrimenti la spec mente e i tipi generati seguono. Fix nel servizio,
-  mai tipi a mano qui. Articuno e FileHarbor oggi non hanno l'interceptor: DTO nudo corretto.
+  mai tipi a mano qui. Il client non toglie l'envelope: lo unwrap tocca ai consumer.
+  Eccezione FileHarbor: le route file (`GET /images/:id`, avatar, video) sono `@NoTransform()`;
+  con `?info=true` rispondono `{ data }` a mano, e la spec lo documenta senza `required`
+  (`getImageInfo` → `{ data?: ImageResponseDto }`).
 - Una route senza schema di risposta dà `unknown`: anche qui il fix è nel servizio.
 
 ## Migrazione dei consumer
@@ -115,6 +118,21 @@ con `baseUrl: \`${FILEHARBOR_URL}/v2\``.
 - `uploadImage(file, userId)` → `fileharbor.uploadImage({ data: file.buffer, filename: file.originalname, contentType: file.mimetype }, {}, { userId })`.
 - Controlli MIME e dimensione restano nell'app.
 - `deleteImage` ora lancia: tenere il `.catch(warn)` al punto di chiamata se serve.
+- Da 1.0.0 `uploadImage` rende `{ data: ImageResponseDto }`: leggere `.data`.
+
+**articuno `modules/fileharbor`** (1.0.0): stessa policy tenuta in `FileHarborService`
+(`validateImageFile`, `isUnderEndpoint`, estrazione id, 404 = già cancellata), solo l'HTTP passa al
+client. La config è per tenant (`endpoint`, `apiKey`): un `FileHarborClient` per tenant, non il
+modulo Nest globale.
+- `HttpService.post('/images', form)` → `uploadImage(file, { description }, { userId: externalId })`
+  (`creatorId` come sopra) → `.data.fullPath`.
+- `HttpService.delete('/images/:id')` → `deleteImage(id)`; `error.response?.status === 404` →
+  `err instanceof HeyAtomHttpError && err.status === 404`.
+
+**beacon `modules/fileharbor`** (1.0.0): `baseUrl: \`${FILEHARBOR_URL}/v2\``, `apiKeyAuth`.
+- `call('POST', '/images', form)` → `uploadImage(file, { tags: ['beacon', owner, kind] })` → `.data.fullPath`.
+- `call('GET', '/images/:id?info=true')` → `getImageInfo(id)` → `.data?.tags`.
+- `call('DELETE', '/images/:id')` → `deleteImage(id)`. Il timeout di 15 s → `timeoutMs: 15_000`.
 
 **dbdbuilds-api `modules/fileharbor`**: `FileHarborService` tiene la sua policy
 (`validateImageFile`, `deleteImageSafely`, `uploadImageIfProvided`, estrazione id dall'URL,

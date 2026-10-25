@@ -148,8 +148,11 @@ try {
 
 ## Clients
 
-**`FileHarborClient`** (API key): `uploadImage`, `updateImage`, `deleteImage`, `uploadAvatar`,
-`deleteAvatar`, `getClientStats`.
+Every client returns the response body as the service sends it: `{ data }` for a single
+resource, `{ data, meta }` for a page (`page`, `limit` in the query). Unwrap `.data` yourself.
+
+**`FileHarborClient`** (API key): `uploadImage`, `getImageInfo`, `updateImage`, `deleteImage`,
+`uploadAvatar`, `deleteAvatar`, `getClientStats`.
 
 **`ArticunoClient`** (tenant key or service-client token):
 - Articles: `listArticles`, `getArticle(slug)`, `listTranslations`, `getTranslation`
@@ -161,11 +164,9 @@ try {
 - Users: `syncUser`, `deleteUser`
 
 **`BeaconClient`** (`anonymousAuth()`): `getCreator(name)`, `getTeam(slug)`, `getOrg(slug)`.
-Answers keep the `{ data }` envelope.
 
 **`GatherlyClient`** (service-client token): `listEvents`, `getEvent`, `getEventStats`,
-`addParticipant(eventId, body, { idempotencyKey })`. Answers keep the `{ data }` envelope
-(`{ data, meta }` for lists). `idempotencyKey` is sent as `Idempotency-Key`: a retry gets the
+`addParticipant(eventId, body, { idempotencyKey })`. `idempotencyKey` is sent as `Idempotency-Key`: a retry gets the
 original answer.
 
 `baseUrl` includes any prefix a reverse proxy adds in front of the service.

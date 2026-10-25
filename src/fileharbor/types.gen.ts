@@ -609,33 +609,11 @@ export interface components {
              */
             srcset?: string;
         };
-        PaginationMetaDto: {
-            /**
-             * @description Current page number
-             * @example 1
-             */
-            page: number;
-            /**
-             * @description Items per page
-             * @example 20
-             */
-            perPage: number;
-            /**
-             * @description Total number of items
-             * @example 150
-             */
+        PageMetaDto: {
             total: number;
-            /**
-             * @description Total number of pages
-             * @example 8
-             */
+            page: number;
+            limit: number;
             totalPages: number;
-        };
-        ListImagesResponseDto: {
-            /** @description Array of images */
-            data: components["schemas"]["ImageResponseDto"][];
-            /** @description Pagination metadata */
-            pagination: components["schemas"]["PaginationMetaDto"];
         };
         UpdateImageMetadataDto: {
             /**
@@ -653,14 +631,6 @@ export interface components {
             description?: string;
             /** @description Make the image private or public. Bytes already served public may stay in browser and shared caches until they expire. */
             isPrivate?: boolean;
-        };
-        CreateShareLinkDto: {
-            /**
-             * Format: date-time
-             * @description Expiration date for the share link (future)
-             * @example 2025-11-05T12:00:00.000Z
-             */
-            expiresAt?: string;
         };
         ShareLinkResponseDto: {
             /**
@@ -696,6 +666,14 @@ export interface components {
              */
             shareUrl: string;
         };
+        CreateShareLinkDto: {
+            /**
+             * Format: date-time
+             * @description Expiration date for the share link (future)
+             * @example 2025-11-05T12:00:00.000Z
+             */
+            expiresAt?: string;
+        };
         DeleteResponseDto: {
             /**
              * @description Operation success status
@@ -708,22 +686,30 @@ export interface components {
              */
             message: string;
         };
-        CreateCreatorDto: {
-            /** @description External creator ID from the client system */
-            externalId: string;
-            /** @description Username */
-            username?: string;
-            /** @description Email address (stored but never returned in list responses) */
-            email?: string;
-            /** @description Website URL or label */
-            website?: string;
-            /** @description Creator biography */
-            bio?: string;
-        };
         CreatorClientDto: {
             id: string;
             name: string;
             domain?: string;
+        };
+        CreatorListResponseDto: {
+            /** @description Internal creator UUID */
+            id: string;
+            /** @description External creator ID from the client system */
+            externalId: string;
+            username?: string;
+            website?: string;
+            clientId: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            totalImages?: number;
+            totalAlbums?: number;
+            totalVideos?: number;
+            /** @description Whether the requesting admin has bookmarked this creator */
+            isBookmarked?: boolean;
+            avatarUrl?: string;
+            client?: components["schemas"]["CreatorClientDto"];
         };
         CreatorResponseDto: {
             /** @description Internal creator UUID */
@@ -747,6 +733,18 @@ export interface components {
             avatarUrl?: string;
             client?: components["schemas"]["CreatorClientDto"];
         };
+        CreateCreatorDto: {
+            /** @description External creator ID from the client system */
+            externalId: string;
+            /** @description Username */
+            username?: string;
+            /** @description Email address (stored but never returned in list responses) */
+            email?: string;
+            /** @description Website URL or label */
+            website?: string;
+            /** @description Creator biography */
+            bio?: string;
+        };
         UpdateCreatorByExternalIdDto: {
             /** @description Updated username from external system */
             username?: string;
@@ -756,18 +754,6 @@ export interface components {
             website?: string;
             /** @description Updated biography from external system */
             bio?: string;
-        };
-        UploadAvatarDto: {
-            /**
-             * Format: binary
-             * @description Avatar image file (JPEG, PNG, WebP, or GIF)
-             */
-            file: string;
-            /**
-             * @description External creator ID from your system
-             * @example creator-123
-             */
-            externalUserId: string;
         };
         AvatarResponseDto: {
             /**
@@ -833,6 +819,18 @@ export interface components {
              */
             fullPath: string;
         };
+        UploadAvatarDto: {
+            /**
+             * Format: binary
+             * @description Avatar image file (JPEG, PNG, WebP, or GIF)
+             */
+            file: string;
+            /**
+             * @description External creator ID from your system
+             * @example creator-123
+             */
+            externalUserId: string;
+        };
         DeleteAvatarResponseDto: {
             /**
              * @description Operation success status
@@ -844,34 +842,6 @@ export interface components {
              * @example Avatar deleted successfully
              */
             message: string;
-        };
-        CreateAlbumDto: {
-            /**
-             * @description External album ID from the client application
-             * @example ext-album-123
-             */
-            externalAlbumId?: string;
-            /**
-             * @description Album name
-             * @example Vacation Photos 2025
-             */
-            name: string;
-            /**
-             * @description Album description
-             * @example Photos from our summer vacation in Italy
-             */
-            description?: string;
-            /**
-             * @description Whether the album is public (accessible without authentication)
-             * @default false
-             * @example true
-             */
-            isPublic: boolean;
-            /**
-             * @description Cover image ID (must be an image already in the album)
-             * @example image-uuid-123
-             */
-            coverImageId?: string;
         };
         AlbumResponseDto: {
             /**
@@ -938,19 +908,33 @@ export interface components {
             /** @description Array of images in the album */
             images?: Record<string, unknown>[];
         };
-        ListAlbumsResponseDto: {
-            /** @description Array of albums */
-            data: Record<string, unknown>[];
+        CreateAlbumDto: {
             /**
-             * @description Pagination metadata
-             * @example {
-             *       "page": 1,
-             *       "perPage": 20,
-             *       "total": 100,
-             *       "totalPages": 5
-             *     }
+             * @description External album ID from the client application
+             * @example ext-album-123
              */
-            pagination: Record<string, unknown>;
+            externalAlbumId?: string;
+            /**
+             * @description Album name
+             * @example Vacation Photos 2025
+             */
+            name: string;
+            /**
+             * @description Album description
+             * @example Photos from our summer vacation in Italy
+             */
+            description?: string;
+            /**
+             * @description Whether the album is public (accessible without authentication)
+             * @default false
+             * @example true
+             */
+            isPublic: boolean;
+            /**
+             * @description Cover image ID (must be an image already in the album)
+             * @example image-uuid-123
+             */
+            coverImageId?: string;
         };
         UpdateAlbumDto: {
             /**
@@ -991,6 +975,11 @@ export interface components {
              */
             message: string;
         };
+        AddAlbumItemsResponseDto: {
+            albumId: string;
+            count: number;
+            items: Record<string, unknown>[];
+        };
         AddAlbumItemDto: {
             /** @description UUID of the image or video */
             id: string;
@@ -1002,10 +991,13 @@ export interface components {
         AddAlbumItemsDto: {
             items: components["schemas"]["AddAlbumItemDto"][];
         };
-        AddAlbumItemsResponseDto: {
+        AdminRemoveImagesFromAlbumResponseDto: {
+            /** @description UUID of the album */
             albumId: string;
-            count: number;
-            items: Record<string, unknown>[];
+            /** @description Number of images removed */
+            removed: number;
+            success: boolean;
+            message: string;
         };
         RemoveAlbumItemDto: {
             /** @description UUID of the image or video */
@@ -1049,23 +1041,6 @@ export interface components {
             image?: components["schemas"]["AlbumItemImageDataDto"];
             video?: components["schemas"]["AlbumItemVideoDataDto"];
         };
-        AlbumItemPaginationDto: {
-            page: number;
-            perPage: number;
-            total: number;
-            totalPages: number;
-        };
-        AlbumItemListResponseDto: {
-            data: components["schemas"]["AlbumItemDto"][];
-            pagination: components["schemas"]["AlbumItemPaginationDto"];
-        };
-        CreateAlbumTokenDto: {
-            /**
-             * @description Token expiration in days (default: 7, null for no expiration)
-             * @example 7
-             */
-            expiresInDays?: number;
-        };
         AlbumTokenResponseDto: {
             /**
              * @description Access token for the album
@@ -1088,6 +1063,13 @@ export interface components {
              * @example /albums/shared/abc123-xyz789-token
              */
             url: string;
+        };
+        CreateAlbumTokenDto: {
+            /**
+             * @description Token expiration in days (default: 7, null for no expiration)
+             * @example 7
+             */
+            expiresInDays?: number;
         };
         VideoResponseDto: {
             id: string;
@@ -1112,16 +1094,6 @@ export interface components {
             /** @description Full absolute thumbnail URL */
             fullThumbnailUrl: string;
         };
-        VideoPaginationMetaDto: {
-            page: number;
-            perPage: number;
-            total: number;
-            totalPages: number;
-        };
-        ListVideosResponseDto: {
-            data: components["schemas"]["VideoResponseDto"][];
-            pagination: components["schemas"]["VideoPaginationMetaDto"];
-        };
         UpdateVideoDto: {
             description?: string;
             tags?: string[];
@@ -1140,39 +1112,35 @@ export interface components {
 }
 export type ClientStatsResponseDto = components['schemas']['ClientStatsResponseDto'];
 export type ImageResponseDto = components['schemas']['ImageResponseDto'];
-export type PaginationMetaDto = components['schemas']['PaginationMetaDto'];
-export type ListImagesResponseDto = components['schemas']['ListImagesResponseDto'];
+export type PageMetaDto = components['schemas']['PageMetaDto'];
 export type UpdateImageMetadataDto = components['schemas']['UpdateImageMetadataDto'];
-export type CreateShareLinkDto = components['schemas']['CreateShareLinkDto'];
 export type ShareLinkResponseDto = components['schemas']['ShareLinkResponseDto'];
+export type CreateShareLinkDto = components['schemas']['CreateShareLinkDto'];
 export type DeleteResponseDto = components['schemas']['DeleteResponseDto'];
-export type CreateCreatorDto = components['schemas']['CreateCreatorDto'];
 export type CreatorClientDto = components['schemas']['CreatorClientDto'];
+export type CreatorListResponseDto = components['schemas']['CreatorListResponseDto'];
 export type CreatorResponseDto = components['schemas']['CreatorResponseDto'];
+export type CreateCreatorDto = components['schemas']['CreateCreatorDto'];
 export type UpdateCreatorByExternalIdDto = components['schemas']['UpdateCreatorByExternalIdDto'];
-export type UploadAvatarDto = components['schemas']['UploadAvatarDto'];
 export type AvatarResponseDto = components['schemas']['AvatarResponseDto'];
+export type UploadAvatarDto = components['schemas']['UploadAvatarDto'];
 export type DeleteAvatarResponseDto = components['schemas']['DeleteAvatarResponseDto'];
-export type CreateAlbumDto = components['schemas']['CreateAlbumDto'];
 export type AlbumResponseDto = components['schemas']['AlbumResponseDto'];
-export type ListAlbumsResponseDto = components['schemas']['ListAlbumsResponseDto'];
+export type CreateAlbumDto = components['schemas']['CreateAlbumDto'];
 export type UpdateAlbumDto = components['schemas']['UpdateAlbumDto'];
 export type DeleteAlbumResponseDto = components['schemas']['DeleteAlbumResponseDto'];
+export type AddAlbumItemsResponseDto = components['schemas']['AddAlbumItemsResponseDto'];
 export type AddAlbumItemDto = components['schemas']['AddAlbumItemDto'];
 export type AddAlbumItemsDto = components['schemas']['AddAlbumItemsDto'];
-export type AddAlbumItemsResponseDto = components['schemas']['AddAlbumItemsResponseDto'];
+export type AdminRemoveImagesFromAlbumResponseDto = components['schemas']['AdminRemoveImagesFromAlbumResponseDto'];
 export type RemoveAlbumItemDto = components['schemas']['RemoveAlbumItemDto'];
 export type RemoveAlbumItemsDto = components['schemas']['RemoveAlbumItemsDto'];
 export type AlbumItemImageDataDto = components['schemas']['AlbumItemImageDataDto'];
 export type AlbumItemVideoDataDto = components['schemas']['AlbumItemVideoDataDto'];
 export type AlbumItemDto = components['schemas']['AlbumItemDto'];
-export type AlbumItemPaginationDto = components['schemas']['AlbumItemPaginationDto'];
-export type AlbumItemListResponseDto = components['schemas']['AlbumItemListResponseDto'];
-export type CreateAlbumTokenDto = components['schemas']['CreateAlbumTokenDto'];
 export type AlbumTokenResponseDto = components['schemas']['AlbumTokenResponseDto'];
+export type CreateAlbumTokenDto = components['schemas']['CreateAlbumTokenDto'];
 export type VideoResponseDto = components['schemas']['VideoResponseDto'];
-export type VideoPaginationMetaDto = components['schemas']['VideoPaginationMetaDto'];
-export type ListVideosResponseDto = components['schemas']['ListVideosResponseDto'];
 export type UpdateVideoDto = components['schemas']['UpdateVideoDto'];
 export type DeleteVideoResponseDto = components['schemas']['DeleteVideoResponseDto'];
 export type $defs = Record<string, never>;
@@ -1191,7 +1159,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ClientStatsResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["ClientStatsResponseDto"];
+                    };
                 };
             };
         };
@@ -1199,14 +1169,12 @@ export interface operations {
     ImageController_listImages: {
         parameters: {
             query?: {
+                page?: number;
+                limit?: number;
                 /** @description Filter by creator ID */
                 creatorId?: string;
                 /** @description Filter by album ID */
                 albumId?: string;
-                /** @description Page number */
-                page?: number;
-                /** @description Items per page */
-                perPage?: number;
             };
             header?: never;
             path?: never;
@@ -1214,13 +1182,16 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Retrieved successfully */
+            /** @description Paginated list. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ListImagesResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["ImageResponseDto"][];
+                        meta: components["schemas"]["PageMetaDto"];
+                    };
                 };
             };
         };
@@ -1258,7 +1229,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ImageResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["ImageResponseDto"];
+                    };
                 };
             };
             /** @description No file or invalid format */
@@ -1316,7 +1289,9 @@ export interface operations {
                     "image/webp": unknown;
                     "image/jpeg": unknown;
                     "image/png": unknown;
-                    "application/json": components["schemas"]["ImageResponseDto"];
+                    "application/json": {
+                        data?: components["schemas"]["ImageResponseDto"];
+                    };
                 };
             };
             /** @description Forbidden - Authentication or valid token required */
@@ -1353,7 +1328,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DeleteResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["DeleteResponseDto"];
+                    };
                 };
             };
             /** @description Not found */
@@ -1387,7 +1364,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ImageResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["ImageResponseDto"];
+                    };
                 };
             };
             /** @description Invalid data or missing Creator ID */
@@ -1435,7 +1414,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ShareLinkResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["ShareLinkResponseDto"];
+                    };
                 };
             };
             /** @description Missing Creator ID */
@@ -1479,7 +1460,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DeleteResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["DeleteResponseDto"];
+                    };
                 };
             };
             /** @description Missing Creator ID */
@@ -1508,10 +1491,10 @@ export interface operations {
     CreatorClientController_listCreators: {
         parameters: {
             query?: {
+                page?: number;
+                limit?: number;
                 /** @description Search by externalId or username */
                 search?: string;
-                page?: number;
-                perPage?: number;
             };
             header?: never;
             path?: never;
@@ -1519,12 +1502,17 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Paginated list of creators */
+            /** @description Paginated list. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CreatorListResponseDto"][];
+                        meta: components["schemas"]["PageMetaDto"];
+                    };
+                };
             };
             /** @description Missing or invalid X-API-Key header */
             401: {
@@ -1553,7 +1541,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CreatorResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["CreatorResponseDto"];
+                    };
                 };
             };
             /** @description Invalid payload or reserved externalId */
@@ -1599,7 +1589,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CreatorResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["CreatorResponseDto"];
+                    };
                 };
             };
             /** @description Invalid payload or no fields to update */
@@ -1644,7 +1636,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AvatarResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["AvatarResponseDto"];
+                    };
                 };
             };
             /** @description No file uploaded, invalid format, or missing externalUserId */
@@ -1757,7 +1751,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DeleteAvatarResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["DeleteAvatarResponseDto"];
+                    };
                 };
             };
             /** @description Missing or invalid X-API-Key header */
@@ -1779,16 +1775,14 @@ export interface operations {
     AlbumController_listAlbums: {
         parameters: {
             query?: {
+                page?: number;
+                limit?: number;
                 /** @description Filter by creator ID */
                 creatorId?: string;
                 /** @description Filter by public status (true/false) */
                 public?: boolean;
                 /** @description Search albums by name */
                 search?: string;
-                /** @description Page number */
-                page?: number;
-                /** @description Items per page */
-                perPage?: number;
             };
             header?: never;
             path?: never;
@@ -1796,12 +1790,16 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Paginated list. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ListAlbumsResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["AlbumResponseDto"][];
+                        meta: components["schemas"]["PageMetaDto"];
+                    };
                 };
             };
         };
@@ -1824,7 +1822,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AlbumResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["AlbumResponseDto"];
+                    };
                 };
             };
         };
@@ -1845,7 +1845,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AlbumResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["AlbumResponseDto"];
+                    };
                 };
             };
         };
@@ -1866,7 +1868,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AlbumResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["AlbumResponseDto"];
+                    };
                 };
             };
         };
@@ -1887,7 +1891,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DeleteAlbumResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["DeleteAlbumResponseDto"];
+                    };
                 };
             };
         };
@@ -1912,7 +1918,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AlbumResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["AlbumResponseDto"];
+                    };
                 };
             };
         };
@@ -1920,10 +1928,10 @@ export interface operations {
     AlbumController_listItems: {
         parameters: {
             query?: {
+                page?: number;
+                limit?: number;
                 /** @description Filter by resource type */
                 resourceType?: "IMAGE" | "VIDEO";
-                page?: number;
-                perPage?: number;
             };
             header?: never;
             path: {
@@ -1933,12 +1941,16 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Paginated list. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AlbumItemListResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["AlbumItemDto"][];
+                        meta: components["schemas"]["PageMetaDto"];
+                    };
                 };
             };
         };
@@ -1963,7 +1975,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AddAlbumItemsResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["AddAlbumItemsResponseDto"];
+                    };
                 };
             };
         };
@@ -1987,7 +2001,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["AdminRemoveImagesFromAlbumResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -2011,7 +2029,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AlbumTokenResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["AlbumTokenResponseDto"];
+                    };
                 };
             };
         };
@@ -2032,7 +2052,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DeleteAlbumResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["DeleteAlbumResponseDto"];
+                    };
                 };
             };
         };
@@ -2053,7 +2075,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AlbumResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["AlbumResponseDto"];
+                    };
                 };
             };
         };
@@ -2078,7 +2102,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AlbumResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["AlbumResponseDto"];
+                    };
                 };
             };
         };
@@ -2103,7 +2129,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AddAlbumItemsResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["AddAlbumItemsResponseDto"];
+                    };
                 };
             };
         };
@@ -2127,7 +2155,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["AdminRemoveImagesFromAlbumResponseDto"];
+                    };
+                };
             };
         };
     };
@@ -2327,7 +2359,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["VideoResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["VideoResponseDto"];
+                    };
                 };
             };
         };
@@ -2335,10 +2369,10 @@ export interface operations {
     VideoController_listVideos: {
         parameters: {
             query?: {
+                page?: number;
+                limit?: number;
                 creatorId?: string;
                 tag?: string;
-                page?: number;
-                perPage?: number;
             };
             header?: never;
             path?: never;
@@ -2346,12 +2380,16 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Paginated list. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ListVideosResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["VideoResponseDto"][];
+                        meta: components["schemas"]["PageMetaDto"];
+                    };
                 };
             };
         };
@@ -2393,7 +2431,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["VideoResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["VideoResponseDto"];
+                    };
                 };
             };
         };
@@ -2415,7 +2455,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DeleteVideoResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["DeleteVideoResponseDto"];
+                    };
                 };
             };
         };
@@ -2441,7 +2483,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["VideoResponseDto"];
+                    "application/json": {
+                        data: components["schemas"]["VideoResponseDto"];
+                    };
                 };
             };
         };
