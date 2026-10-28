@@ -12,8 +12,8 @@
 # @heyatom/client
 
 Client SDK for the HeyAtom platform services: FileHarbor (media), Articuno (content), Beacon
-(streams) and Gatherly (events). Typed clients on native `fetch`, optional NestJS modules, and
-Standard Webhooks verification. Twin of [`@heyatom/bastion-client`](https://www.npmjs.com/package/@heyatom/bastion-client).
+(streams) and Gatherly (events). Typed clients on native `fetch`, optional NestJS modules,
+Standard Webhooks verification, and a Nuxt module for self-hosted Umami analytics. Twin of [`@heyatom/bastion-client`](https://www.npmjs.com/package/@heyatom/bastion-client).
 
 ```bash
 pnpm add @heyatom/client
@@ -22,6 +22,7 @@ pnpm add @heyatom/client
 - Node ≥ 20.19. CJS and ESM builds. The core subpaths have no dependencies and run in any
   runtime, Nuxt/Nitro included.
 - `/nest` subpaths: peer `@nestjs/common` 11.
+- `/nuxt`: Nuxt 4 module, ESM only; peer `@nuxt/kit` (comes with `nuxt`).
 - `@heyatom/bastion-client` is an optional peer, only to pass its `ServiceTokenProvider` to
   `serviceTokenAuth`.
 
@@ -33,6 +34,7 @@ pnpm add @heyatom/client
 | `@heyatom/client/gatherly` | `GatherlyClient`, `serviceTokenAuth`, generated types |
 | `@heyatom/client/<service>/nest` | the above plus `HeyAtom<Service>Module.forRoot / forRootAsync` |
 | `@heyatom/client/webhooks` | `verifyStandardWebhook` |
+| `@heyatom/client/nuxt` | Nuxt module: Umami tracker behind a same-origin proxy, `useUmami()` |
 
 There is no root export: import a subpath. The clients cover transport only (endpoints, auth
 headers, types, errors); validation, size limits and cleanup policies stay in your app.
@@ -201,6 +203,61 @@ HMAC-SHA256 over `<webhook-id>.<webhook-timestamp>.<raw body>`, secret used as a
 any secret against any `v1` entry, constant-time comparison. Returns `null` on a missing header,
 a timestamp outside `toleranceSeconds` (default 300) or no match. Bastion webhooks use their own
 format: verify them with `@heyatom/bastion-client/webhooks`.
+
+## Nuxt: Umami analytics
+
+A Nuxt 4 module for a self-hosted [Umami](https://umami.is) (3.x). The tracker and the collect
+endpoint are proxied through your app's own server, so visitors only ever talk to your domain and
+the Umami dashboard stays unreachable from it.
+
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  modules: ['@heyatom/client/nuxt'],
+  umami: {
+    websiteId: 'b59e9c65-…',
+    domains: ['example.com', 'www.example.com'], // localhost and previews don't track
+    // ignore: ['/auth/callback', '/admin/*'],
+  },
+});
+```
+
+| Option | Default | |
+|---|---|---|
+| `websiteId` | — | Required. Without it nothing is injected (warning at build). |
+| `upstream` | `http://umami:3000` | Umami as your Nitro server reaches it. Server-only. |
+| `path` | `/_u` | Same-origin prefix of the proxy. Build time. |
+| `domains` | `[]` | `data-domains`: only these hostnames track. Empty = all. |
+| `excludeHash` | `true` | Strip `#hash` from tracked URLs. |
+| `excludeSearch` | `false` | Strip `?search`. Off, so `utm_*` / `ref` attribution works. |
+| `ignore` | `[]` | Paths whose page views are not sent. Exact, trailing slash optional, `*` = anything. Custom events still go out. |
+| `enabled` | production builds | Inject the tracker and serve the proxy. |
+
+Everything except `path` can be overridden at runtime: `NUXT_PUBLIC_UMAMI_WEBSITE_ID`,
+`NUXT_PUBLIC_UMAMI_ENABLED`, `NUXT_PUBLIC_UMAMI_DOMAINS` (comma list or JSON array),
+`NUXT_PUBLIC_UMAMI_IGNORE`, `NUXT_PUBLIC_UMAMI_EXCLUDE_HASH`, `NUXT_PUBLIC_UMAMI_EXCLUDE_SEARCH`,
+and `NUXT_UMAMI_UPSTREAM` (private runtime config, never sent to the browser).
+
+**Events.** `data-umami-event` attributes work as usual. From code, the auto-imported composable:
+
+```ts
+const { track } = useUmami();
+track('signup', { plan: 'pro' }); // no-op on the server, when disabled, or when the tracker is blocked
+```
+
+**Proxy.** Two server routes, everything else under `path` answers 404:
+
+- `GET {path}/s.js` → `{upstream}/s.js`
+- `POST {path}/api/send` → `{upstream}/api/send` (body ≤ 64 KB)
+
+Forwarded: the body, `Content-Type`, `User-Agent`, `Accept-Language`, `X-Umami-Cache`, and the
+visitor IP as `X-Client-IP`, taken from `CF-Connecting-IP`, then `X-Real-IP`, then the socket.
+Cookies and `Authorization` are never forwarded. Set `CLIENT_IP_HEADER=x-client-ip` on Umami,
+and make sure the reverse proxy in front of the app sets (or strips) `CF-Connecting-IP` /
+`X-Real-IP`: the module trusts them.
+
+**`ignore`** is applied with Umami's `data-before-send` hook (a small inline script), because
+`data-auto-track="false"` would also switch off `data-umami-event` click tracking.
 
 ## Changelog
 

@@ -1,6 +1,6 @@
 # Architettura di `@heyatom/client`
 
-**Aggiornato**: 2026-10-23 (0.3.0)
+**Aggiornato**: 2026-10-28 (1.1.0)
 
 Documento interno: come è fatto il package, perché, e come si mantiene. L'uso dall'esterno sta
 nel [README](../README.md) (pubblico, su npm). Le regole HTTP comuni sono in
@@ -14,6 +14,7 @@ nel [README](../README.md) (pubblico, su npm). Le regole HTTP comuni sono in
 | `@heyatom/client/<service>` | `src/<service>/` + `src/core/` | solo Node (≥ 20.19): `fetch`, `FormData`, `Blob` nativi |
 | `@heyatom/client/<service>/nest` | `src/<service>/nest/` + `src/nest/` (riesporta il core) | peer `@nestjs/common` |
 | `@heyatom/client/webhooks` | `src/webhooks/` | solo `node:crypto` |
+| `@heyatom/client/nuxt` | `src/nuxt/` (solo ESM) | peer `@nuxt/kit` ^4 |
 
 `<service>`: `fileharbor`, `articuno`, `beacon`, `gatherly`. Nessun export root: un consumer
 Nuxt/Nitro importa il core senza trascinarsi Nest. `@heyatom/bastion-client` è peer opzionale,
@@ -69,6 +70,35 @@ path e status, mai header o body. `toHttpException` mappa un `HeyAtomHttpError` 
 `verifyStandardWebhook`: lato ricevente di `signStandardWebhook` di `@heyatom/nest-common/webhooks`
 (Articuno, Gatherly). Test sul vettore fisso di `nest-common/docs/usage.md`. Bastion usa un suo
 formato: `@heyatom/bastion-client/webhooks`.
+
+### Nuxt / Umami (`src/nuxt/`)
+
+Sostituisce `simple-analytics-vue` nei siti Nuxt (heyatom-portfolio, dbdbuilds-web, sgweb).
+Umami self-hosted su `stats.heyatom.dev`, container `umami:3000` sulla `internal_network` del
+server Docker, dove girano anche le app: da qui il default di `upstream`. Spicy Potions (Cloudflare
+Pages, Function sua) è fuori.
+
+- `module.ts` (build, `@nuxt/kit`): fonde opzioni modulo + `runtimeConfig` già in nuxt.config,
+  scrive `runtimeConfig.umami.upstream` (privato) e `runtimeConfig.public.umami`, registra plugin,
+  auto-import `useUmami` e un solo handler Nitro `{path}/**`.
+- `runtime/utils.ts`: tutto il puro (risoluzione opzioni, tag `<script>`, regex di `ignore`,
+  allow-list del proxy, scelta IP). Nessun import: gira in Node, Nitro e browser. È quello che
+  testa `test/nuxt.test.ts`.
+- `runtime/plugin.ts` (`#app`), `runtime/server/proxy.ts` (`#imports` di Nitro), `composable.ts`
+  (solo `window`). tsc li compila lasciando `#app` / `#imports` intatti: li risolve Nuxt nell'app.
+  Per il type-check `tsconfig.json` mappa `#app` sui tipi di `nuxt` e `#imports` su
+  `runtime/server/imports.d.ts` (h3 + `nitropack/runtime`); `nuxt`, `h3`, `nitropack` sono solo dev.
+- Solo ESM: `@nuxt/kit` è ESM-only, quindi `tsconfig.cjs.json` esclude `src/nuxt` e l'export
+  `./nuxt` ha solo la condizione `import`.
+- `ignore` via `data-before-send` e non via `data-auto-track="false"` + `router.afterEach`: nel
+  tracker 3.x `auto-track=false` spegne anche i click `data-umami-event` (`handleClicks` sta in
+  `init`). Lo script inline definisce la callback prima del tracker `defer`. `data-host-url`
+  relativo funziona: l'endpoint è `${hostUrl}/api/send` passato a `fetch`.
+- `path` è di build (ci si monta la route); il resto si sovrascrive a runtime con le env Nuxt.
+
+Verifica fatta il 2026-10-28 su un'app Nuxt 4.6.3 con il tarball: build, proxy contro un upstream
+finto con il tracker vero di Umami, pageview, click `data-umami-event`, `useUmami().track`,
+navigazione SPA tracciata e `/auth/callback` scartata, 404 su `/_u/`, `/_u/login`, `/_u/api/*`.
 
 ## Tipi
 
@@ -161,6 +191,11 @@ modulo Nest globale.
 `new GatherlyClient({ baseUrl: gatherlyUrl, auth: serviceTokenAuth(tokens, 'gatherly') })`.
 `gatherlyFetch` → `listEvents`, `getEvent`, `getEventStats`, `addParticipant(id, body, { idempotencyKey })`.
 Cache e sanificazione degli errori per il browser restano nell'app; `gatherly.types.ts` sparisce.
+
+**Siti Nuxt con `simple-analytics-vue`** (heyatom-portfolio, dbdbuilds-web, sgweb): togliere il
+plugin client e la dipendenza, `modules: ['@heyatom/client/nuxt']`, `umami: { websiteId, domains }`.
+dbdbuilds-web: `ignorePages` → `ignore: ['/auth/callback']`; gli eventi custom di `AppHeader.vue`
+(`saEvent(...)`) → `useUmami().track(...)` o `data-umami-event`.
 
 ## Rilascio
 

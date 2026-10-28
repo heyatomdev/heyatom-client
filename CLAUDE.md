@@ -16,6 +16,7 @@ dbdbuilds-api, shelfie-api, website4 (e sgweb). Gemello di `../bastion-client`
   @heyatom/client/beacon/nest
   @heyatom/client/gatherly          core: GatherlyClient (service-client JWT) + tipi
   @heyatom/client/gatherly/nest
+  @heyatom/client/nuxt              modulo Nuxt 4 per Umami self-hosted (solo ESM, peer @nuxt/kit)
   ```
   Nessun export root che trascina tutto. Nest è peer dep opzionale, usata solo dai subpath `/nest`.
 - **Core su `fetch` nativo.** Niente axios, `@nestjs/axios`, `form-data`. Multipart con `FormData`/`Blob` nativi
