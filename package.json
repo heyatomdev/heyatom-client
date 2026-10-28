@@ -1,7 +1,7 @@
 {
   "name": "@heyatom/client",
-  "version": "1.0.0",
-  "description": "Consumer SDK for the HeyAtom platform services: FileHarbor, Articuno, Beacon and Gatherly clients on native fetch, with optional NestJS modules",
+  "version": "1.1.0",
+  "description": "Consumer SDK for the HeyAtom platform services: FileHarbor, Articuno, Beacon and Gatherly clients on native fetch, with optional NestJS modules and a Nuxt module for self-hosted Umami",
   "license": "MIT",
   "author": "Andrea Tombolato <hey@heyatom.dev> (https://heyatom.dev)",
   "repository": {
@@ -103,6 +103,12 @@
         "types": "./dist/cjs/webhooks/index.d.ts",
         "default": "./dist/cjs/webhooks/index.js"
       }
+    },
+    "./nuxt": {
+      "import": {
+        "types": "./dist/esm/nuxt/module.d.ts",
+        "default": "./dist/esm/nuxt/module.js"
+      }
     }
   },
   "typesVersions": {
@@ -133,6 +139,9 @@
       ],
       "webhooks": [
         "./dist/cjs/webhooks/index.d.ts"
+      ],
+      "nuxt": [
+        "./dist/esm/nuxt/module.d.ts"
       ]
     }
   },
@@ -151,7 +160,8 @@
   },
   "peerDependencies": {
     "@heyatom/bastion-client": ">=0.3.0",
-    "@nestjs/common": "^11.0.0"
+    "@nestjs/common": "^11.0.0",
+    "@nuxt/kit": "^4.0.0"
   },
   "peerDependenciesMeta": {
     "@heyatom/bastion-client": {
@@ -159,13 +169,20 @@
     },
     "@nestjs/common": {
       "optional": true
+    },
+    "@nuxt/kit": {
+      "optional": true
     }
   },
   "devDependencies": {
     "@heyatom/bastion-client": "^0.9.0",
     "@nestjs/common": "^11.2.6",
     "@nestjs/core": "^11.2.6",
+    "@nuxt/kit": "^4.6.3",
     "@types/node": "^26.6.3",
+    "h3": "^1.15.11",
+    "nitropack": "^2.13.5",
+    "nuxt": "^4.6.3",
     "openapi-typescript": "^7.13.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
