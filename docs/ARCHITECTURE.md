@@ -79,11 +79,20 @@ server Docker, dove girano anche le app: da qui il default di `upstream`. Spicy 
 Pages, Function sua) è fuori.
 
 - `module.ts` (build, `@nuxt/kit`): fonde opzioni modulo + `runtimeConfig` già in nuxt.config,
-  scrive `runtimeConfig.umami.upstream` (privato) e `runtimeConfig.public.umami`, registra plugin,
-  auto-import `useUmami` e un solo handler Nitro `{path}/**`.
+  scrive `runtimeConfig.umami.upstream` (privato) e `runtimeConfig.public.umami` (senza `path`),
+  auto-import `useUmami` e un solo handler Nitro `{path}/**`. `path` resta fuori dalla runtime
+  config (la route è fissata in build): plugin e proxy sono factory (`createUmamiPlugin(path)`,
+  `createUmamiProxy(path)`) e due template di una riga (`addPluginTemplate`, `addServerTemplate`)
+  ci cuociono dentro il valore.
 - `runtime/utils.ts`: tutto il puro (risoluzione opzioni, tag `<script>`, regex di `ignore`,
-  allow-list del proxy, scelta IP). Nessun import: gira in Node, Nitro e browser. È quello che
-  testa `test/nuxt.test.ts`.
+  allow-list del proxy, scelta IP). Nessun import: gira in Node, Nitro e browser. Test in
+  `test/nuxt.test.ts`; il proxy in `test/nuxt-proxy.test.ts` (h3 `toWebHandler`, `fetch` stub,
+  `#imports` → `test/nuxt-imports.ts` via alias in `vitest.config.ts`).
+- `GET {path}/s.js` va a upstream `/script.js`: l'immagine ghcr di Umami 3.4.1 serve `/s.js` solo se
+  buildata con `TRACKER_SCRIPT_NAME` (sul server lo riscrive nginx, ma il modulo parla diretto con
+  `umami:3000`).
+- IP: `X-Real-IP` poi socket. Niente `CF-Connecting-IP`: nginx lo inoltra così com'è dal client
+  (`proxy-headers.conf`), mentre `X-Real-IP` è `$remote_addr` dopo `real_ip` sui range Cloudflare.
 - `runtime/plugin.ts` (`#app`), `runtime/server/proxy.ts` (`#imports` di Nitro), `composable.ts`
   (solo `window`). tsc li compila lasciando `#app` / `#imports` intatti: li risolve Nuxt nell'app.
   Per il type-check `tsconfig.json` mappa `#app` sui tipi di `nuxt` e `#imports` su

@@ -226,7 +226,7 @@ export default defineNuxtConfig({
 |---|---|---|
 | `websiteId` | — | Required. Without it nothing is injected (warning at build). |
 | `upstream` | `http://umami:3000` | Umami as your Nitro server reaches it. Server-only. |
-| `path` | `/_u` | Same-origin prefix of the proxy. Build time. |
+| `path` | `/_u` | Same-origin prefix of the proxy. Build time only, not in runtime config. |
 | `domains` | `[]` | `data-domains`: only these hostnames track. Empty = all. |
 | `excludeHash` | `true` | Strip `#hash` from tracked URLs. |
 | `excludeSearch` | `false` | Strip `?search`. Off, so `utm_*` / `ref` attribution works. |
@@ -247,17 +247,24 @@ track('signup', { plan: 'pro' }); // no-op on the server, when disabled, or when
 
 **Proxy.** Two server routes, everything else under `path` answers 404:
 
-- `GET {path}/s.js` → `{upstream}/s.js`
-- `POST {path}/api/send` → `{upstream}/api/send` (body ≤ 64 KB)
+- `GET {path}/s.js` → `{upstream}/script.js` (the name every Umami image serves)
+- `POST {path}/api/send` → `{upstream}/api/send` (body ≤ 64 KB, else 413)
 
-Forwarded: the body, `Content-Type`, `User-Agent`, `Accept-Language`, `X-Umami-Cache`, and the
-visitor IP as `X-Client-IP`, taken from `CF-Connecting-IP`, then `X-Real-IP`, then the socket.
-Cookies and `Authorization` are never forwarded. Set `CLIENT_IP_HEADER=x-client-ip` on Umami,
-and make sure the reverse proxy in front of the app sets (or strips) `CF-Connecting-IP` /
-`X-Real-IP`: the module trusts them.
+The query string is never forwarded. Upstream gets only the body, `Content-Type`, `User-Agent`,
+`Accept-Language`, `X-Umami-Cache`, and the visitor IP as `X-Client-IP`; the browser gets back
+only the status, the body, `Content-Type` and `Cache-Control`. Cookies and `Authorization` never
+leave the app. An unreachable upstream answers 502.
 
-**`ignore`** is applied with Umami's `data-before-send` hook (a small inline script), because
-`data-auto-track="false"` would also switch off `data-umami-event` click tracking.
+**Visitor IP.** Set `CLIENT_IP_HEADER=x-client-ip` on Umami. The module reads `X-Real-IP`, then
+the socket address. `X-Real-IP` must be set by the reverse proxy in front of the app (for example
+nginx `proxy_set_header X-Real-IP $remote_addr;`, after resolving the real client address) and
+never passed through from the client, or visitors can forge their IP. `CF-Connecting-IP` is
+deliberately not read: anyone reaching the origin directly can send it.
+
+**`ignore`** is applied with Umami's `data-before-send` hook, through a small inline `<script>`
+(`data-auto-track="false"` would also switch off `data-umami-event` click tracking). Under a
+strict Content Security Policy that inline script needs `'unsafe-inline'`, a nonce or its hash in
+`script-src`; without `ignore` there is no inline script.
 
 ## Changelog
 

@@ -5,10 +5,11 @@
 ### Added
 
 - `@heyatom/client/nuxt`: Nuxt 4 module for self-hosted Umami 3.x (config key `umami`). Injects
-  the tracker from a same-origin proxy (`GET {path}/s.js`, `POST {path}/api/send`, nothing else),
-  forwards the visitor IP as `X-Client-IP`, drops cookies and `Authorization`. Options
-  `websiteId`, `upstream`, `path`, `domains`, `excludeHash`, `excludeSearch`, `ignore`, `enabled`,
-  overridable at runtime through `NUXT_PUBLIC_UMAMI_*` / `NUXT_UMAMI_UPSTREAM`. Auto-imported
+  the tracker from a same-origin proxy (`GET {path}/s.js` → upstream `/script.js`,
+  `POST {path}/api/send`, nothing else), forwards the visitor IP (`X-Real-IP` or the socket) as
+  `X-Client-IP`, drops cookies and `Authorization`. Options `websiteId`, `upstream`, `path`,
+  `domains`, `excludeHash`, `excludeSearch`, `ignore`, `enabled`; all but `path` overridable at
+  runtime through `NUXT_PUBLIC_UMAMI_*` / `NUXT_UMAMI_UPSTREAM`. Auto-imported
   `useUmami().track(event, data?)`. `@nuxt/kit` ^4 is a new optional peer.
 
 ## 1.0.0
