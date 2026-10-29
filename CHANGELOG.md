@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.0
+
+### Changed
+
+- FileHarbor types regenerated (FileHarbor 4.0.1): `uploadImage` fields and the `updateImage`
+  body accept an optional `blurPublic`, `ImageResponseDto` gains `blurPublic: boolean`, and
+  `GET /images/:imageId` is typed with the `blur` query (blurred preview, ≤ 480 px WebP).
+  `blurPublic: true` serves the `?blur=1` preview of a private image to anyone; the original
+  keeps its own access.
+
 ## 1.1.0
 
 ### Added
