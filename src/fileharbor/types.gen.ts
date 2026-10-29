@@ -71,7 +71,7 @@ export interface paths {
         head?: never;
         /**
          * Update image metadata
-         * @description Update tags, description or isPrivate. Only the owner (X-User-Id) can update.
+         * @description Update tags, description, isPrivate or blurPublic. Only the owner (X-User-Id) can update.
          */
         patch: operations["ImageController_updateImage"];
         trace?: never;
@@ -559,6 +559,11 @@ export interface components {
              */
             isPrivate: boolean;
             /**
+             * @description The ?blur=1 preview is served to anyone, even when private
+             * @example false
+             */
+            blurPublic: boolean;
+            /**
              * @description Image tags for categorization
              * @example [
              *       "nature",
@@ -631,6 +636,8 @@ export interface components {
             description?: string;
             /** @description Make the image private or public. Bytes already served public may stay in browser and shared caches until they expire. */
             isPrivate?: boolean;
+            /** @description Serve the ?blur=1 preview to anyone, even when the image is private. The original keeps its own access. */
+            blurPublic?: boolean;
         };
         ShareLinkResponseDto: {
             /**
@@ -1217,6 +1224,11 @@ export interface operations {
                     description?: string;
                     /** @default false */
                     isPrivate?: boolean;
+                    /**
+                     * @description Serve the ?blur=1 preview to anyone, even when the image is private
+                     * @default false
+                     */
+                    blurPublic?: boolean;
                     /** @description Username of the uploader (saved/updated on the creator record) */
                     username?: string;
                 };
@@ -1257,6 +1269,8 @@ export interface operations {
                 thumb?: boolean;
                 /** @description Force download with Content-Disposition header and increment download counter */
                 download?: boolean;
+                /** @description Return the blurred preview (≤ 480 px, webp). Same access as the original, unless the image has blurPublic. Ignored with info or download; thumb, width, height, format and quality are ignored with it */
+                blur?: boolean;
                 /** @description Return JSON metadata instead of image file */
                 info?: boolean;
                 /** @description Target width in pixels (maintains aspect ratio if height not specified). Rounded up to the next step of 16, 32, 48, 64, 96, 128, 160, 192, 256, 320, 384, 480, 640, 768, 960, 1080, 1280, 1440, 1600, 1920, 2560, 3200, 3840, 4096 */

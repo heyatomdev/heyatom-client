@@ -29,7 +29,7 @@ export class FileHarborClient {
     return this.http.json<ResponseOf<Op<'ImageController_getImage'>>>('GET', `/images/${seg(imageId)}`, { query: { info: true } }, opts);
   }
 
-  /** `PATCH /images/:imageId` — tags, description, isPrivate; only the owner (`opts.userId`). */
+  /** `PATCH /images/:imageId` — tags, description, isPrivate, blurPublic; only the owner (`opts.userId`). */
   updateImage(imageId: string, body: BodyOf<Op<'ImageController_updateImage'>>, opts?: RequestOptions) {
     return this.http.json<ResponseOf<Op<'ImageController_updateImage'>>>('PATCH', `/images/${seg(imageId)}`, { body }, opts);
   }
