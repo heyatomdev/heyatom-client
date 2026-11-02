@@ -151,71 +151,6 @@ export interface paths {
         patch: operations["CreatorClientController_updateCreatorByExternalId"];
         trace?: never;
     };
-    "/avatars": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Upload or update creator avatar
-         * @description Upload new avatar or update existing one for a creator. Auto-converts to WebP, creates thumbnail, and optimizes.
-         */
-        post: operations["AvatarController_uploadAvatar"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/avatars/{clientRef}/{externalUserId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get creator avatar (public endpoint)
-         * @description Retrieve a creator avatar. clientRef is the client domain, or its id when it has none (the url/fullPath returned by the API already carry it). Query parameters: info (return JSON metadata), thumb (return thumbnail), format (webp | jpeg | png, default webp; converted on the fly, combinable with thumb), download (force download), t (timestamp for cache busting)
-         */
-        get: operations["AvatarController_getClientAvatar"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/avatars/{externalUserId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get creator avatar (deprecated)
-         * @deprecated
-         * @description Deprecated: use GET /avatars/{clientRef}/{externalUserId}. An external id is unique only within a client: without an X-API-Key this route serves it only when exactly one client has a creator with that id, and 404s otherwise.
-         */
-        get: operations["AvatarController_getAvatar"];
-        put?: never;
-        post?: never;
-        /**
-         * Delete creator avatar
-         * @description Delete the avatar for a specific creator. Requires only API key authentication.
-         */
-        delete: operations["AvatarController_deleteAvatar"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/albums": {
         parameters: {
             query?: never;
@@ -343,6 +278,71 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/avatars": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Upload or update creator avatar
+         * @description Upload new avatar or update existing one for a creator. Auto-converts to WebP, creates thumbnail, and optimizes.
+         */
+        post: operations["AvatarController_uploadAvatar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/avatars/{clientRef}/{externalUserId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get creator avatar (public endpoint)
+         * @description Retrieve a creator avatar. clientRef is the client domain, or its id when it has none (the url/fullPath returned by the API already carry it). Query parameters: info (return JSON metadata), thumb (return thumbnail), format (webp | jpeg | png, default webp; converted on the fly, combinable with thumb), download (force download), t (timestamp for cache busting)
+         */
+        get: operations["AvatarController_getClientAvatar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/avatars/{externalUserId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get creator avatar (deprecated)
+         * @deprecated
+         * @description Deprecated: use GET /avatars/{clientRef}/{externalUserId}. An external id is unique only within a client: without an X-API-Key this route serves it only when exactly one client has a creator with that id, and 404s otherwise.
+         */
+        get: operations["AvatarController_getAvatar"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete creator avatar
+         * @description Delete the avatar for a specific creator. Requires only API key authentication.
+         */
+        delete: operations["AvatarController_deleteAvatar"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health/live": {
         parameters: {
             query?: never;
@@ -465,6 +465,81 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/files": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List files (paginated, newest first) */
+        get: operations["FileController_listFiles"];
+        put?: never;
+        /** Upload a downloadable file (.zip or .pdf) */
+        post: operations["FileController_uploadFile"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/files/{id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download a file (attachment, Range support)
+         * @description Public for public files. A private file needs the X-API-Key of its client or a ?token from POST /files/:id/link; otherwise 404.
+         */
+        get: operations["FileController_download"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/files/{id}/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Signed download link, valid 10 minutes
+         * @description For private files: the caller checks its own user, then redirects them to `url`. The bytes go from FileHarbor to the user.
+         */
+        post: operations["FileController_createLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/files/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a file */
+        delete: operations["FileController_deleteFile"];
         options?: never;
         head?: never;
         patch?: never;
@@ -676,7 +751,7 @@ export interface components {
         CreateShareLinkDto: {
             /**
              * Format: date-time
-             * @description Expiration date for the share link (future)
+             * @description Expiration date for the share link: in the future, at most 365 days out. Omitted: the link never expires.
              * @example 2025-11-05T12:00:00.000Z
              */
             expiresAt?: string;
@@ -761,94 +836,6 @@ export interface components {
             website?: string;
             /** @description Updated biography from external system */
             bio?: string;
-        };
-        AvatarResponseDto: {
-            /**
-             * @description Unique avatar identifier (UUID)
-             * @example avatar-uuid-123
-             */
-            id: string;
-            /**
-             * @description Creator identifier who owns the avatar
-             * @example creator-123
-             */
-            creatorId: string;
-            /**
-             * @description Image format
-             * @example webp
-             * @enum {string}
-             */
-            format: "webp" | "jpeg" | "png" | "gif";
-            /**
-             * @description Avatar width in pixels
-             * @example 512
-             */
-            width: number;
-            /**
-             * @description Avatar height in pixels
-             * @example 512
-             */
-            height: number;
-            /**
-             * @description File size in bytes
-             * @example 45678
-             */
-            size: number;
-            /**
-             * @description MIME type
-             * @example image/webp
-             */
-            mimeType: string;
-            /**
-             * @description Whether the avatar has been optimized
-             * @example true
-             */
-            isOptimized: boolean;
-            /**
-             * Format: date-time
-             * @description Avatar upload timestamp
-             * @example 2025-10-29T12:00:00.000Z
-             */
-            createdAt: string;
-            /**
-             * @description URL to access the avatar
-             * @example /avatars/creator-123
-             */
-            url: string;
-            /**
-             * @description URL to access the avatar thumbnail
-             * @example /avatars/creator-123?thumb=true
-             */
-            thumbnailUrl?: string;
-            /**
-             * @description Full URL to access the avatar (baseUrl + url)
-             * @example http://localhost:3000/avatars/creator-123
-             */
-            fullPath: string;
-        };
-        UploadAvatarDto: {
-            /**
-             * Format: binary
-             * @description Avatar image file (JPEG, PNG, WebP, or GIF)
-             */
-            file: string;
-            /**
-             * @description External creator ID from your system
-             * @example creator-123
-             */
-            externalUserId: string;
-        };
-        DeleteAvatarResponseDto: {
-            /**
-             * @description Operation success status
-             * @example true
-             */
-            success: boolean;
-            /**
-             * @description Success message
-             * @example Avatar deleted successfully
-             */
-            message: string;
         };
         AlbumResponseDto: {
             /**
@@ -1073,10 +1060,99 @@ export interface components {
         };
         CreateAlbumTokenDto: {
             /**
-             * @description Token expiration in days (default: 7, null for no expiration)
+             * @description Token expiration in days (default: 7). Every token expires.
+             * @default 7
              * @example 7
              */
-            expiresInDays?: number;
+            expiresInDays: number;
+        };
+        AvatarResponseDto: {
+            /**
+             * @description Unique avatar identifier (UUID)
+             * @example avatar-uuid-123
+             */
+            id: string;
+            /**
+             * @description Creator identifier who owns the avatar
+             * @example creator-123
+             */
+            creatorId: string;
+            /**
+             * @description Image format
+             * @example webp
+             * @enum {string}
+             */
+            format: "webp" | "jpeg" | "png" | "gif";
+            /**
+             * @description Avatar width in pixels
+             * @example 512
+             */
+            width: number;
+            /**
+             * @description Avatar height in pixels
+             * @example 512
+             */
+            height: number;
+            /**
+             * @description File size in bytes
+             * @example 45678
+             */
+            size: number;
+            /**
+             * @description MIME type
+             * @example image/webp
+             */
+            mimeType: string;
+            /**
+             * @description Whether the avatar has been optimized
+             * @example true
+             */
+            isOptimized: boolean;
+            /**
+             * Format: date-time
+             * @description Avatar upload timestamp
+             * @example 2025-10-29T12:00:00.000Z
+             */
+            createdAt: string;
+            /**
+             * @description URL to access the avatar
+             * @example /avatars/creator-123
+             */
+            url: string;
+            /**
+             * @description URL to access the avatar thumbnail
+             * @example /avatars/creator-123?thumb=true
+             */
+            thumbnailUrl?: string;
+            /**
+             * @description Full URL to access the avatar (baseUrl + url)
+             * @example http://localhost:3000/avatars/creator-123
+             */
+            fullPath: string;
+        };
+        UploadAvatarDto: {
+            /**
+             * Format: binary
+             * @description Avatar image file (JPEG, PNG, WebP, or GIF)
+             */
+            file: string;
+            /**
+             * @description External creator ID from your system
+             * @example creator-123
+             */
+            externalUserId: string;
+        };
+        DeleteAvatarResponseDto: {
+            /**
+             * @description Operation success status
+             * @example true
+             */
+            success: boolean;
+            /**
+             * @description Success message
+             * @example Avatar deleted successfully
+             */
+            message: string;
         };
         VideoResponseDto: {
             id: string;
@@ -1110,6 +1186,31 @@ export interface components {
             success: boolean;
             message: string;
         };
+        FileCreatorDto: {
+            externalId: string;
+        };
+        FileResponseDto: {
+            id: string;
+            clientId: string;
+            originalName: string;
+            /** @enum {string} */
+            mimeType: "application/zip" | "application/pdf";
+            /** @description Bytes */
+            size: number;
+            isPrivate: boolean;
+            downloads: number;
+            /** Format: date-time */
+            createdAt: string;
+            creator: components["schemas"]["FileCreatorDto"];
+            /** @description Absolute download URL. A private file also needs the X-API-Key of its client, or a signed link (POST /files/:id/link). */
+            downloadUrl: string;
+        };
+        FileLinkResponseDto: {
+            /** @description Download URL with a ?token valid 10 minutes */
+            url: string;
+            /** Format: date-time */
+            expiresAt: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -1129,9 +1230,6 @@ export type CreatorListResponseDto = components['schemas']['CreatorListResponseD
 export type CreatorResponseDto = components['schemas']['CreatorResponseDto'];
 export type CreateCreatorDto = components['schemas']['CreateCreatorDto'];
 export type UpdateCreatorByExternalIdDto = components['schemas']['UpdateCreatorByExternalIdDto'];
-export type AvatarResponseDto = components['schemas']['AvatarResponseDto'];
-export type UploadAvatarDto = components['schemas']['UploadAvatarDto'];
-export type DeleteAvatarResponseDto = components['schemas']['DeleteAvatarResponseDto'];
 export type AlbumResponseDto = components['schemas']['AlbumResponseDto'];
 export type CreateAlbumDto = components['schemas']['CreateAlbumDto'];
 export type UpdateAlbumDto = components['schemas']['UpdateAlbumDto'];
@@ -1147,9 +1245,15 @@ export type AlbumItemVideoDataDto = components['schemas']['AlbumItemVideoDataDto
 export type AlbumItemDto = components['schemas']['AlbumItemDto'];
 export type AlbumTokenResponseDto = components['schemas']['AlbumTokenResponseDto'];
 export type CreateAlbumTokenDto = components['schemas']['CreateAlbumTokenDto'];
+export type AvatarResponseDto = components['schemas']['AvatarResponseDto'];
+export type UploadAvatarDto = components['schemas']['UploadAvatarDto'];
+export type DeleteAvatarResponseDto = components['schemas']['DeleteAvatarResponseDto'];
 export type VideoResponseDto = components['schemas']['VideoResponseDto'];
 export type UpdateVideoDto = components['schemas']['UpdateVideoDto'];
 export type DeleteVideoResponseDto = components['schemas']['DeleteVideoResponseDto'];
+export type FileCreatorDto = components['schemas']['FileCreatorDto'];
+export type FileResponseDto = components['schemas']['FileResponseDto'];
+export type FileLinkResponseDto = components['schemas']['FileLinkResponseDto'];
 export type $defs = Record<string, never>;
 export interface operations {
     ClientController_getStats: {
@@ -1269,7 +1373,7 @@ export interface operations {
                 thumb?: boolean;
                 /** @description Force download with Content-Disposition header and increment download counter */
                 download?: boolean;
-                /** @description Return the blurred preview (≤ 480 px, webp). Same access as the original, unless the image has blurPublic. Ignored with info or download; thumb, width, height, format and quality are ignored with it */
+                /** @description Return the blurred preview (≤ 480 px, webp unless format asks otherwise). Same access as the original, unless the image has blurPublic. Ignored with info or download; thumb and quality are ignored with it; width, height (capped at 480) and format apply */
                 blur?: boolean;
                 /** @description Return JSON metadata instead of image file */
                 info?: boolean;
@@ -1631,167 +1735,12 @@ export interface operations {
             };
         };
     };
-    AvatarController_uploadAvatar: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": components["schemas"]["UploadAvatarDto"];
-            };
-        };
-        responses: {
-            /** @description Avatar uploaded successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data: components["schemas"]["AvatarResponseDto"];
-                    };
-                };
-            };
-            /** @description No file uploaded, invalid format, or missing externalUserId */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid X-API-Key header */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AvatarController_getClientAvatar: {
-        parameters: {
-            query?: {
-                /** @description Return thumbnail version of the avatar */
-                thumb?: boolean;
-                /** @description Return only metadata (JSON) instead of the file */
-                info?: boolean;
-                /** @description Force file download with Content-Disposition header */
-                download?: boolean;
-                /** @description Output format. Avatars are stored as WebP; jpeg/png are converted on the fly */
-                format?: "webp" | "jpeg" | "png";
-                /** @description Timestamp for cache busting (ignored by server, used by browser to force reload) */
-                t?: string;
-            };
-            header?: never;
-            path: {
-                clientRef: string;
-                externalUserId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Avatar file or metadata */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Client or avatar not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AvatarController_getAvatar: {
-        parameters: {
-            query?: {
-                /** @description Return thumbnail version of the avatar */
-                thumb?: boolean;
-                /** @description Return only metadata (JSON) instead of the file */
-                info?: boolean;
-                /** @description Force file download with Content-Disposition header */
-                download?: boolean;
-                /** @description Output format. Avatars are stored as WebP; jpeg/png are converted on the fly */
-                format?: "webp" | "jpeg" | "png";
-                /** @description Timestamp for cache busting (ignored by server, used by browser to force reload) */
-                t?: string;
-            };
-            header?: never;
-            path: {
-                externalUserId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Avatar file or metadata */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Avatar not found or ambiguous */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AvatarController_deleteAvatar: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                externalUserId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Avatar deleted successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data: components["schemas"]["DeleteAvatarResponseDto"];
-                    };
-                };
-            };
-            /** @description Missing or invalid X-API-Key header */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Avatar not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     AlbumController_listAlbums: {
         parameters: {
             query?: {
                 page?: number;
                 limit?: number;
-                /** @description Filter by creator ID */
+                /** @description Filter by the internal Creator.id (the `creatorId` returned in album and image responses), not the X-User-Id */
                 creatorId?: string;
                 /** @description Filter by public status (true/false) */
                 public?: boolean;
@@ -2177,6 +2126,161 @@ export interface operations {
             };
         };
     };
+    AvatarController_uploadAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["UploadAvatarDto"];
+            };
+        };
+        responses: {
+            /** @description Avatar uploaded successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["AvatarResponseDto"];
+                    };
+                };
+            };
+            /** @description No file uploaded, invalid format, or missing externalUserId */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid X-API-Key header */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AvatarController_getClientAvatar: {
+        parameters: {
+            query?: {
+                /** @description Return thumbnail version of the avatar */
+                thumb?: boolean;
+                /** @description Return only metadata (JSON) instead of the file */
+                info?: boolean;
+                /** @description Force file download with Content-Disposition header */
+                download?: boolean;
+                /** @description Output format. Avatars are stored as WebP; jpeg/png are converted on the fly */
+                format?: "webp" | "jpeg" | "png";
+                /** @description Timestamp for cache busting (ignored by server, used by browser to force reload) */
+                t?: string;
+            };
+            header?: never;
+            path: {
+                clientRef: string;
+                externalUserId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Avatar file or metadata */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Client or avatar not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AvatarController_getAvatar: {
+        parameters: {
+            query?: {
+                /** @description Return thumbnail version of the avatar */
+                thumb?: boolean;
+                /** @description Return only metadata (JSON) instead of the file */
+                info?: boolean;
+                /** @description Force file download with Content-Disposition header */
+                download?: boolean;
+                /** @description Output format. Avatars are stored as WebP; jpeg/png are converted on the fly */
+                format?: "webp" | "jpeg" | "png";
+                /** @description Timestamp for cache busting (ignored by server, used by browser to force reload) */
+                t?: string;
+            };
+            header?: never;
+            path: {
+                externalUserId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Avatar file or metadata */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Avatar not found or ambiguous */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AvatarController_deleteAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                externalUserId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Avatar deleted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["DeleteAvatarResponseDto"];
+                    };
+                };
+            };
+            /** @description Missing or invalid X-API-Key header */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Avatar not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     HealthController_live: {
         parameters: {
             query?: never;
@@ -2509,7 +2613,9 @@ export interface operations {
             query?: {
                 download?: boolean;
             };
-            header?: never;
+            header: {
+                range: string;
+            };
             path: {
                 /** @description Video UUID */
                 id: string;
@@ -2523,6 +2629,160 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    FileController_listFiles: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                /** @description Creator's externalId (X-User-Id) */
+                creatorId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated list. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["FileResponseDto"][];
+                        meta: components["schemas"]["PageMetaDto"];
+                    };
+                };
+            };
+        };
+    };
+    FileController_uploadFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                    /** @default false */
+                    isPrivate?: boolean;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["FileResponseDto"];
+                    };
+                };
+            };
+            /** @description UNSUPPORTED_FILE_TYPE */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Over MAX_DOWNLOAD_FILE_SIZE */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    FileController_download: {
+        parameters: {
+            query?: {
+                token?: string;
+            };
+            header: {
+                range: string;
+            };
+            path: {
+                /** @description File UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/zip": unknown;
+                    "application/pdf": unknown;
+                };
+            };
+            /** @description Not found, or private without access */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    FileController_createLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description File UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["FileLinkResponseDto"];
+                    };
+                };
+            };
+        };
+    };
+    FileController_deleteFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description File UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["DeleteResponseDto"];
+                    };
+                };
             };
         };
     };

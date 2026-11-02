@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.3.0
+
+### Added
+
+- `FileHarborClient` downloadable files (.zip, .pdf): `uploadFile(file, { isPrivate }, { userId })`
+  (`POST /files`), `listFiles({ page, limit, creatorId })` (`GET /files`, `creatorId` is the
+  creator's external id), `deleteFile(fileId)` (`DELETE /files/:id`) and `createFileLink(fileId)`
+  (`POST /files/:id/link`, `{ url, expiresAt }`: a signed download URL valid 10 minutes). New types
+  `FileResponseDto`, `FileCreatorDto`, `FileLinkResponseDto`. No download method: the browser
+  follows `downloadUrl` (public file) or the signed `url`.
+
 ## 1.2.0
 
 ### Changed

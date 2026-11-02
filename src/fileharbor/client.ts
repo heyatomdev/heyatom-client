@@ -1,5 +1,5 @@
 import { HeyAtomHttp, seg, toFormData, type FileInput, type HeyAtomClientOptions, type RequestOptions } from '../core/http.js';
-import type { BodyOf, FormFieldsOf, ResponseOf } from '../core/openapi.js';
+import type { BodyOf, FormFieldsOf, QueryOf, ResponseOf } from '../core/openapi.js';
 import type { operations } from './types.gen.js';
 
 type Op<K extends keyof operations> = operations[K];
@@ -37,6 +37,29 @@ export class FileHarborClient {
   /** `DELETE /images/:imageId`. */
   deleteImage(imageId: string, opts?: RequestOptions) {
     return this.http.json<ResponseOf<Op<'ImageController_deleteImage'>>>('DELETE', `/images/${seg(imageId)}`, {}, opts);
+  }
+
+  /** `POST /files` — multipart `file` (.zip or .pdf) plus `isPrivate`; the creator is `opts.userId`. */
+  uploadFile(file: FileInput, fields: FormFieldsOf<Op<'FileController_uploadFile'>> = {}, opts?: RequestOptions) {
+    return this.http.upload<ResponseOf<Op<'FileController_uploadFile'>>>('POST', '/files', toFormData('file', [file], fields), opts);
+  }
+
+  /** `GET /files` — paginated; `creatorId` is the creator's external id. */
+  listFiles(query?: QueryOf<Op<'FileController_listFiles'>>, opts?: RequestOptions) {
+    return this.http.json<ResponseOf<Op<'FileController_listFiles'>>>('GET', '/files', { query: query as never }, opts);
+  }
+
+  /** `DELETE /files/:fileId`. */
+  deleteFile(fileId: string, opts?: RequestOptions) {
+    return this.http.json<ResponseOf<Op<'FileController_deleteFile'>>>('DELETE', `/files/${seg(fileId)}`, {}, opts);
+  }
+
+  /**
+   * `POST /files/:fileId/link` — a signed download URL valid 10 minutes, for a private file.
+   * No download method: hand the URL (or a public file's `downloadUrl`) to the browser.
+   */
+  createFileLink(fileId: string, opts?: RequestOptions) {
+    return this.http.json<ResponseOf<Op<'FileController_createLink'>>>('POST', `/files/${seg(fileId)}/link`, {}, opts);
   }
 
   /** `POST /avatars` — one avatar per `externalUserId`, an upload replaces the previous one. */
