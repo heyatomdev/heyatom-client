@@ -80,3 +80,5 @@ Non in fase 1: Herald, migrazione dei consumer (arriva dopo, repo per repo).
   nomi di repo/app interne, path del monorepo, piani o note di migrazione. Interni, pipeline dei
   tipi, `check:api`, migrazione dei consumer e rilascio stanno in `docs/ARCHITECTURE.md` (come
   `../bastion-client`). Ogni rilascio aggiorna `CHANGELOG.md`.
+- **Consumer.** Chi usa il package, con cosa e con che range: [`docs/CONSUMERS.md`](docs/CONSUMERS.md),
+  con il comando per rifare il censimento. Dopo ogni rilascio: bump nei consumer e tabella aggiornata.
