@@ -20,10 +20,7 @@ bump nei consumer. Interno: non va su npm (vedi [`CLAUDE.md`](../CLAUDE.md), Doc
 | heyatom-portfolio | `heyatom/heyatom-portfolio` | Nuxt 4 | `nuxt` | `^1.3.0` |
 | spicypotions | `heyatom/spicypotions` | Nuxt 4 | `nuxt` | `^1.3.0` |
 | wood19aw | `heyatom/wood19aw` | Nuxt 4 | `nuxt` | `^1.3.0` |
-| nestjs-prisma-template | `heyatom/nestjs-prisma-template` | NestJS (scaffold) | `articuno/nest` | `^0.3.0` ⚠️ |
-
-⚠️ Il template è fermo a 0.3.0, prima del contratto v1 (1.0.0, breaking): portarlo a 1.x richiede di
-adattare il codice, non solo il bump.
+| nestjs-prisma-template | `heyatom/nestjs-prisma-template` | NestJS (scaffold) | `articuno/nest` | `^1.3.0` |
 
 Non sono consumer: Meridian (chiama i servizi dal suo BFF, senza SDK) e i servizi che il package
 copre (FileHarbor, Gatherly) quando non lo importano.
@@ -39,6 +36,10 @@ find element heyatom medas personal -name package.json -maxdepth 5 \
     grep -rhoE "@heyatom/client(/[a-z-]+)*" "$d" --include='*.ts' --include='*.js' --include='*.mjs' --include='*.vue' \
       --exclude-dir=node_modules --exclude-dir=.nuxt --exclude-dir=.output --exclude-dir=dist | sort -u | tr '\n' ' '; echo; done
 ```
+
+Legge il branch attivo di ogni repo: se un repo è su un feature branch vecchio il range può essere
+falso (il template risultava `^0.3.0` da `chore/slim-prod-image`, mentre `main` era già a `^1.0.0`).
+In caso di dubbio controllare il branch di integrazione: `git -C <repo> show <branch>:package.json`.
 
 ## Bump dopo un rilascio
 
