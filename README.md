@@ -154,7 +154,9 @@ Every client returns the response body as the service sends it: `{ data }` for a
 resource, `{ data, meta }` for a page (`page`, `limit` in the query). Unwrap `.data` yourself.
 
 **`FileHarborClient`** (API key): `uploadImage`, `getImageInfo`, `updateImage`, `deleteImage`,
-`uploadAvatar`, `deleteAvatar`, `getClientStats`.
+`uploadAvatar`, `deleteAvatar`, `getClientStats`. Downloadable files (.zip, .pdf): `uploadFile`,
+`listFiles`, `deleteFile`, `createFileLink(fileId)` (signed download URL valid 10 minutes, for a
+private file). There is no download method: hand `downloadUrl` or the signed `url` to the browser.
 
 **`ArticunoClient`** (tenant key or service-client token):
 - Articles: `listArticles`, `getArticle(slug)`, `listTranslations`, `getTranslation`

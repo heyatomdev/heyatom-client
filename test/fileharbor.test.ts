@@ -50,6 +50,36 @@ describe('FileHarborClient', () => {
     expect(calls[0].init.method).toBe('GET');
   });
 
+  it('uploads a downloadable file as multipart, attributed to X-User-Id', async () => {
+    const { fetchImpl, calls } = fakeFetch(() => json(201, { data: { id: 'f-1', mimeType: 'application/zip', downloadUrl: 'http://fh/files/f-1/download' } }));
+    const fh = new FileHarborClient({ baseUrl: 'http://fh', auth: apiKeyAuth('k'), fetch: fetchImpl });
+
+    const res = await fh.uploadFile({ data: Buffer.from('zip'), filename: 'pack.zip', contentType: 'application/zip' }, { isPrivate: true }, { userId: 'user-9' });
+
+    expect(res.data.id).toBe('f-1');
+    const { url, init, headers } = calls[0];
+    expect([url, init.method]).toEqual(['http://fh/files', 'POST']);
+    expect(headers).toEqual({ 'X-API-Key': 'k', 'X-User-Id': 'user-9' });
+    const form = init.body as FormData;
+    expect((form.get('file') as File).name).toBe('pack.zip');
+    expect(form.get('isPrivate')).toBe('true');
+  });
+
+  it('lists, deletes and signs a link for files', async () => {
+    const { fetchImpl, calls } = fakeFetch(() => json(200, { data: [] }));
+    const fh = new FileHarborClient({ baseUrl: 'http://fh', auth: apiKeyAuth('k'), fetch: fetchImpl });
+
+    await fh.listFiles({ page: 2, limit: 10, creatorId: 'user-9' });
+    await fh.deleteFile('f/1');
+    await fh.createFileLink('f-1');
+
+    expect(calls.map((c) => [c.init.method, c.url])).toEqual([
+      ['GET', 'http://fh/files?page=2&limit=10&creatorId=user-9'],
+      ['DELETE', 'http://fh/files/f%2F1'],
+      ['POST', 'http://fh/files/f-1/link'],
+    ]);
+  });
+
   it('uploads an avatar with externalUserId in the form, not the header', async () => {
     const { fetchImpl, calls } = fakeFetch(() => json(201, { id: 'av' }));
     const fh = new FileHarborClient({ baseUrl: 'http://fh', auth: apiKeyAuth('k'), fetch: fetchImpl });
