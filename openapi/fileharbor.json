@@ -2676,11 +2676,7 @@
             "description": "Not found, or private without access"
           }
         },
-        "security": [
-          {
-            "api-key": []
-          }
-        ],
+        "security": [],
         "summary": "Download a file (attachment, Range support)",
         "tags": [
           "Files"
